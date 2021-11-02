@@ -25,4 +25,6 @@ if ( git2r::in_repository() ) {
  }
 ```
 
-
+```{r}
+devtools::session_info()
+```
