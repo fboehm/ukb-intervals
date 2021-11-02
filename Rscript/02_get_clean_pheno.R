@@ -7,7 +7,9 @@ library(plyr)
 comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
 load(paste0(comp_str, "02_pheno/01_sqc.RData"))
 load(paste0(comp_str, "02_pheno/02_pheno_c_raw.RData"))
-load(paste0(comp_str, "02_pheno/03_pheno_b_raw.RData"))
+#load(paste0(comp_str, "02_pheno/03_pheno_b_raw.RData"))
+
+out_dir <- "~/research/ukb-intervals/dat"
 
 # continuous traits
 pheno_c_all <- matrix(NA, ncol = 25, nrow = nrow(pheno_c))
@@ -46,10 +48,12 @@ for (i in 1: 25){
   na_idx <- ifelse(is.na(pheno_c_all[, i]), T, F)
   pheno_na <- ifelse(na_idx, NA, pheno_c_all[, i])
   pheno_scale <- scale(pheno_na)
-  resid <- lm(pheno_scale[!na_idx] ~ covVar[!na_idx, ])$residual
+   resid <- lm(pheno_scale[!na_idx] ~ covVar[!na_idx, ])$residual
   pheno_c_adj[!na_idx, i] <- qqnorm(resid, plot.it = F)$x
+  ## Check Xiang's R code for quantile normalization, with attention to treatment of ties!
+  
   pheno_c_adj[na_idx, i] <- NA
   cat(paste0("pheno: ", i, ", sample size: ", length(pheno_c_adj[!na_idx, i]), "\n"))
 }
-save(pheno_c_adj, file = paste0(comp_str, "02_pheno/04_pheno_c_adj.RData"))
-
+#save(pheno_c_adj, file = paste0(comp_str, "02_pheno/04_pheno_c_adj.RData"))
+saveRDS(file.path(out_dir, "04_pheno_c_adj.rds"))
