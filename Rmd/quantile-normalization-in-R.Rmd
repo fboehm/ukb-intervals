@@ -5,7 +5,19 @@ date: "11/2/2021"
 output: html_document
 ---
 
+## Generate data
+
+```{r}
+dat <- rnorm(1000)
+dat[901:1000] <- 0
+```
+
 ## Xiang's method with `qqnorm` and `sample`
+
+```{r}
+qqnorm(dat, plot.it = FALSE)$x
+```
+
 
 ## `ryouready::qqnorm_spss`
 
@@ -13,6 +25,19 @@ The function `ryouready::qqnorm_spss` has an argument, `ties.method`, for dealin
 `base::qqnorm` has no comparable argument.
 
 It seems that we want to set `ties.method = "random"` for our analyses.
+
+```{r}
+ryouready::qqnorm_spss(dat, ties.method = "average")$y
+```
+
+```{r}
+ryouready::qqnorm_spss(dat, ties.method = "random")$y
+```
+
+
+
+
+
 
 ## Colophon
 
