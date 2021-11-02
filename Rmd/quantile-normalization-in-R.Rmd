@@ -1,0 +1,28 @@
+---
+title: "Quantile normalization in R"
+author: "Fred Boehm"
+date: "11/2/2021"
+output: html_document
+---
+
+## Xiang's method with `qqnorm` and `sample`
+
+## `ryouready::qqnorm_spss`
+
+The function `ryouready::qqnorm_spss` has an argument, `ties.method`, for dealing with ties, while
+`base::qqnorm` has no comparable argument.
+
+It seems that we want to set `ties.method = "random"` for our analyses.
+
+## Colophon
+
+
+```{r}
+if ( git2r::in_repository() ) {
+        summary(git2r::last_commit()) 
+ } else { 
+        message("We are not in a git repository") 
+ }
+```
+
+
