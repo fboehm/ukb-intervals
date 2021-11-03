@@ -38,6 +38,17 @@ ry_random <- ryouready::qqnorm_spss(dat, ties.method = "random")$y
 tibble::tibble(xz_method = xz_method, ry_average = ry_average, ry_random = ry_random)
 ```
 
+## Source code
+
+It's easiest to see the differences when you compare the R code that defines the two functions, `stats:::qqnorm.default` and `ryouready::qqnorm_spss`. 
+
+```{r}
+stats:::qqnorm.default
+```
+
+```{r}
+ryouready::qqnorm_spss
+```
 
 ## Colophon
 
