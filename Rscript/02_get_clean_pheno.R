@@ -39,6 +39,11 @@ pheno_c_all[, 23] <- pheno_c[, 22]                 # 23. HDL, n = 294227
 pheno_c_all[, 24] <- pheno_c[, 23]                 # 24. LDL, n = 320810
 pheno_c_all[, 25] <- pheno_c[, 24]                 # 25. TC, n = 321152
 
+# Quantile normalize raw data values for every trait
+pheno_c_all <- apply(X = pheno_c_all, MARGIN = 2, FUN = function(dat){ryouready::qqnorm_spss(dat, method = 1, ties.method = "random")})
+
+
+
 # adjust PC for 25 continuous traits and 10-fold cross veidation
 PC <- sqc_i[, which(colnames(sqc_i)%in%paste0("PC", 1:20))]
 sex <- sqc_i[, which(colnames(sqc_i)%in%"Inferred.Gender")]
@@ -49,9 +54,9 @@ for (i in 1: 25){
   pheno_na <- ifelse(na_idx, NA, pheno_c_all[, i])
   pheno_scale <- scale(pheno_na)
    resid <- lm(pheno_scale[!na_idx] ~ covVar[!na_idx, ])$residual
-  pheno_c_adj[!na_idx, i] <- qqnorm(resid, plot.it = F)$x
+  #pheno_c_adj[!na_idx, i] <- qqnorm(resid, plot.it = F)$x
   ## Check Xiang's R code for quantile normalization, with attention to treatment of ties!
-  
+  pheno_c_adj[!na_idx, i] <- ryouready::qqnorm_spss(resid, method = 1, ties.method = "random")$y
   pheno_c_adj[na_idx, i] <- NA
   cat(paste0("pheno: ", i, ", sample size: ", length(pheno_c_adj[!na_idx, i]), "\n"))
 }

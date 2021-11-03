@@ -6,8 +6,10 @@ library(plyr)
 # load data
 load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_sqc.RData")
 load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/04_pheno_c_adj.RData")
-load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/05_pheno_b_clean.RData")
-comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
+#load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/05_pheno_b_clean.RData")
+#comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
+comp_str <- "~/research/ukb-intervals/dat/"
+out_dir <- "~/research/ukb-intervals/dat"
 
 # parameters
 sub_num <- 500 # subsample number: 1000 inviduals
@@ -37,19 +39,19 @@ write.table(cbind(sort(idx_male_sub), sort(idx_male_sub)),
             file = paste0(comp_str, "03_subsample/01_idx_male.txt"),
             col.names = F, row.names = F, quote = F)
 pheno_c_adj_sub <- pheno_c_adj[sqc_i$idx %in% idx_sub, ]
-pheno_b_all_sub <- pheno_b_all[sqc_i$idx %in% idx_sub, ]
+#pheno_b_all_sub <- pheno_b_all[sqc_i$idx %in% idx_sub, ]
 write.table(pheno_c_adj_sub, file = paste0(comp_str, "03_subsample/02_pheno_c.txt"),
             col.names = F, row.names = F, quote = F)
-write.table(pheno_b_all_sub, file = paste0(comp_str, "03_subsample/03_pheno_b.txt"),
-            col.names = F, row.names = F, quote = F)
+#write.table(pheno_b_all_sub, file = paste0(comp_str, "03_subsample/03_pheno_b.txt"),
+#            col.names = F, row.names = F, quote = F)
 ### End here!
 ##########################
 
 ##########################
 ### change the phenotype, build subsample by the same index
-idx_sub <- read.table(paste0(comp_str, "03_subsample/01_idx.txt"))[, 1]
+idx_sub <- read.table(file.path(out_dir, "03_subsample/01_idx.txt"))[, 1]
 pheno_c_adj_sub <- pheno_c_adj[sqc_i$idx %in% idx_sub, ]
-pheno_b_all_sub <- pheno_b_all[sqc_i$idx %in% idx_sub, ]
+#pheno_b_all_sub <- pheno_b_all[sqc_i$idx %in% idx_sub, ]
 write.table(pheno_c_adj_sub, file = paste0(comp_str, "03_subsample/02_pheno_c.txt"),
             col.names = F, row.names = F, quote = F)
 #write.table(pheno_b_all_sub, file = paste0(comp_str, "03_subsample/03_pheno_b.txt"),
@@ -64,9 +66,9 @@ idx_male_ref <- sample(idx_male_sub, ref_num)
 set.seed(20170529)
 idx_female_ref <- sample(idx_female_sub, ref_num)
 idx_ref <- c(idx_male_ref, idx_female_ref)
-write.table(cbind(idx_ref, idx_ref), file = "/net/mulan/disk2/yasheng/comparisonProject/04_reference/01_idx.txt",
+write.table(cbind(idx_ref, idx_ref), file = file.path(out_dir, "04_reference/01_idx.txt"),
             col.names = F, row.names = F, quote = F)
-idx_ref <- read.table("/net/mulan/disk2/yasheng/comparisonProject/04_reference/01_idx.txt")[, 1]
+idx_ref <- read.table(file.path(out_dir, "04_reference/01_idx.txt"))[, 1]
 
 # delete subsample and 5 folds cross validation
 fold <- 5
@@ -96,11 +98,11 @@ for (p in 1: 25){
                 quote = F, row.names = F, col.names = F)
   }
   cat ("pheno: ", p, " sample size: ", n, "\n")
-  write.table(n_train, file = paste0(comp_str, "02_pheno/02_train_c/n_pheno", p, ".txt"),
+  write.table(n_train, file = file.path(out_dir, "02_pheno/02_train_c", paste0("n_pheno", p, ".txt")),
               quote = F, row.names = F, col.names = F)
-  write.table(pheno_train, file = paste0(comp_str, "02_pheno/02_train_c/pheno_pheno", p, ".txt"),
+  write.table(pheno_train, file = file.path(out_dir, "02_pheno/02_train_c", paste0("pheno_pheno", p, ".txt")),
               quote = F, row.names = F, col.names = F)
-  write.table(pheno_test, file = paste0(comp_str, "02_pheno/03_test_c/pheno_pheno", p, ".txt"),
+  write.table(pheno_test, file = file.path(out_dir, "02_pheno/03_test_c", paste0("pheno_pheno", p, ".txt")),
               quote = F, row.names = F, col.names = F)
 }
 
