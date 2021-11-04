@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
 rm(list=ls())
 library(tidyverse)
-library(plyr)
 
 # load data
 comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
