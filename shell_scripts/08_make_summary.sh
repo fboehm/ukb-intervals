@@ -14,7 +14,7 @@ bash
 let k=0
 gemma=/net/mulan/home/yasheng/comparisonProject/program/gemma-0.98.1-linux-static
 compstr=/net/mulan/disk2/yasheng/comparisonProject/
-dat=2
+dat=1
 type=ukb
 
 for p in 9
