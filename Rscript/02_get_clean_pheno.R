@@ -38,7 +38,16 @@ pheno_c_all[, 24] <- pheno_c[, 23]                 # 24. LDL, n = 320810
 pheno_c_all[, 25] <- pheno_c[, 24]                 # 25. TC, n = 321152
 
 # Quantile normalize raw data values for every trait
-pheno_c_all <- apply(X = pheno_c_all, MARGIN = 2, FUN = function(dat){ryouready::qqnorm_spss(dat, method = 1, ties.method = "random")})
+pheno <- apply(X = pheno_c_all, 
+               MARGIN = 2, 
+               FUN = function(dat){
+                
+                 qs <- ryouready::qqnorm_spss(dat, method = 1, ties.method = "random")$y
+                 # qs has no NAs
+                 # add back the NAs
+                 dat[!is.na(dat)] <- qs
+                 return(dat)
+                 })
 
 
 
@@ -59,4 +68,4 @@ for (i in 1: 25){
   cat(paste0("pheno: ", i, ", sample size: ", length(pheno_c_adj[!na_idx, i]), "\n"))
 }
 #save(pheno_c_adj, file = paste0(comp_str, "02_pheno/04_pheno_c_adj.RData"))
-saveRDS(file.path(out_dir, "04_pheno_c_adj.rds"))
+saveRDS(object = pheno_c_adj, file = file.path(out_dir, "04_pheno_c_adj.rds"))
