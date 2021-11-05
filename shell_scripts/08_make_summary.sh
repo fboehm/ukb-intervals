@@ -7,8 +7,8 @@
 #SBATCH --cpus-per-task=1
 
 #SBATCH --array=1-110%50
-#SBATCH --output=/net/mulan/disk2/yasheng/comparisonProject/00_cluster_file/08_make_summary_%a.out
-#SBATCH --error=/net/mulan/disk2/yasheng/comparisonProject/00_cluster_file/08_make_summary_%a.err
+#SBATCH --output=~/research/ukb-intervals/cluster_outputs/08_make_summary_%a.out
+#SBATCH --error=~/research/ukb-intervals/cluster_outputs/08_make_summary_%a.err
 
 bash
 let k=0
