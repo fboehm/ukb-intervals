@@ -38,7 +38,7 @@ dat/02_pheno/03_test_c%.txt :  Rscript/03_get_cross_sample.R /net/mulan/disk2/ya
 
 
 dat/plink_files/genotype/chr1.bed : shell_scripts/04_transformat_plink.sh /net/mulan/disk2/yasheng/predictionProject/plink_file/pheno_list/ukb_all_info.sample /net/mulan/disk2/yasheng/predictionProject/plink_file/pheno_list/brIdx1.txt /net/mulan/disk2/yasheng/predictionProject/plink_file/pheno_list/brIdx2.txt 
-	bash $<
+	sbatch $<
 
 
 
