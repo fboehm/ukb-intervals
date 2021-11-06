@@ -16,10 +16,10 @@ read -u6
 {
 
 ## subsample
-bfileAll=/net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr${chr}
-bfileSub=${compStr}03_subsample/ukb/geno/allchr${chr}
-bfileSubP=${compStr}03_subsample/ukb/geno/chr${chr}
-idxSub=${compStr}03_subsample/01_idx.txt
+bfileAll=~/research/ukb-intervals/dat/plink_files/ukb/chr${chr}
+bfileSub=~/research/ukb-intervals/dat/03_subsample/ukb/geno/allchr${chr}
+bfileSubP=~/research/ukb-intervals/dat/03_subsample/ukb/geno/chr${chr}
+idxSub=~/research/ukb-intervals/dat/03_subsample/01_idx.txt
 plink-1.9 --bfile ${bfileAll} --keep ${idxSub} --make-bed --out ${bfileSub}
 plink-1.9 --bfile ${bfileSub} --maf 0.01 --make-bed --out ${bfileSubP}
 rm ${bfileSub}.log
@@ -29,9 +29,9 @@ rm ${bfileSub}.fam
 rm ${bfileSubP}.log
 
 ## reference sample
-bfileRef=${compStr}04_reference/ukb/geno/allchr${chr}
-bfileRefP=${compStr}04_reference/ukb/geno/chr${chr}
-idxRef=${compStr}04_reference/01_idx.txt
+bfileRef=~/research/ukb-intervals/dat/04_reference/ukb/geno/allchr${chr}
+bfileRefP=~/research/ukb-intervals/dat/04_reference/ukb/geno/chr${chr}
+idxRef=~/research/ukb-intervals/dat/04_reference/01_idx.txt
 plink-1.9 --bfile ${bfileSubP} --keep ${idxRef} --make-bed --out ${bfileRef}
 plink-1.9 --bfile ${bfileRef} --maf 0.01 --make-bed --out ${bfileRefP}
 

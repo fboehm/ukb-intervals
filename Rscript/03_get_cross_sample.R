@@ -4,12 +4,13 @@ library(tidyverse)
 library(plyr)
 
 # load data
-#load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_sqc.RData")
+load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_sqc.RData")
 #load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/04_pheno_c_adj.RData")
 #load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/05_pheno_b_clean.RData")
 #comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
 comp_str <- "~/research/ukb-intervals/dat/"
 out_dir <- "~/research/ukb-intervals/dat"
+pheno_c_adj <- readRDS(file.path(out_dir, "04_pheno_c_adj.rds"))
 
 # parameters
 sub_num <- 500 # subsample number: 1000 inviduals
@@ -49,11 +50,11 @@ write.table(pheno_c_adj_sub, file = paste0(comp_str, "03_subsample/02_pheno_c.tx
 
 ##########################
 ### change the phenotype, build subsample by the same index
-idx_sub <- read.table(file.path(out_dir, "03_subsample/01_idx.txt"))[, 1]
-pheno_c_adj_sub <- pheno_c_adj[sqc_i$idx %in% idx_sub, ]
-#pheno_b_all_sub <- pheno_b_all[sqc_i$idx %in% idx_sub, ]
-write.table(pheno_c_adj_sub, file = paste0(comp_str, "03_subsample/02_pheno_c.txt"),
-            col.names = F, row.names = F, quote = F)
+#idx_sub <- read.table(file.path(out_dir, "03_subsample/01_idx.txt"))[, 1]
+#pheno_c_adj_sub <- pheno_c_adj[sqc_i$idx %in% idx_sub, ]
+##pheno_b_all_sub <- pheno_b_all[sqc_i$idx %in% idx_sub, ]
+#write.table(pheno_c_adj_sub, file = paste0(comp_str, "03_subsample/02_pheno_c.txt"),
+#            col.names = F, row.names = F, quote = F)
 #write.table(pheno_b_all_sub, file = paste0(comp_str, "03_subsample/03_pheno_b.txt"),
 #            col.names = F, row.names = F, quote = F)
 ### End here!

@@ -7,14 +7,15 @@
 #SBATCH --cpus-per-task=1
 
 #SBATCH --array=1-110%50
-#SBATCH --output=/net/mulan/disk2/yasheng/comparisonProject/00_cluster_file/08_make_summary_%a.out
-#SBATCH --error=/net/mulan/disk2/yasheng/comparisonProject/00_cluster_file/08_make_summary_%a.err
+#SBATCH --output=~/research/ukb-intervals/cluster_outputs/08_make_summary_%a.out
+#SBATCH --error=~/research/ukb-intervals/cluster_outputs/08_make_summary_%a.err
 
 bash
 let k=0
 gemma=/net/mulan/home/yasheng/comparisonProject/program/gemma-0.98.1-linux-static
-compstr=/net/mulan/disk2/yasheng/comparisonProject/
-dat=2
+#compstr=/net/mulan/disk2/yasheng/comparisonProject/
+compstr=~/research/ukb-intervals/dat/
+dat=1
 type=ukb
 
 for p in 9
@@ -29,7 +30,8 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]
 then
 let col=(${p}-1)*5+${cross}
 
-bfile=/net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}
+#bfile=/net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}
+bfile=~/research/ukb-intervals/dat/plink_files/${type}/chr${chr}
 summ=summary_${type}_cross${cross}_chr${chr}
 
 if [ ${dat} -eq 1 ]
@@ -39,7 +41,7 @@ echo continuous phenotype
 cd ${compstr}05_internal_c/pheno${p}
 ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ}
 sed -i '1d' ${compstr}05_internal_c/pheno${p}/output/${summ}.assoc.txt
-rm ${compstr}05_internal_c/pheno${p}/output/${summ}.log.txt
+#rm ${compstr}05_internal_c/pheno${p}/output/${summ}.log.txt
 
 else
 
