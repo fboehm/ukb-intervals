@@ -13,7 +13,8 @@
 bash
 let k=0
 gemma=/net/mulan/home/yasheng/comparisonProject/program/gemma-0.98.1-linux-static
-compstr=/net/mulan/disk2/yasheng/comparisonProject/
+#compstr=/net/mulan/disk2/yasheng/comparisonProject/
+compstr=~/research/ukb-intervals/dat/
 dat=1
 type=ukb
 
@@ -29,7 +30,8 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]
 then
 let col=(${p}-1)*5+${cross}
 
-bfile=/net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}
+#bfile=/net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}
+bfile=~/research/ukb-intervals/dat/plink_files/${type}/chr${chr}
 summ=summary_${type}_cross${cross}_chr${chr}
 
 if [ ${dat} -eq 1 ]
