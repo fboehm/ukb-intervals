@@ -41,7 +41,7 @@ echo continuous phenotype
 cd ${compstr}05_internal_c/pheno${p}
 ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ}
 sed -i '1d' ${compstr}05_internal_c/pheno${p}/output/${summ}.assoc.txt
-rm ${compstr}05_internal_c/pheno${p}/output/${summ}.log.txt
+#rm ${compstr}05_internal_c/pheno${p}/output/${summ}.log.txt
 
 else
 
