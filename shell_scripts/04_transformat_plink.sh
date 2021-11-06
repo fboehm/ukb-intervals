@@ -7,8 +7,6 @@
 #SBATCH --cpus-per-task=5
 
 #SBATCH --array=1-21
-#SBATCH --output=~/research/ukb-intervals/cluster_outputs/to_plink_%a.out
-#SBATCH --error=~/research/ukb-intervals/cluster_outputs/to_plink_%a.err
 
 bash
 let k=0
@@ -54,7 +52,7 @@ removeid=/net/mulan/disk2/yasheng/comparisonProject/w30186_idx.txt
 plink-1.9 --bfile ${bfile1} --maf 0.01 --remove ${removeid} --make-bed --out ${bfile2}
 rm ${bfile1}*
 bfile3=~/research/ukb-intervals/dat/plink_files/hm3/chr${chr}
-snplist=/net/mulan/disk2/yasheng/predictionProject/plink_file/snplist.txt
+snplist=~/research/ukb-intervals/dat/plink_files/snplist.txt
 plink-1.9 --bfile ${bfile2} --maf 0.01 --extract ${snplist} --make-bed --out ${bfile3}
 #rm ${bfile2}.log
 #rm ${bfile3}.log
