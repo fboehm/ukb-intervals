@@ -36,4 +36,3 @@ dat/02_pheno/03_test_c%.txt :  Rscript/03_get_cross_sample.R /net/mulan/disk2/ya
   Rscript '$<'
 
 
-
