@@ -21,7 +21,7 @@ for ((chr=1;chr<23;chr++));do
 let k=${k}+1
 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 bgen=/net/mulan/Biobank/rawdata/EGAD00010001225/001/ukb_imp_chr${chr}_v2.bgen
-snpList=/net/mulan/disk2/yasheng/predictionProject/plink_file/removal_snp_list/chr${chr}.txt
+snpList=/net/mulan/disk2/yasheng/predictionProject/plink_file/removal_snp_list/chr${chr}.txt.gz
 bfile1=~/research/ukb-intervals/dat/plink_files/genotype/xchr${chr}
 bfile2=~/research/ukb-intervals/dat/plink_files/genotype/chr${chr}
 ## change to plink file
@@ -29,9 +29,9 @@ ${PLINK2} --bgen ${bgen} --sample ${sample} --keep ${brIdx1} --exclude ${snpList
           --hard-call-threshold 0.1 --geno 0.05 --make-bed --out ${bfile1}
 ## change the allele order
 plink-1.9 --bfile ${bfile1} --keep ${brIdx2} --make-bed --out ${bfile2}
-rm ${bfile1}.bed
-rm ${bfile1}.fam
-rm ${bfile1}.bim
+#rm ${bfile1}.bed
+#rm ${bfile1}.fam
+#rm ${bfile1}.bim
  fi
  done
 
