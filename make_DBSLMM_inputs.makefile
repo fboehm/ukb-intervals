@@ -1,6 +1,6 @@
 SHELL = /bin/sh
 
-BED_FILES := dat/plink_files/genotype/$(wildcard *.bed)
+BED_FILES := dat/plink_files/genotype/*.bed
 
 
 .SUFFIXES:
