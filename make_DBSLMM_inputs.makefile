@@ -1,6 +1,6 @@
 SHELL = /bin/sh
 
-BED_FILES := dat/plink_files/genotype/*.bed
+BED_FILES := dat/plink_files/genotype/chr$(wildcard *.bed)
 
 
 .SUFFIXES:
@@ -23,7 +23,7 @@ dat/04_pheno_c_adj.rds
 	Rscript '$<'
 
 
-dat/plink_files/genotype/chr*.bed \
+$(BED_FILES) \
 dat/plink_files/genotype/chr*.bim \
 dat/plink_files/genotype/chr*.fam &: shell_scripts/04_transformat_plink.sh \
 /net/mulan/disk2/yasheng/predictionProject/plink_file/pheno_list/ukb_all_info.sample \
