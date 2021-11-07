@@ -5,7 +5,8 @@
 #SBATCH --job-name=to_plink
 #SBATCH --mem=10G
 #SBATCH --cpus-per-task=5
-
+#SBATCH --mail-type=ARRAY_TASKS,ALL
+#SBATCH --mail-user=fredboe@umich.edu  
 #SBATCH --array=1-22
 
 bash
