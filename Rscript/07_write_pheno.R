@@ -2,7 +2,8 @@
 rm(list=ls())
 library(parallel)
 library(data.table)
-comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
+#comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
+comp_str <- "~/research/ukb-intervals/dat/"
 pred_str <- "/net/mulan/disk2/yasheng/predictionProject/"
 ## output to fam file for cross validation 
 pheno_num <- 25
