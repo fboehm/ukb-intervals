@@ -22,11 +22,11 @@ bfileSubP=~/research/ukb-intervals/dat/03_subsample/ukb/geno/chr${chr}
 idxSub=~/research/ukb-intervals/dat/03_subsample/01_idx.txt
 plink-1.9 --bfile ${bfileAll} --keep ${idxSub} --make-bed --out ${bfileSub}
 plink-1.9 --bfile ${bfileSub} --maf 0.01 --make-bed --out ${bfileSubP}
-rm ${bfileSub}.log
+#rm ${bfileSub}.log
 rm ${bfileSub}.bed
 rm ${bfileSub}.bim
 rm ${bfileSub}.fam
-rm ${bfileSubP}.log
+#rm ${bfileSubP}.log
 
 ## reference sample
 bfileRef=~/research/ukb-intervals/dat/04_reference/ukb/geno/allchr${chr}

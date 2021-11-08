@@ -21,7 +21,8 @@ compstr=~/research/ukb-intervals/dat/
 dat=1
 type=ukb
 
-for p in 9
+#for p in 9
+for p in `seq 1 25`
 do
 for cross in 1 2 3 4 5
 do
