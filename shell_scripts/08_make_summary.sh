@@ -21,13 +21,6 @@ compstr=~/research/ukb-intervals/dat/
 dat=1
 type=ukb
 
-# make symbolic links to Sheng's genotype files
-for chr in `seq 1 22`
-do
-cd ~/research/ukb-intervals/dat/plink_files/ukb
-ln -s /net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}.bim
-ln -s /net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}.bed
-done
 
 
 #for p in 9
