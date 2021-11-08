@@ -21,7 +21,7 @@ fam <- data.frame(fread(paste0(pred_str, "plink_file/hm3/chr22.fam")))
 #######
 fam_pheno <- cbind(fam[, c(1:5)], pheno) # pheno
 fam_output <- mclapply(c(1:22), function(chr){
-  write.table(fam_pheno, file = paste0(pred_str, "plink_file/ukb/chr", chr, ".fam"),
+  write.table(fam_pheno, file = paste0("~/research/ukb-intervals/dat/plink_files/ukb/chr", chr, ".fam"),
               col.names = F, row.names = F, quote = F)
   # write.table(fam_pheno, file = paste0(pred_str, "plink_file/hm3/chr", chr, ".fam"), 
   #             col.names = F, row.names = F, quote = F)
