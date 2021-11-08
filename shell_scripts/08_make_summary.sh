@@ -27,7 +27,6 @@ do
 cd ~/research/ukb-intervals/dat/plink_files/ukb
 ln -s /net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}.bim
 ln -s /net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}.bed
-
 done
 
 
