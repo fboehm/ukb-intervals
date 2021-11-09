@@ -37,7 +37,7 @@ let col=(${p}-1)*5+${cross}
 #bfile=/net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}
 
 bfile=~/research/ukb-intervals/dat/plink_files/${type}/chr${chr}
-summ=summary_${type}_cross${cross}_chr${chr}
+summ=summary_${type}_pheno${p}_cross${cross}_chr${chr}
 
 if [ ${dat} -eq 1 ]
 then
@@ -46,7 +46,7 @@ echo continuous phenotype
 #cd ~/research/ukb-intervals/dat/05_internal_c/pheno${p}
 ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ}
 #sed -i '1d' ${compstr}05_internal_c/pheno${p}/output/${summ}.assoc.txt
-sed -i '1d' ~/research/ukb-intervals/dat/05_internal_c/pheno${p}/${summ}.assoc.txt
+sed -i '1d' ~/research/ukb-intervals/shell_scripts/output/${summ}.assoc.txt
 #rm ${compstr}05_internal_c/pheno${p}/output/${summ}.log.txt
 
 else
