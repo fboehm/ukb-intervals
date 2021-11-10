@@ -17,8 +17,7 @@ ldsc=/usr/cluster/ldsc/ldsc.py
 #source activate ldsc
 
 ${ldsc} --out ~/research/ukb-intervals/dat/04_reference/ukb/ldsc/${chr} \
-#		--bfile ~/research/ukb-intervals/dat/03_subsample/ukb/geno/chr${chr} \
-    --bfile ~/research/ukb-intervals/dat/plink_files/ukb/chr${chr} \
+		--bfile ~/research/ukb-intervals/dat/plink_files/ukb/chr${chr} \
 		--l2  --ld-wind-kb 1000.0 
 } &
 pid=$!
