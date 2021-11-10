@@ -12,7 +12,7 @@ done >&6
 for chr in `seq 1 22`;do
 read -u6
 {
-ldsc=/usr/cluster/ldsc
+ldsc=/usr/cluster/ldsc/ldsc.py
 #cd ~/ldsc
 #source activate ldsc
 
