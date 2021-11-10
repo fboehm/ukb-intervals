@@ -12,9 +12,9 @@ done >&6
 for chr in `seq 1 22`;do
 read -u6
 {
-ldsc=~/ldsc/ldsc.py
-cd ~/ldsc
-source activate ldsc
+ldsc=/usr/cluster/ldsc
+#cd ~/ldsc
+#source activate ldsc
 
 ${ldsc} --out ~/research/ukb-intervals/dat/04_reference/ukb/ldsc/${chr} \
 		--bfile ~/research/ukb-intervals/dat/03_subsample/ukb/geno/chr${chr} \
