@@ -6,7 +6,7 @@
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
 
-#SBATCH --array=1-110%50
+#SBATCH --array=1-2640%50
 #SBATCH --mail-type=ARRAY_TASKS,ALL
 #SBATCH --mail-user=fredboe@umich.edu  
 
@@ -20,9 +20,9 @@ dat=1
 type=ukb
 
 
-
+npheno=24
 #for p in 9
-for p in `seq 1 25`
+for p in `seq 2 25`
 do
 for cross in 1 2 3 4 5
 do
