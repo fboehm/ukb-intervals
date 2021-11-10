@@ -47,8 +47,9 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 if [[ "$dat" == "c" ]]
 then
 herit=/net/mulan/disk2/yasheng/comparisonProject/05_internal_c/pheno${p}/herit/h2_ukb_cross${cross}.log
-summ=/net/mulan/disk2/yasheng/comparisonProject/05_internal_c/pheno${p}/output/summary_ukb_cross${cross}_chr
-outPath=/net/mulan/disk2/yasheng/comparisonProject/05_internal_c/pheno${p}/DBSLMM/ukb/
+#summ=/net/mulan/disk2/yasheng/comparisonProject/05_internal_c/pheno${p}/output/summary_ukb_cross${cross}_chr
+summ=~/research/ukb-intervals/dat/pheno${p}/output/summary_ukb_pheno${p}_cross${cross}_chr
+outPath=~/research/ukb-intervals/dat/05_internal_c/pheno${p}/ukb/
 else
 herit=/net/mulan/disk2/yasheng/comparisonProject/06_internal_b/pheno${p}/herit/h2_ukb_cross${cross}.log
 summ=/net/mulan/disk2/yasheng/comparisonProject/06_internal_b/pheno${p}/output/summary_ukb_cross${cross}_chr
@@ -61,17 +62,18 @@ cov=/net/mulan/disk2/yasheng/comparisonProject/03_subsample/04_cov.txt
 fi
 fi
 
-for chr in `seq 1 22`
-do
-gunzip ${summ}${chr}.assoc.txt.gz
-done
+#for chr in `seq 1 22`
+#do
+#gunzip ${summ}${chr}.assoc.txt.gz
+#done
 
 ## DBSLMM
-esttime=/net/mulan/disk2/yasheng/comparisonProject/01_time_file/06_DBSLMM_ukb_${dat}_pheno${p}_cross${cross}_thread${thread}.tm
+#esttime=/net/mulan/disk2/yasheng/comparisonProject/01_time_file/06_DBSLMM_ukb_${dat}_pheno${p}_cross${cross}_thread${thread}.tm
+esttime=~/research/ukb-intervals/dat/01_time_file/06_DBSLMM_ukb_${dat}_pheno${p}_cross${cross}_thread${thread}.tm
 if [[ "$dat" == "c" ]]
 then
 
-# time /usr/bin/time -v -o ${esttime} 
+time /usr/bin/time -v -o ${esttime} 
 sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
              -H ${herit} -G ${ref} -P ${phenoVal}\
              -l ${p} -T ${type} -i ${index} -t ${thread} -o ${outPath}
