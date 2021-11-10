@@ -41,7 +41,7 @@ ref=/net/mulan/disk2/yasheng/comparisonProject/03_subsample/ukb/geno/chr
 phenoMiss=/net/mulan/disk2/yasheng/comparisonProject/code/02_method/DBSLMM_miss/pheno.txt
 crossMiss=/net/mulan/disk2/yasheng/comparisonProject/code/02_method/DBSLMM_miss/cross.txt
 
-for p in 23
+for p in 1
 do
 for cross in 5
 do
