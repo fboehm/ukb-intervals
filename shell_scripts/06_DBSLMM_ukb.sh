@@ -9,8 +9,10 @@
 #SBATCH --cpus-per-task=5
 
 #SBATCH --array=1
-#SBATCH --output=/net/mulan/disk2/yasheng/comparisonProject/00_cluster_file/06_DBSLMM_ukb_thread5_c_%a.out
-#SBATCH --error=/net/mulan/disk2/yasheng/comparisonProject/00_cluster_file/06_DBSLMM_ukb_thread5_c_%a.err
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_thread5_c_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_thread5_c_%a.err
+#SBATCH --mail-type=ARRAY_TASKS,ALL
+#SBATCH --mail-user=fredboe@umich.edu  
 
 bash
 let k=0
