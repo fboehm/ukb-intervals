@@ -12,8 +12,8 @@ done >&6
 for chr in `seq 1 22`;do
 read -u6
 {
-ldsc=/net/mulan/home/yasheng/comparisonProject/program/ldsc/ldsc.py
-cd /net/mulan/home/yasheng/comparisonProject/program/ldsc
+ldsc=~/ldsc/ldsc.py
+cd ~/ldsc
 source activate ldsc
 
 ${ldsc} --out ~/research/ukb-intervals/dat/04_reference/ukb/ldsc/${chr} \
