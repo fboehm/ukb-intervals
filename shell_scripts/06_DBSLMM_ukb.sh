@@ -52,7 +52,7 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 if [[ "$dat" == "c" ]]
 then
 #herit=/net/mulan/disk2/yasheng/comparisonProject/05_internal_c/pheno${p}/herit/h2_ukb_cross${cross}.log
-herit=/net/mulan/disk2/yasheng/comparisonProject/04_reference/hm3/ldsc/${chr}.log
+herit=/net/mulan/disk2/yasheng/comparisonProject/04_reference/hm3/ldsc/1.log
 #summ=/net/mulan/disk2/yasheng/comparisonProject/05_internal_c/pheno${p}/output/summary_ukb_cross${cross}_chr
 #summ=~/research/ukb-intervals/dat/05_internal_c/pheno${p}/output/summary_ukb_pheno${p}_cross${cross}_chr
 summ=~/research/ukb-intervals/shell_scripts/output/summary_ukb_pheno${p}_cross${cross}_chr
