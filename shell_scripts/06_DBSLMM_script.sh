@@ -69,7 +69,8 @@ h2=`sed -n '26p' ${herit} | cut -d ":" -f 2 | cut -d '(' -f 1 | cut -d " " -f 2`
 # DBSLMM: tuning version
 if [[ "$type" == "t" ]]
 then
-	for chr in `seq 1 22`
+	#for chr in `seq 1 22`
+	for chr in 1
 	do
 
 		BLOCK=${block_prefix}${chr}
@@ -119,7 +120,8 @@ fi
 ## DBSLMM default version
 if [[ "$type" == "d" ]]
 then
-for chr in `seq 1 22` 
+#for chr in `seq 1 22` 
+for chr in 1
 do
 	BLOCK=${block_prefix}${chr}
 	summchr=${summary_file_prefix}${chr}
@@ -133,7 +135,7 @@ do
 					  --dbslmm ${dbslmm} --ref ${val_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
 					  --h2 ${h2} --thread ${thread}
 	summchr_prefix=`echo ${summchr##*/}`
-	rm ${outpath}${summchr_prefix}.dbslmm.badsnps
+	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
 
 done
 fi
