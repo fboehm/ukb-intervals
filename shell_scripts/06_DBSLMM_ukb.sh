@@ -36,7 +36,7 @@ DBSLMM=~/research/ukb-intervals/shell_scripts/06_DBSLMM_script.sh
 #DBSLMMpath=/net/mulan/home/yasheng/predictionProject/code/
 DBSLMMpath=~/research/
 blockf=/net/mulan/disk2/yasheng/comparisonProject/LDblock_EUR/chr
-ref=/net/mulan/disk2/yasheng/comparisonProject/03_subsample/ukb/geno/chr
+ref=/net/mulan/disk2/yasheng/comparisonProject-archive/03_subsample/ukb/geno/chr
 
 phenoMiss=/net/mulan/disk2/yasheng/comparisonProject/code/02_method/DBSLMM_miss/pheno.txt
 crossMiss=/net/mulan/disk2/yasheng/comparisonProject/code/02_method/DBSLMM_miss/cross.txt
