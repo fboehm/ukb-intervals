@@ -26,9 +26,9 @@ then
 phenoVal=/net/mulan/disk2/yasheng/comparisonProject/03_subsample/02_pheno_c.txt
 #phenoVal=~/research/ukb-intervals/dat/03_subsample/02_pheno_c.txt
 index=r2
-else
-phenoVal=/net/mulan/disk2/yasheng/comparisonProject/03_subsample/03_pheno_b.txt
-index=auc
+#else
+#phenoVal=/net/mulan/disk2/yasheng/comparisonProject/03_subsample/03_pheno_b.txt
+#index=auc
 fi
 plink=/usr/cluster/bin/plink-1.9
 #DBSLMM=/net/mulan/disk2/yasheng/comparisonProject/code/02_method/06_DBSLMM_script.sh
