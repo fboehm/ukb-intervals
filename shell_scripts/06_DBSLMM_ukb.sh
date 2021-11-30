@@ -4,7 +4,7 @@
 #SBATCH --partition=mulan,nomosix
 #SBATCH --time=24:00:00
 #SBATCH --job-name=DBSLMM
-#SBATCH --mem=12G
+#SBATCH --mem=24G
 #SBATCH --cpus-per-task=5
 #SBATCH --array=1
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_thread5_c_%a.out
