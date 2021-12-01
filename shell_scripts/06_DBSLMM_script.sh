@@ -135,7 +135,7 @@ do
 	echo ${model}
 	Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outpath} --plink ${plink} --model ${model}\
 					  --dbslmm ${dbslmm} --ref ${val_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
-					  --h2 ${h2} --thread ${thread}
+					  --h2 ${h2} --thread ${thread} --training true
 	summchr_prefix=`echo ${summchr##*/}`
 	mv corr_mats.bin ~/research/ukb-intervals/dat/corr_mats_files/pheno1_chr${chr}_corr_mats.bin
 	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
