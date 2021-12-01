@@ -63,15 +63,15 @@ TUNE=${software_path}DBSLMM/software/TUNE.R
 dbslmm=${software_path}/DBSLMM/scr/dbslmm
 
 # LDSC: heritability and number of SNP
-#nsnp=101584
-#h2=0.5
-nsnp=`sed -n '24p' ${herit} | cut -d ',' -f 2 | cut -d ' ' -f 2`
-h2=`sed -n '26p' ${herit} | cut -d ":" -f 2 | cut -d '(' -f 1 | cut -d " " -f 2`
+nsnp=101584
+h2=0.5
+#nsnp=`sed -n '24p' ${herit} | cut -d ',' -f 2 | cut -d ' ' -f 2`
+#h2=`sed -n '26p' ${herit} | cut -d ":" -f 2 | cut -d '(' -f 1 | cut -d " " -f 2`
 
 # DBSLMM: tuning version
 if [[ "$type" == "t" ]]
 then
-	for chr in `seq 1 22`
+	#for chr in `seq 1 22`
 	#for chr in 1
 	do
 
