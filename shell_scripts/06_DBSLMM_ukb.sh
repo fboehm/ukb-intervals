@@ -23,8 +23,8 @@ dat=c
 type=d
 if [[ "$dat" == "c" ]]
 then
-phenoVal=/net/mulan/disk2/yasheng/comparisonProject/03_subsample/02_pheno_c.txt
-#phenoVal=~/research/ukb-intervals/dat/03_subsample/02_pheno_c.txt
+#phenoVal=/net/mulan/disk2/yasheng/comparisonProject/03_subsample/02_pheno_c.txt
+phenoVal=~/research/ukb-intervals/dat/03_subsample/02_pheno_c.txt
 index=r2
 #else
 #phenoVal=/net/mulan/disk2/yasheng/comparisonProject/03_subsample/03_pheno_b.txt
@@ -75,6 +75,8 @@ fi
 #do
 #gunzip ${summ}${chr}.assoc.txt.gz
 #done
+
+
 
 ## DBSLMM
 #esttime=/net/mulan/disk2/yasheng/comparisonProject/01_time_file/06_DBSLMM_ukb_${dat}_pheno${p}_cross${cross}_thread${thread}.tm
