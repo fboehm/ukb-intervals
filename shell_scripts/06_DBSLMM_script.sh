@@ -72,7 +72,7 @@ h2=0.5
 if [[ "$type" == "t" ]]
 then
 	#for chr in `seq 1 22`
-	#for chr in 1
+	for chr in 1
 	do
 
 		BLOCK=${block_prefix}${chr}
