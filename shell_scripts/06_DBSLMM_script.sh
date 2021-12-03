@@ -122,8 +122,8 @@ fi
 ## DBSLMM default version
 if [[ "$type" == "d" ]]
 then
-for chr in `seq 1 22` 
-#for chr in 1
+#for chr in `seq 1 22` 
+for chr in 1
 do
 	BLOCK=${block_prefix}${chr}
 	summchr=${summary_file_prefix}${chr}
