@@ -2,7 +2,10 @@
 
 ## read fam file for all subjects, post-qc
 
+
+
 fam <- genio::read_fam("~/research/ukb-intervals/dat/plink_files/ukb/chr1.fam")
+set.seed(2021-12-05)
 ss <- sample(fam$id, size = 10000)
 write.table(x = ss, file = "~/research/ukb-intervals/dat/idx_sample1.txt")
 
