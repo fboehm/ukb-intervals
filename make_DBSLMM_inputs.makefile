@@ -23,6 +23,9 @@ dat/04_pheno_c_adj.rds
 	Rscript '$<'
 
 
+
+
+
 $(BED_FILES) \
 dat/plink_files/genotype/chr*.bim \
 dat/plink_files/genotype/chr*.fam &: shell_scripts/04_transformat_plink.sh \
