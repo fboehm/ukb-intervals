@@ -31,8 +31,8 @@ do
 #for chr in `seq 1 22`
 for chr in 1
 do
-for subset_type in ${SUBSET_TYPE}
-do
+let subset_type=training
+
 
 
 let k=${k}+1
@@ -60,4 +60,4 @@ fi
 done
 done
 #done
-done
+
