@@ -37,9 +37,9 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]
 then
 let col=1
 
-bfile=~/research/ukb-intervals/dat/plink_files/${type}/modified_fam/training/chr${chr}
+bfile=~/research/ukb-intervals/dat/plink_files/${type}/modified_fam/test/chr${chr}
 #summ=summary_${type}_pheno${p}_cross${cross}_chr${chr}
-summ=summary_${type}_pheno${p}_training_chr${chr}
+summ=summary_${type}_pheno${p}_test_chr${chr}
 
 
 echo continuous phenotype
