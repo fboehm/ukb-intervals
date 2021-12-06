@@ -6,7 +6,7 @@
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
 
-#SBATCH --array=1-2
+#SBATCH --array=1
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=fredboe@umich.edu  
 
