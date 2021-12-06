@@ -68,56 +68,6 @@ h2=0.5
 #nsnp=`sed -n '24p' ${herit} | cut -d ',' -f 2 | cut -d ' ' -f 2`
 #h2=`sed -n '26p' ${herit} | cut -d ":" -f 2 | cut -d '(' -f 1 | cut -d " " -f 2`
 
-# DBSLMM: tuning version
-if [[ "$type" == "t" ]]
-then
-	#for chr in `seq 1 22`
-	for chr in 1
-	do
-
-		BLOCK=${block_prefix}${chr}
-		summchr=${summary_file_prefix}${chr}
-		nobs=`sed -n "2p" ${summchr}.assoc.txt | awk '{print $5}'`
-		nmis=`sed -n "2p" ${summchr}.assoc.txt | awk '{print $4}'`
-		n=$(echo "${nobs}+${nmis}" | bc -l)
-		ref_geno=${ref_geno_prefix}${chr}
-		val_geno=${val_geno_prefix}${chr}
-		Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outpath} --plink ${plink} --model ${model}\
-						  --dbslmm ${dbslmm} --ref ${ref_geno} --n ${n} --type ${type} --nsnp ${nsnp} --block ${BLOCK}.bed\
-						  --h2 ${h2} --h2f 0.7,1,1.4 --thread ${thread}
-		for h2f in 0.7 1 1.4
-		do
-			if [ -f "${outpath}${summchr_prefix}_h2f${h2f}.dbslmm.badsnps" ];then
-				rm ${outpath}${summchr_prefix}_h2f${h2f}.dbslmm.badsnps
-			fi
-			summchr_prefix=`echo ${summchr##*/}`
-			${plink}  --silent --bfile ${val_geno} --score ${outpath}${summchr_prefix}_h2f${h2f}.dbslmm.txt 1 2 4 sum\
-					  --out ${outpath}${summchr_prefix}_h2f${h2f}
-			rm ${outpath}${summchr_prefix}_h2f${h2f}.log
-			if [ -f "${outpath}${summchr_prefix}_h2f${h2f}.nopred" ];then
-				rm ${outpath}${summchr_prefix}_h2f${h2f}.nopred
-			fi
-		done
-	done
-
-	summchr_prefix2=`echo ${summchr_prefix%_*}`
-	if [[ ! -n "$cov" ]]
-	then 
-	Rscript ${TUNE} --phenoPred ${outpath}${summchr_prefix2} --phenoVal ${val_pheno},${col} \
-		   --h2Range 0.7,1,1.4 --index ${index}
-	else 
-	Rscript ${TUNE} --phenoPred ${outpath}${summchr_prefix2} --phenoVal ${val_pheno},${col} \
-		   --h2Range 0.7,1,1.4 --index ${index} --cov ${cov}
-	fi
-
-	hbest=`cat ${outpath}${summchr_prefix2}_hbest.${index}`
-	for chr in `seq 1 22`
-	do
-		mv ${outpath}${summchr_prefix2}_chr${chr}_h2f${hbest}.dbslmm.txt ${outpath}${summchr_prefix2}_chr${chr}_best.dbslmm.txt
-		rm ${outpath}${summchr_prefix2}_chr${chr}_h2f*
-	done
-
-fi
 
 ## DBSLMM default version
 if [[ "$type" == "d" ]]
@@ -137,7 +87,7 @@ do
 					  --dbslmm ${dbslmm} --ref ${val_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
 					  --h2 ${h2} --thread ${thread} --training true
 	summchr_prefix=`echo ${summchr##*/}`
-	mv corr_mats.bin ~/research/ukb-intervals/dat/corr_mats_files/pheno1_chr${chr}_corr_mats.bin
+	mv corr_mats.bin ~/research/ukb-intervals/dat/corr_mats_files/pheno1_chr${chr}_training_corr_mats.bin
 	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
 
 done
