@@ -26,25 +26,20 @@ SUBSET_TYPE=(training test)
 #for p in `seq 2 25`
 for p in 1
 do
-#for cross in 1 2 3 4 5
-#do
-#for chr in `seq 1 22`
 for chr in 1
 do
-let subset_type=training
+
 
 
 
 let k=${k}+1
 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]
 then
-#let col=(${p}-1)*5+${cross}
 let col=1
-#bfile=/net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}
 
-bfile=~/research/ukb-intervals/dat/plink_files/${type}/modified_fam/${subset_type}/chr${chr}
+bfile=~/research/ukb-intervals/dat/plink_files/${type}/modified_fam/training/chr${chr}
 #summ=summary_${type}_pheno${p}_cross${cross}_chr${chr}
-summ=summary_${type}_pheno${p}_${subset_type}_chr${chr}
+summ=summary_${type}_pheno${p}_training_chr${chr}
 
 
 echo continuous phenotype
