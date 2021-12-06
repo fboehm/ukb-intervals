@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:" opt; do
+while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:r:" opt; do
   case $opt in
     D) software_path="$OPTARG"
     ;;
@@ -20,7 +20,7 @@ while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:" opt; do
     ;;
     R) ref_geno_prefix="$OPTARG"
     ;;
-    o) outpath="$OPTARG"
+    o) outPath="$OPTARG"
     ;;
     P) val_pheno="$OPTARG"
     ;;
@@ -31,6 +31,8 @@ while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:" opt; do
     i) index="$OPTARG"
     ;;
     t) thread="$OPTARG"
+    ;;
+    r) training="$OPTARG"
     ;;
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
@@ -56,7 +58,8 @@ if [ -n "$cov" ]; then
 	printf "\033[33mArgument cov is %s  \033[0m\n" "$cov"
 fi
 printf "\033[33mArgument thread is %s  \033[0m\n" "$thread"
-printf "\033[33mArgument outpath is %s  \033[0m\n" "$outpath"
+printf "\033[33mArgument outPath is %s  \033[0m\n" "$outPath"
+printf "\033[33mArgument training is %s  \033[0m\n" "$training"
 
 DBSLMM=${software_path}DBSLMM/software/DBSLMM.R
 TUNE=${software_path}DBSLMM/software/TUNE.R
@@ -83,11 +86,11 @@ do
 	nmis=`sed -n "2p" ${summchr}.assoc.txt | awk '{print $4}'`
 	n=$(echo "${nobs}+${nmis}" | bc -l)
 	echo ${model}
-	Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outpath} --plink ${plink} --model ${model}\
+	Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outPath} --plink ${plink} --model ${model}\
 					  --dbslmm ${dbslmm} --ref ${val_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
-					  --h2 ${h2} --thread ${thread} --training true
+					  --h2 ${h2} --thread ${thread} --training ${training}
 	summchr_prefix=`echo ${summchr##*/}`
-	mv corr_mats.bin ~/research/ukb-intervals/dat/corr_mats_files/pheno1_chr${chr}_training_corr_mats.bin
+	mv corr_mats.bin ~/research/ukb-intervals/dat/corr_mats_files/pheno1_chr${chr}_test_corr_mats.bin
 	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
 
 done
