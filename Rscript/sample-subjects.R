@@ -1,10 +1,12 @@
-# GOAL: sample 1000 subjects and output the ids to a text file
+# GOAL: sample 10000 subjects and output new fam files
+
 
 ## read fam file for all subjects, post-qc
 
 fam <- readr::read_delim("~/research/ukb-intervals/dat/plink_files/ukb/chr1.fam", col_names = FALSE)
 set.seed(2021-12-05)
 ss <- sample(1:nrow(fam), size = 10000)
+readr::write_delim(x = ss, file = "~/research/ukb-intervals/dat/test-subjects-ids.txt")
 tr <- fam
 tr[(1:nrow(fam) %in% ss), 6:ncol(fam)] <- NA
 te <- fam
