@@ -1,5 +1,6 @@
 *.rds 
 corr_mats_files
 test-subjects-ids.txt
+subsetted_plink_files
 
 
