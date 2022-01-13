@@ -19,7 +19,7 @@ the training set and use R's pseudorandom sampling to partition subjects.
 
 
 ```{r}
-fam <- readr::read_delim("test_chr1.fam", col_names = FALSE)
+fam <- readr::read_delim("~/research/ukb-intervals/dat/plink_files/chr1.fam", col_names = FALSE)
 n_total <- nrow(fam) 
 # Does the fam file have column names???
 # No! So every line corresponds to a subject!
