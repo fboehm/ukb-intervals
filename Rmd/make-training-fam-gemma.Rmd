@@ -25,7 +25,7 @@ training_indices <- 1 + readr::read_delim("~/research/ukb-intervals/Rmd/training
                                           col_names = FALSE) 
 # training_indices is written for C++ based indexing, so we add 1 to every entry here!
 fam[!(1:nrow(fam) %in% training_indices), 6:ncol(fam)] <- NA
-readr::write_delim(x = fam, 
+readr::write_tsv(x = fam, 
                    file = "~/research/ukb-intervals/dat/plink_files/ukb-gemma-training/chr1.fam", 
                    quote = "none",
                    col_names = FALSE)
