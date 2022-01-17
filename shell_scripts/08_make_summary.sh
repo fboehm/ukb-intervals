@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,nomosix
-#SBATCH --time=1-00:00:00
+#SBATCH --time=3:00:00
 #SBATCH --job-name=mksum
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
@@ -36,7 +36,7 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]
 then
 let col=1
 
-bfile=~/research/ukb-intervals/dat/plink_files/ukb-gemma-training/chr${chr}
+bfile=~/research/ukb-intervals/dat/plink_files/ukb-gemma-training/pheno${p}/chr${chr}
 #summ=summary_${type}_pheno${p}_cross${cross}_chr${chr}
 summ=summary_${type}_pheno${p}_training_chr${chr}
 
