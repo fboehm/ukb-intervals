@@ -32,8 +32,6 @@ while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:r:" opt; do
     ;;
     t) thread="$OPTARG"
     ;;
-    r) training="$OPTARG"
-    ;;
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
   esac
@@ -87,10 +85,8 @@ do
 	echo ${model}
 	Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outPath} --plink ${plink} --model ${model}\
 					  --dbslmm ${dbslmm} --ref ${val_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
-					  --h2 ${h2} --thread ${thread}
-	summchr_prefix=`echo ${summchr##*/}`
-	#mv corr_mats.bin ~/research/ukb-intervals/dat/corr_mats_files/pheno1_chr${chr}_test_corr_mats.bin
-	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
+					  --h2 ${h2} --thread ${thread} --ntotal 337129
+	#summchr_prefix=`echo ${summchr##*/}`
 
 done
 fi
