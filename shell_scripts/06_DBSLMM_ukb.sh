@@ -55,7 +55,7 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
   time /usr/bin/time -v -o ${esttime} 
   sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
                -H ${herit} -G ${ref} -P ${phenoVal}\
-               -l ${p} -T ${type} -i ${index} -t ${thread} -o ${outPath} -r false
+               -l ${p} -T ${type} -i ${index} -t ${thread} -o ${outPath}
 
 fi # end if statement that matches array task
 

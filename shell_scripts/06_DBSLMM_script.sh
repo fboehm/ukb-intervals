@@ -59,14 +59,13 @@ if [ -n "$cov" ]; then
 fi
 printf "\033[33mArgument thread is %s  \033[0m\n" "$thread"
 printf "\033[33mArgument outPath is %s  \033[0m\n" "$outPath"
-printf "\033[33mArgument training is %s  \033[0m\n" "$training"
 
 DBSLMM=${software_path}DBSLMM/software/DBSLMM.R
 TUNE=${software_path}DBSLMM/software/TUNE.R
 dbslmm=${software_path}/DBSLMM/scr/dbslmm
 
 # LDSC: heritability and number of SNP
-nsnp=101584
+nsnp=704126
 h2=0.5
 #nsnp=`sed -n '24p' ${herit} | cut -d ',' -f 2 | cut -d ' ' -f 2`
 #h2=`sed -n '26p' ${herit} | cut -d ":" -f 2 | cut -d '(' -f 1 | cut -d " " -f 2`
@@ -88,9 +87,9 @@ do
 	echo ${model}
 	Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outPath} --plink ${plink} --model ${model}\
 					  --dbslmm ${dbslmm} --ref ${val_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
-					  --h2 ${h2} --thread ${thread} --training ${training}
+					  --h2 ${h2} --thread ${thread}
 	summchr_prefix=`echo ${summchr##*/}`
-	mv corr_mats.bin ~/research/ukb-intervals/dat/corr_mats_files/pheno1_chr${chr}_test_corr_mats.bin
+	#mv corr_mats.bin ~/research/ukb-intervals/dat/corr_mats_files/pheno1_chr${chr}_test_corr_mats.bin
 	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
 
 done
