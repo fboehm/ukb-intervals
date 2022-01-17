@@ -16,7 +16,7 @@ training set subjects and NAs for the test set subjects. We'll read an existing
 fam file - one that has trait values for all subjects - and replace the trait
 values with NAs for those subjects in the test set.
 
-Initially, we'll write a fam file with the name 'Chr1.fam' for use with the 
+Initially, we'll write a fam file with the name 'chr1.fam' for use with the 
 genotypic data files for Chr 1 of the UKB data.
 
 ```{r}
