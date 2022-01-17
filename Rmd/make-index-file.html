@@ -172,27 +172,42 @@ pre code {
 
 <p>Our goal here is to produce a plain text file with one column of integers. Those integers correspond to the row numbers (minus one, for C++) of the subjects that get assigned to the training set.</p>
 <p>To accomplish this goal, we need the number of subjects. Once we have that number, we can specify the proportion to be in the training set and use R's pseudorandom sampling to partition subjects.</p>
-<pre class="r"><code>fam &lt;- readr::read_delim(&quot;~/research/ukb-intervals/dat/plink_files/ukb/chr1.fam&quot;, col_names = FALSE)</code></pre>
+<pre class="r"><code># which column in the fam file?
+fam &lt;- readr::read_delim(&quot;~/research/ukb-intervals/dat/plink_files/ukb/chr1.fam&quot;, col_names = FALSE)</code></pre>
 <pre><code>## Rows: 337129 Columns: 130</code></pre>
-<pre><code>## ── Column specification ────────────────────────────────────────────────────────
+<pre><code>## ── Column specification ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot; &quot;
 ## dbl (130): X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14, X15,...</code></pre>
 <pre><code>## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>n_total &lt;- nrow(fam) 
+<pre class="r"><code>fam_nona &lt;- fam[!is.na(fam$X6), ] # change column name for other traits
+n_total &lt;- nrow(fam_nona) 
 # Does the fam file have column names???
 # No! So every line corresponds to a subject!</code></pre>
-<p>Now that we have <code>n_total</code>, the total number of subjects in the fam file, we proceed by specifying the proportion of the subjects that will be in the training set.</p>
+<p>Now that we have <code>n_total</code>, the total number of subjects in the fam file, after discarding those with missing trait values for teh trait of interest, we proceed by specifying the proportion of the subjects that will be in the training set.</p>
 <pre class="r"><code>training_proportion &lt;- 0.8
 set.seed(2022-01-06)
 cpp_indices &lt;- sample(0:(n_total - 1), size = floor(training_proportion * n_total))
+r_indices &lt;- cpp_indices + 1
 readr::write_delim(x = tibble::as_tibble(cpp_indices), 
                    quote = &quot;none&quot;,
-                   file = &quot;training_indices.txt&quot;, # this is hardcoded into dbslmm.cpp
+                   file = &quot;training_indices.txt&quot;, # this is not hardcoded into dbslmm.cpp
                    col_names = FALSE)
-readr::write_delim(x = tibble::as_tibble(fam$X1[1 + cpp_indices]), 
+readr::write_delim(x = tibble::as_tibble(fam_nona$X1[1 + cpp_indices]), 
                    file = &quot;training_ids.txt&quot;, 
+                   quote = &quot;none&quot;,
+                   col_names = FALSE)</code></pre>
+<pre class="r"><code># determine test indices
+cpp_indices_test &lt;- setdiff(0:(n_total - 1), cpp_indices)
+readr::write_delim(x = tibble::as_tibble(cpp_indices_test), 
+                   quote = &quot;none&quot;,
+                   file = &quot;test_indices.txt&quot;, # this is not hardcoded into dbslmm.cpp
+                   col_names = FALSE)</code></pre>
+<pre class="r"><code># write the training fam file for this trait
+fam_nona[!(1:nrow(fam_nona) %in% r_indices), 6:ncol(fam_nona)] &lt;- NA
+readr::write_delim(x = fam_nona, 
+                   file = &quot;~/research/ukb-intervals/dat/plink_files/ukb-gemma-training/pheno1/chr1.fam&quot;, # change path for different traits
                    quote = &quot;none&quot;,
                    col_names = FALSE)</code></pre>
 
