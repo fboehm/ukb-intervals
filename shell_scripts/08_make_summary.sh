@@ -18,7 +18,6 @@ gemma=/net/mulan/home/yasheng/comparisonProject/program/gemma-0.98.1-linux-stati
 compstr=~/research/ukb-intervals/dat/
 dat=1
 type=ukb
-SUBSET_TYPE=(training test)
 
 
 #npheno=24
@@ -37,13 +36,12 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]
 then
 let col=1
 
-bfile=~/research/ukb-intervals/dat/plink_files/${type}/modified_fam/test/chr${chr}
+bfile=~/research/ukb-intervals/dat/plink_files/ukb-gemma-training/chr${chr}
 #summ=summary_${type}_pheno${p}_cross${cross}_chr${chr}
-summ=summary_${type}_pheno${p}_test_chr${chr}
+summ=summary_${type}_pheno${p}_training_chr${chr}
 
 
 echo continuous phenotype
-#cd ~/research/ukb-intervals/dat/05_internal_c/pheno${p}
 ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ}
 #sed -i '1d' ${compstr}05_internal_c/pheno${p}/output/${summ}.assoc.txt
 sed -i '1d' ~/research/ukb-intervals/shell_scripts/output/${summ}.assoc.txt
