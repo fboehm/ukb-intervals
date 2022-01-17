@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:r:q:" opt; do
+while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:r:z:q:" opt; do
   case $opt in
     D) software_path="$OPTARG"
     ;;
@@ -31,6 +31,8 @@ while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:r:q:" opt; do
     i) index="$OPTARG"
     ;;
     t) thread="$OPTARG"
+    ;;
+    z) test_indices_file="$OPTARG"
     ;;
     q) training_indices_file="$OPTARG"
     ;;
@@ -88,7 +90,9 @@ do
 	echo ${model}
 	Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outPath} --plink ${plink} --model ${model}\
 					  --dbslmm ${dbslmm} --ref ${val_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
-					  --h2 ${h2} --thread ${thread} --ntotal 337129 --training_indices_file ~/research/ukb-intervals/Rmd/training_indices.txt
+					  --h2 ${h2} --thread ${thread} \
+					  --test_indices_file ~/research/ukb-intervals/Rmd/test_indices.txt \
+					  --training_indices_file ~/research/ukb-intervals/Rmd/training_indices.txt
 	summchr_prefix=`echo ${summchr##*/}`
 	#mv corr_mats.bin ~/research/ukb-intervals/dat/corr_mats_files/pheno1_chr${chr}_test_corr_mats.bin
 	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
