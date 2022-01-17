@@ -32,11 +32,8 @@ while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:r:q:" opt; do
     ;;
     t) thread="$OPTARG"
     ;;
-<<<<<<< HEAD
-=======
     q) training_indices_file="$OPTARG"
     ;;
->>>>>>> 3e564e9a3f2715a178812e2a168aea659647ddcb
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
   esac
