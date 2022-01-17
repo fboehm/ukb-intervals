@@ -58,7 +58,7 @@ readr::write_delim(x = tibble::as_tibble(cpp_indices_test),
 
 ```{r}
 # write the training fam file for this trait
-fam_nona[!(1:nrow(fam_nona) %in% training_indices), 6:ncol(fam_nona)] <- NA
+fam_nona[!(1:nrow(fam_nona) %in% r_indices), 6:ncol(fam_nona)] <- NA
 readr::write_delim(x = fam_nona, 
                    file = "~/research/ukb-intervals/dat/plink_files/ukb-gemma-training/pheno1/chr1.fam", # change path for different traits
                    quote = "none",
