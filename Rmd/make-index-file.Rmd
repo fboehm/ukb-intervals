@@ -20,7 +20,7 @@ the training set and use R's pseudorandom sampling to partition subjects.
 
 ```{r}
 # which column in the fam file?
-fam <- readr::read_delim("~/research/ukb-intervals/dat/plink_files/ukb/pheno1/chr1.fam", col_names = FALSE)
+fam <- readr::read_delim("~/research/ukb-intervals/dat/plink_files/ukb/chr1.fam", col_names = FALSE)
 fam_nona <- fam[!is.na(fam$X6), ] # change column name for other traits
 n_total <- nrow(fam_nona) 
 # Does the fam file have column names???
@@ -60,7 +60,7 @@ readr::write_delim(x = tibble::as_tibble(cpp_indices_test),
 # write the training fam file for this trait
 fam_nona[!(1:nrow(fam_nona) %in% training_indices), 6:ncol(fam_nona)] <- NA
 readr::write_delim(x = fam_nona, 
-                   file = "~/research/ukb-intervals/dat/plink_files/ukb-gemma-training/chr1.fam", 
+                   file = "~/research/ukb-intervals/dat/plink_files/ukb-gemma-training/pheno1/chr1.fam", # change path for different traits
                    quote = "none",
                    col_names = FALSE)
 
