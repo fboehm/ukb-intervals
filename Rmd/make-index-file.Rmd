@@ -23,8 +23,14 @@ the training set and use R's pseudorandom sampling to partition subjects.
 fam <- readr::read_delim("~/research/ukb-intervals/dat/plink_files/ukb/chr1.fam", col_names = FALSE)
 fam_nona <- fam[!is.na(fam$X6), ] # change column name for other traits
 n_total <- nrow(fam_nona) 
+indic <- as.numeric(!is.na(fam$X6))
+(n_total <- sum(indic)) 
 # Does the fam file have column names???
 # No! So every line corresponds to a subject!
+readr::write_delim(x = tibble::as_tibble(indic), 
+                   quote = "none", 
+                   file = "indicator-pheno1.txt", 
+                   col_names = FALSE)
 ```
 
 Now that we have `n_total`, the total number of subjects in the fam file, after discarding those with 
@@ -40,7 +46,7 @@ readr::write_delim(x = tibble::as_tibble(cpp_indices),
                    quote = "none",
                    file = "training_indices.txt", # this is not hardcoded into dbslmm.cpp
                    col_names = FALSE)
-readr::write_delim(x = tibble::as_tibble(fam_nona$X1[1 + cpp_indices]), 
+readr::write_delim(x = tibble::as_tibble(fam_nona$X1[r_indices]), 
                    file = "training_ids.txt", 
                    quote = "none",
                    col_names = FALSE)
