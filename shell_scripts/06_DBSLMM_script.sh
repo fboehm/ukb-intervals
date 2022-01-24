@@ -92,7 +92,9 @@ do
 					  --dbslmm ${dbslmm} --ref ${val_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
 					  --h2 ${h2} --thread ${thread} \
 					  --test_indices_file ~/research/ukb-intervals/Rmd/test_indices.txt \
-					  --training_indices_file ~/research/ukb-intervals/Rmd/training_indices.txt
+					  --training_indices_file ~/research/ukb-intervals/Rmd/training_indices.txt \
+					  --dat_str ~/research/ukb-intervals/dat/plink_files/ukb/chr1.bed \
+					  --indicator_file ~/research/ukb-intervals/Rmd/indicator-pheno1.txt
 	summchr_prefix=`echo ${summchr##*/}`
 	#mv corr_mats.bin ~/research/ukb-intervals/dat/corr_mats_files/pheno1_chr${chr}_test_corr_mats.bin
 	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
