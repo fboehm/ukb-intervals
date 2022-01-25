@@ -4,20 +4,22 @@
 #SBATCH --partition=mulan,nomosix
 #SBATCH --time=24:00:00
 #SBATCH --job-name=DBSLMM
-#SBATCH --mem=24G
+#SBATCH --mem=48G
 #SBATCH --cpus-per-task=5
 #SBATCH --array=1
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_test_thread5_c_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_test_thread5_c_%a.err
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_thread5_c_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_thread5_c_%a.err
 #SBATCH --mail-user=fredboe@umich.edu  
 #SBATCH --mail-type=ALL
 
 # Modified from /net/mulan/home/fredboe/research/comparisonProject/code/02_method/06_DBSLMM_ukb.sh
 
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+
 bash
 let k=0
 
-thread=5
+thread=$OMP_NUM_THREADS
 
 dat=c
 type=d
@@ -50,7 +52,7 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
   
   
   ## DBSLMM
-  esttime=~/research/ukb-intervals/dat/01_time_file/06_DBSLMM_ukb_${dat}_pheno${p}_test_thread${thread}.tm
+  esttime=~/research/ukb-intervals/dat/01_time_file/06_DBSLMM_ukb_${dat}_pheno${p}_thread${thread}.tm
 
   time /usr/bin/time -v -o ${esttime} 
   sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
