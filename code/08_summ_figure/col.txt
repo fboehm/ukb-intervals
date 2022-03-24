@@ -1,0 +1,11 @@
+"#E64B35CC" CT
+"#F39B7FCC" SCT
+"#4DBBD5CC" DBSLMM
+"#3C5488CC" SBLUP
+"#00A087CC" LDpred2-inf
+"#91D1C2CC" LDpred2-sp
+"#8491B4CC" LDpred2-nosp
+"#91D1C2CC" LDpred2-auto
+"#7E6148CC" lassosum
+"#B09C85CC" PRScs
+"#8491B4CC" SbayesR
