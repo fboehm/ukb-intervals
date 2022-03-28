@@ -2,7 +2,7 @@
 compStr=/net/mulan/disk2/yasheng/comparisonProject/
 
 # ukb subsample
-SEND_THREAD_NUM=8
+SEND_THREAD_NUM=22
 tmp_fifofile="/tmp/$$.fifo"
 mkfifo "$tmp_fifofile"
 exec 6<>"$tmp_fifofile"
@@ -11,7 +11,7 @@ for ((i=0;i<$SEND_THREAD_NUM;i++));do
 echo
 done >&6
 
-for chr in `seq 15 22`;do
+for chr in `seq 1 22`;do
 read -u6
 {
 
