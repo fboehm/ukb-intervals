@@ -79,7 +79,7 @@ fi
 if [[ "$dat" == "continuous" ]]
 then
 # time /usr/bin/time -v -o ${esttime} 
-sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
+bash ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
              -H ${herit} -G ${val} -R ${ref} -P ${phenoVal}\
              -l 1 -T ${type} -i ${index} -t ${thread} -o ${outPath} \
              -X ${/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno1_cross1.txt} \
