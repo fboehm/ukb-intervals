@@ -32,6 +32,12 @@ while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:" opt; do
     ;;
     t) thread="$OPTARG"
     ;;
+    X) test_indices_file="$OPTARG"
+    ;;
+    d) dat_str="$OPTARG"
+    ;;
+    N) indicator_file="$OPTARG"
+    ;;
     # C) chr="$OPTARG"
     # ;;
     \?) echo "Invalid option -$OPTARG" >&2

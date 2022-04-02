@@ -80,7 +80,11 @@ then
 # time /usr/bin/time -v -o ${esttime} 
 sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
              -H ${herit} -G ${val} -R ${ref} -P ${phenoVal}\
-             -l 1 -T ${type} -i ${index} -t ${thread} -o ${outPath} #-C ${chr} -f ${h2f} -h ${pth}
+             -l 1 -T ${type} -i ${index} -t ${thread} -o ${outPath} \
+             --test_indices_file ${/net/mulan/disk2/yasheng/comparisonProject/02_pheno/idx_pheno1_cross1.txt} \
+             --dat_str ${/net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr22.bed} \
+             --indicator_file ${}
+             
 else 
 # time /usr/bin/time -v -o ${esttime} 
 sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ}  -m DBSLMM\

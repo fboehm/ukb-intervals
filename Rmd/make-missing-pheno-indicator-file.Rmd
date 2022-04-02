@@ -1,0 +1,19 @@
+---
+title: "Make missing phenotype indicator file"
+author: "Frederick Boehm"
+date: "4/2/2022"
+output: html_document
+---
+
+## Overview
+
+We create a text file containing a single column of zeroes and ones. The number of rows equals 
+the number of rows in the fam file. For a single trait, we need to know which subjects have 
+missing values.
+
+
+## Read the fam file
+
+```{r}
+fam <- readr::read_table(file = "/net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr22.fam")
+```
