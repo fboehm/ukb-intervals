@@ -82,9 +82,9 @@ then
 sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
              -H ${herit} -G ${val} -R ${ref} -P ${phenoVal}\
              -l 1 -T ${type} -i ${index} -t ${thread} -o ${outPath} \
-             --test_indices_file ${/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno1_cross1.txt} \
-             --dat_str ${/net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr22.bed} \
-             --indicator_file ${/net/mulan/home/fredboe/research/ukb-intervals/Rmd/trait_1_missingness_indicator.txt}
+             -X ${/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno1_cross1.txt} \
+             -d ${/net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr22.bed} \
+             -n ${/net/mulan/home/fredboe/research/ukb-intervals/Rmd/trait_1_missingness_indicator.txt}
              
 else 
 # time /usr/bin/time -v -o ${esttime} 
