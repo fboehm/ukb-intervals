@@ -25,7 +25,8 @@ blockf=${compstr}LDblock_EUR/chr
 ref=${compstr}04_reference/ukb/geno/chr
 
 for p in 1; do
-for cross in 1 2 3 4 5; do
+#for cross in 1 2 3 4 5; do
+for cross in 1; do
 let k=${k}+1
 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 
@@ -83,7 +84,7 @@ sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
              -l 1 -T ${type} -i ${index} -t ${thread} -o ${outPath} \
              --test_indices_file ${/net/mulan/disk2/yasheng/comparisonProject/02_pheno/idx_pheno1_cross1.txt} \
              --dat_str ${/net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr22.bed} \
-             --indicator_file ${}
+             --indicator_file ${/net/mulan/home/fredboe/research/ukb-intervals/Rmd/trait_1_missingness_indicator.txt}
              
 else 
 # time /usr/bin/time -v -o ${esttime} 

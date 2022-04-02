@@ -148,11 +148,14 @@ do
 	echo ${model}
 	Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outpath} --plink ${plink} --model ${model}\
 					  --dbslmm ${dbslmm} --ref ${ref_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
-					  --h2 ${h2} --thread ${thread} --val ${val_geno}
+					  --h2 ${h2} --thread ${thread}\
+					  --test_indices_file ${test_indices_file} \
+					  --dat_str ${dat_str} --indicator_file ${indicator_file}
+	#				  --val ${val_geno}
 	summchr_prefix=`echo ${summchr##*/}`
 	summchr_prefix2=`echo ${summchr_prefix%_*}`
 	mv ${outpath}${summchr_prefix2}_chr${chr}.dbslmm.txt ${outpath}${summchr_prefix2}_chr${chr}_auto.dbslmm.txt
-	rm ${outpath}${summchr_prefix}.dbslmm.badsnps
+	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
 	mv variance.txt variance_chr${chr}.txt
 
 done
