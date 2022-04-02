@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:" opt; do
+while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:C:d:N:" opt; do
   case $opt in
     D) software_path="$OPTARG"
     ;;
@@ -67,7 +67,10 @@ if [ -n "$cov" ]; then
 fi
 printf "\033[33mArgument thread is %s  \033[0m\n" "$thread"
 printf "\033[33mArgument outpath is %s  \033[0m\n" "$outpath"
-# printf "\033[33mArgument chr is %s  \033[0m\n" "$chr"
+printf "\033[33mArgument test_indices_file is %s  \033[0m\n" "$test_indices_file"
+printf "\033[33mArgument dat_str is %s  \033[0m\n" "$dat_str"
+printf "\033[33mArgument indicator_file is %s  \033[0m\n" "$indicator_file"
+
 
 DBSLMM=${software_path}DBSLMM/software/DBSLMM.R
 TUNE=${software_path}DBSLMM/software/TUNE.R
