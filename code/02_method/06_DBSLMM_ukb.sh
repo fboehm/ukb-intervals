@@ -7,8 +7,8 @@
 #SBATCH --cpus-per-task=5
 
 #SBATCH --array=1-5
-#SBATCH --output=/net/mulan/disk2/yasheng/comparisonProject/00_cluster_file/06_DBSLMM_ukb_c_%a.out
-#SBATCH --error=/net/mulan/disk2/yasheng/comparisonProject/00_cluster_file/06_DBSLMM_ukb_c_%a.err
+#SBATCH --output=06_DBSLMM_ukb_c_%a.out
+#SBATCH --error=06_DBSLMM_ukb_c_%a.err
 
 bash 
 let k=0
@@ -19,8 +19,8 @@ type=t
 
 compstr=/net/mulan/disk2/yasheng/comparisonProject/
 plink=/usr/cluster/bin/plink-1.9
-DBSLMM=${compstr}code/02_method/06_DBSLMM_script.sh
-DBSLMMpath=/net/mulan/home/yasheng/predictionProject/code/
+DBSLMM=06_DBSLMM_script.sh
+DBSLMMpath=~/research/
 blockf=${compstr}LDblock_EUR/chr
 ref=${compstr}04_reference/ukb/geno/chr
 
@@ -64,7 +64,7 @@ if [[ "$dat" == "continuous" ]]
 then
 herit=${compstr}05_internal_c/pheno${p}/herit/h2_ukb_cross${cross}.log
 summ=${compstr}05_internal_c/pheno${p}/output/summary_ukb_cross${cross}_chr
-outPath=/net/mulan/disk2/yasheng/comparisonProject/05_internal_c/pheno${p}/DBSLMM/
+outPath=~/research/ukb-intervals/results/pheno${p}/
 else
 herit=${compstr}06_internal_b/pheno${p}/herit/h2_ukb_cross${cross}.log
 summ=${compstr}06_internal_b/pheno${p}/output/summary_ukb_cross${cross}_chr

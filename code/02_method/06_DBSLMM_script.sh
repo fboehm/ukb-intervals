@@ -128,8 +128,8 @@ fi
 ## DBSLMM automatic version
 if [[ "$type" == "auto" ]]
 then
-for chr in `seq 1 22` 
-# for chr in 22 
+#for chr in `seq 1 22` 
+ for chr in 22 
 do
 	BLOCK=${block_prefix}${chr}
 	summchr=${summary_file_prefix}${chr}
@@ -147,6 +147,7 @@ do
 	summchr_prefix2=`echo ${summchr_prefix%_*}`
 	mv ${outpath}${summchr_prefix2}_chr${chr}.dbslmm.txt ${outpath}${summchr_prefix2}_chr${chr}_auto.dbslmm.txt
 	rm ${outpath}${summchr_prefix}.dbslmm.badsnps
+	mv variance.txt variance_chr${chr}.txt
 
 done
 fi
