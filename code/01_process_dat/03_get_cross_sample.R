@@ -20,7 +20,7 @@ na_list_b <- lapply(1:25, function(x){
 })
 
 # parameters
-ref_num <- 250 # reference number: 500 inviduals
+ref_num <- 250 # reference number: 500 inviduals (250 males and 250 females)
 
 ##########################
 ### Get the reference index
