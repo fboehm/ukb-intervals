@@ -10,6 +10,8 @@ header <- read.table("/net/mulan/Biobank/rawdata/EGAD00010001225/001/ukb_sqc_v2_
                      stringsAsFactors = F)
 fam <- fread2("/net/mulan/data/UKB/ukb30186_baf_chr9_v2_s488363.fam")
 remove_id <- read.table("/net/mulan/disk2/yasheng/comparisonProject/w30186_20200820.csv")[, 1]
+# remove_id must contain ids to be removed from raw data... but why are they being removed??
+
 colnames(sqc) <- header[, 1]
 
 ## Check files
