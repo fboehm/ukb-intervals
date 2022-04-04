@@ -1,2 +1,8 @@
 *.log
-
+l_snp_summary_ukb_cross1_chr22.txt
+l_summary_ukb_cross1_chr22.clumped
+l_summary_ukb_cross1_chr22.txt
+plink_summary_ukb_cross1_chr22.txt
+s_summary_ukb_cross1_chr22.txt
+summary_ukb_cross1_chr22.dbslmm.badsnps
+summary_ukb_cross1_chr22_auto.dbslmm.txt
