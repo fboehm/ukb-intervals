@@ -7,18 +7,20 @@ output: html_document
 
 ## Overview
 
-We create a text file containing a single column of zeroes and ones. The number of rows equals 
-the number of rows in the fam file. For a single trait, we need to know which subjects have 
-missing values for the trait of interest.
+We read the two files - per trait - from Sheng Yang. They tell us which subjects 
+belong to training and test sets. Note that subjects that are in the test (or 
+training) set have nonmissing trait values. Those with NAs are not in the respective 
+set.
 
-
-## Read the fam file
+## Read the phenotype files
 
 ```{r}
-fam <- readr::read_table(file = "/net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr22.fam", col_names = FALSE)
-trait_num <- 1
-indic <- is.na(fam[, 5 + trait_num])
-readr::write_csv(x = tibble::as_tibble(as.numeric(indic)), file = paste0("trait_", trait_num, "_missingness_indicator.txt"), col_names = FALSE)
+train <- readr::read_table(file = "/net/mulan/disk2/yasheng/comparisonProject/02_pheno/02_train_c/pheno_pheno1.txt", col_names = FALSE)
+test <- readr::read_table(file = "/net/mulan/disk2/yasheng/comparisonProject/02_pheno/03_test_c/pheno_pheno1.txt", col_names = FALSE)
+cross <- 1
+
+
+readr::write_csv(x = tibble::as_tibble(as.numeric(indic)), file = paste0("trait_", trait_num, "_cross_", cross, "_missingness_indicator.txt"), col_names = FALSE)
 
 ```
 
