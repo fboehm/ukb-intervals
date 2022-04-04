@@ -12,15 +12,15 @@ belong to training and test sets. Note that subjects that are in the test (or
 training) set have nonmissing trait values. Those with NAs are not in the respective 
 set.
 
-## Read the phenotype files
+## Read the phenotype files from Sheng
 
 ```{r}
 train <- readr::read_table(file = "/net/mulan/disk2/yasheng/comparisonProject/02_pheno/02_train_c/pheno_pheno1.txt", col_names = FALSE)
 test <- readr::read_table(file = "/net/mulan/disk2/yasheng/comparisonProject/02_pheno/03_test_c/pheno_pheno1.txt", col_names = FALSE)
 cross <- 1
+indic <- as.numeric(!is.na(test[, cross]))
 
-
-readr::write_csv(x = tibble::as_tibble(as.numeric(indic)), file = paste0("trait_", trait_num, "_cross_", cross, "_missingness_indicator.txt"), col_names = FALSE)
+readr::write_csv(x = tibble::as_tibble(as.numeric(indic)), file = paste0("trait_", trait_num, "_cross_", cross, "_test-set_indicator.txt"), col_names = FALSE)
 
 ```
 
