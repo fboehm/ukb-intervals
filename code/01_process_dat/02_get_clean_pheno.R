@@ -5,9 +5,9 @@ library(plyr)
 
 # load data
 comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
-load(paste0(comp_str, "02_pheno/01_sqc.RData"))
-load(paste0(comp_str, "02_pheno/02_pheno_c_raw.RData"))
-load(paste0(comp_str, "02_pheno/03_pheno_b_raw.RData"))
+load(paste0(comp_str, "02_pheno/01_sqc.RData")) 
+load(paste0(comp_str, "02_pheno/02_pheno_c_raw.RData")) 
+load(paste0(comp_str, "02_pheno/03_pheno_b_raw.RData")) 
 
 # continuous traits
 pheno_c_all <- matrix(NA, ncol = 25, nrow = nrow(pheno_c))

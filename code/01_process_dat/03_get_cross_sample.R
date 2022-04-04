@@ -13,6 +13,9 @@ comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
 na_list_c <- lapply(1:25, function(x){
   sqc_i$idx[which(is.na(pheno_c_adj[,x]))]
 })
+# na_list_c contains a list with 25 vectors of integers.
+# each vector contains the indices for the subjects with NA value for trait of interest
+
 
 # na idx for binary phenotypes
 na_list_b <- lapply(1:25, function(x){
@@ -58,13 +61,19 @@ cross_seed <- 20170529
 # Continuous trait
 sample_size_dat <- data.frame()
 for (p in 1:25) {
-  sample_size_mat <- matrix(NA, fold, 5)
+  sample_size_mat <- matrix(NA, fold, 5) #nrow = fold & ncol = 5
   idx_tot <- setdiff(sqc_sub$idx, na_list_c[[p]])
   sample_size_mat[c(1:5), 1] <- length(idx_tot)
   cat("pheno", p, "include", length(idx_tot), "samples.\n")
   set.seed(pheno_seed_str[p])
   idx_group <- idx_tot %>% as.data.frame() %>%
     split(sample(1:group_num, length(idx_tot), replace=T))
+  # sample(1:group_num, length(idx_tot), replace=T) draws numbers 1 through 10, with replacement, 
+  # for every entry in idx_tot... so we have a vector of length `length(idx_tot)` with each entry being a number from 
+  # 1 to 10.
+  # application of `split` function creates a list of length 10 (one entry per integer). Each entry in the list is a data.frame with one column. 
+  # the one column contains the indices for members of that 'group' (ie, for that entry in the list)
+  
   
   # Step1: validation and PGSagg set
   ## get index
