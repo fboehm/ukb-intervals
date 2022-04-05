@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:C:d:N:" opt; do
+while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:C:E:d:" opt; do
   case $opt in
     D) software_path="$OPTARG"
     ;;
@@ -34,9 +34,9 @@ while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:C:d:N:" opt; do
     ;;
     C) test_indices_file="$OPTARG"
     ;;
-    d) dat_str="$OPTARG"
+    E) training_indices_file="$OPTARG"
     ;;
-    N) indicator_file="$OPTARG"
+    d) dat_str="$OPTARG"
     ;;
     # C) chr="$OPTARG"
     # ;;
