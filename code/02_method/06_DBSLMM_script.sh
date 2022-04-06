@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:C:E:d:" opt; do
+while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:C:d:" opt; do
   case $opt in
     D) software_path="$OPTARG"
     ;;
@@ -33,8 +33,6 @@ while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:C:E:d:" opt; do
     t) thread="$OPTARG"
     ;;
     C) test_indices_file="$OPTARG"
-    ;;
-    E) training_indices_file="$OPTARG"
     ;;
     d) dat_str="$OPTARG"
     ;;
@@ -69,7 +67,6 @@ printf "\033[33mArgument thread is %s  \033[0m\n" "$thread"
 printf "\033[33mArgument outpath is %s  \033[0m\n" "$outpath"
 printf "\033[33mArgument test_indices_file is %s  \033[0m\n" "$test_indices_file"
 printf "\033[33mArgument dat_str is %s  \033[0m\n" "$dat_str"
-printf "\033[33mArgument training_indices_file is %s  \033[0m\n" "$training_indices_file"
 
 
 DBSLMM=${software_path}DBSLMM/software/DBSLMM.R
@@ -153,7 +150,6 @@ do
 					  --dbslmm ${dbslmm} --ref ${ref_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
 					  --h2 ${h2} --thread ${thread}\
 					  --test_indices_file ${test_indices_file} \
-					  --training_indices_file ${training_indices_file}\
 					  --dat_str ${dat_str} 
 	#				  --val ${val_geno}
 	summchr_prefix=`echo ${summchr##*/}`
