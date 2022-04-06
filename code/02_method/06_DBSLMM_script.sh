@@ -69,7 +69,7 @@ printf "\033[33mArgument thread is %s  \033[0m\n" "$thread"
 printf "\033[33mArgument outpath is %s  \033[0m\n" "$outpath"
 printf "\033[33mArgument test_indices_file is %s  \033[0m\n" "$test_indices_file"
 printf "\033[33mArgument dat_str is %s  \033[0m\n" "$dat_str"
-printf "\033[33mArgument indicator_file is %s  \033[0m\n" "$indicator_file"
+printf "\033[33mArgument training_indices_file is %s  \033[0m\n" "$training_indices_file"
 
 
 DBSLMM=${software_path}DBSLMM/software/DBSLMM.R
