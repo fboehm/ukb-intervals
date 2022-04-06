@@ -1,0 +1,27 @@
+---
+title: "Make index files for test set"
+author: "Frederick J. Boehm"
+date: "4/6/2022"
+output: html_document
+---
+
+The goal is to create, for every cross-pheno combination, a file containing 
+the indices of subjects that belong to the test set. We'll use the phenotype files 
+that Sheng Yang created for his study of UKB traits.
+
+```{r}
+# read the fam file from predictionProject dir.
+library(magrittr)
+fam <- readr::read_delim("/net/mulan/home/fredboe/research/predictionProject/plink_file/ukb/chr22.fam", col_names = FALSE)$X1 %>% tibble::as_tibble()
+
+
+phe_num <- 1
+cross_num <- 1
+test_indices_filename <- paste0("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno", phe_num, "_cross", cross_num, ".txt")
+test_indices <- readr::read_table(test_indices_filename, col_names = FALSE)$X1 %>% tibble::as_tibble()
+my_binary_vec <- (fam$value %in% test_indices$value) %>% as.numeric()
+sum(my_binary_vec)
+outfn <- paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, ".txt")
+readr::write_delim(x = my_binary_vec %>% tibble::as_tibble(), file = outfn, col_names = FALSE)
+```
+
