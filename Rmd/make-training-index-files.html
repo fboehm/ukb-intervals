@@ -188,7 +188,7 @@ dat &lt;- readr::read_table(filename, col_names = FALSE)[, cross_num]</code></pr
 <pre class="r"><code>indices &lt;- which(!is.na(dat$X1))
 # write output
 training_indices_filename &lt;- paste0(&quot;~/research/ukb-intervals/training_index_files/pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;.txt&quot;)
-readr::write_delim(x = tibble::as_tibble(indices), file = training_indices_filename, col_names = FALSE)
+readr::write_delim(x = tibble::tibble(x = indices, y = indices), file = training_indices_filename, col_names = FALSE)
 
 ## Compare with test indices
 test_indices_filename &lt;- paste0(&quot;/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)

@@ -17,7 +17,7 @@ dat <- readr::read_table(filename, col_names = FALSE)[, cross_num]
 indices <- which(!is.na(dat$X1))
 # write output
 training_indices_filename <- paste0("~/research/ukb-intervals/training_index_files/pheno_", phe_num, "_cross_", cross_num, ".txt")
-readr::write_delim(x = tibble::as_tibble(indices), file = training_indices_filename, col_names = FALSE)
+readr::write_delim(x = tibble::tibble(x = indices, y = indices), file = training_indices_filename, col_names = FALSE)
 
 ## Compare with test indices
 test_indices_filename <- paste0("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno", phe_num, "_cross", cross_num, ".txt")
