@@ -82,7 +82,7 @@ then
 sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
              -H ${herit} -G ${val} -R ${ref} -P ${phenoVal}\
              -l 1 -T ${type} -i ${index} -t ${thread} -o ${outPath}\
-             -C /net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno1_cross1.txt \
+             -C ~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_1_cross_1.txt \
              -d /net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr22.bed 
              
 else 

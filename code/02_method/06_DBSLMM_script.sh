@@ -32,7 +32,7 @@ while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:C:d:" opt; do
     ;;
     t) thread="$OPTARG"
     ;;
-    C) test_indices_file="$OPTARG"
+    C) test_indicator_file="$OPTARG"
     ;;
     d) dat_str="$OPTARG"
     ;;
