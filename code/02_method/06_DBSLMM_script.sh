@@ -65,7 +65,7 @@ if [ -n "$cov" ]; then
 fi
 printf "\033[33mArgument thread is %s  \033[0m\n" "$thread"
 printf "\033[33mArgument outpath is %s  \033[0m\n" "$outpath"
-printf "\033[33mArgument test_indices_file is %s  \033[0m\n" "$test_indices_file"
+printf "\033[33mArgument test_indicator_file is %s  \033[0m\n" "$test_indicator_file"
 printf "\033[33mArgument dat_str is %s  \033[0m\n" "$dat_str"
 
 
@@ -149,7 +149,7 @@ do
 	Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outpath} --plink ${plink} --model ${model}\
 					  --dbslmm ${dbslmm} --ref ${ref_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
 					  --h2 ${h2} --thread ${thread}\
-					  --test_indices_file ${test_indices_file} \
+					  --test_indicator_file ${test_indicator_file} \
 					  --dat_str ${dat_str} 
 	#				  --val ${val_geno}
 	summchr_prefix=`echo ${summchr##*/}`
