@@ -39,3 +39,13 @@ readr::write_delim(x = mbv %>% tibble::as_tibble(), file = outfn, col_names = FA
 
 ```
 
+```{r}
+# n_test defines the number of test subjects
+n_test <- 1000
+mbv <- numeric(length = length(my_binary_vec))
+mbv[which(my_binary_vec == 1)[1:n_test]] <- 1
+outfn <- paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest", n_test, ".txt")
+readr::write_delim(x = mbv %>% tibble::as_tibble(), file = outfn, col_names = FALSE)
+
+```
+

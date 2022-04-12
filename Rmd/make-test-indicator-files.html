@@ -205,6 +205,12 @@ mbv &lt;- numeric(length = length(my_binary_vec))
 mbv[which(my_binary_vec == 1)[1:10]] &lt;- 1
 outfn &lt;- paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest10.txt&quot;)
 readr::write_delim(x = mbv %&gt;% tibble::as_tibble(), file = outfn, col_names = FALSE)</code></pre>
+<pre class="r"><code># n_test defines the number of test subjects
+n_test &lt;- 1000
+mbv &lt;- numeric(length = length(my_binary_vec))
+mbv[which(my_binary_vec == 1)[1:n_test]] &lt;- 1
+outfn &lt;- paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest&quot;, n_test, &quot;.txt&quot;)
+readr::write_delim(x = mbv %&gt;% tibble::as_tibble(), file = outfn, col_names = FALSE)</code></pre>
 
 
 
