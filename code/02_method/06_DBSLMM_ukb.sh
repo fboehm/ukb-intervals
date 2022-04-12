@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,nomosix
-#SBATCH --time=2-00:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name=DBSLMM
 #SBATCH --mem=80G
 #SBATCH --cpus-per-task=5
@@ -76,14 +76,15 @@ fi
 
 ## DBSLMM
 # esttime=${compstr}01_time_file/06_DBSLMM_hm3_${dat}_pheno${p}_cross${cross}_thread${thread}.tm
+esttime=~/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_c_pheno${p}_cross${cross}_thread${thread}.tm
 if [[ "$dat" == "continuous" ]]
 then
-# time /usr/bin/time -v -o ${esttime} 
+ time /usr/bin/time -v -o ${esttime} 
 sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
              -H ${herit} -G ${val} -R ${ref} -P ${phenoVal}\
              -l 1 -T ${type} -i ${index} -t ${thread} -o ${outPath}\
-             -C ~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_1_cross_1.txt \
-             -d /net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr22.bed 
+             -C ~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_1_cross_1_ntest10.txt \
+             -d /net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr 
              
 else 
 # time /usr/bin/time -v -o ${esttime} 

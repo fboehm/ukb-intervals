@@ -135,7 +135,7 @@ fi
 if [[ "$type" == "auto" ]]
 then
 #for chr in `seq 1 22` 
- for chr in 22 
+ for chr in 21 
 do
 	BLOCK=${block_prefix}${chr}
 	summchr=${summary_file_prefix}${chr}
@@ -150,7 +150,7 @@ do
 					  --dbslmm ${dbslmm} --ref ${ref_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
 					  --h2 ${h2} --thread ${thread}\
 					  --test_indicator_file ${test_indicator_file} \
-					  --dat_str ${dat_str} 
+					  --dat_str ${dat_str}${chr}.bed 
 	#				  --val ${val_geno}
 	summchr_prefix=`echo ${summchr##*/}`
 	summchr_prefix2=`echo ${summchr_prefix%_*}`

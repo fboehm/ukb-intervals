@@ -25,3 +25,17 @@ outfn <- paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_ph
 readr::write_delim(x = my_binary_vec %>% tibble::as_tibble(), file = outfn, col_names = FALSE)
 ```
 
+We now make an indicator file with a small number of test subjects. We want to check the timing of the analysis with this small set of subjects.
+
+
+
+```{r}
+# n_test defines the number of test subjects
+n_test <- 10
+mbv <- numeric(length = length(my_binary_vec))
+mbv[which(my_binary_vec == 1)[1:10]] <- 1
+outfn <- paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest10.txt")
+readr::write_delim(x = mbv %>% tibble::as_tibble(), file = outfn, col_names = FALSE)
+
+```
+
