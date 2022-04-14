@@ -150,7 +150,7 @@ do
 					  --dbslmm ${dbslmm} --ref ${ref_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
 					  --h2 ${h2} --thread ${thread}\
 					  --test_indicator_file ${test_indicator_file} \
-					  --dat_str ${dat_str}${chr}.bed 
+					  --dat_str ${dat_str}${chr}
 	#				  --val ${val_geno}
 	summchr_prefix=`echo ${summchr##*/}`
 	summchr_prefix2=`echo ${summchr_prefix%_*}`
