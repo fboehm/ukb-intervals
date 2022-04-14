@@ -79,7 +79,7 @@ fi
 esttime=~/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_c_pheno${p}_cross${cross}_thread${thread}.tm
 if [[ "$dat" == "continuous" ]]
 then
- /usr/bin/time -v -o ${esttime} 
+ time /usr/bin/time -v -o ${esttime} 
 sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
              -H ${herit} -G ${val} -R ${ref} -P ${phenoVal}\
              -l 1 -T ${type} -i ${index} -t ${thread} -o ${outPath}\
