@@ -1,0 +1,25 @@
+---
+title: "Reading variance.txt files"
+author: "Frederick J. Boehm"
+date: "4/18/2022"
+output: html_document
+---
+
+We want to read a collection of variance.txt files for analysis of a single trait. We have a collection of 22 files in results/pheno1/variances_cross1_1000test/. 
+
+```{r}
+library(magrittr)
+res_list <- list()
+for (i in 1:22){
+  res_list[[i]] <- readr::read_table(paste0("~/research/ukb-intervals/results/pheno1/variances_cross1_1000test/variance_chr", i, ".txt"), col_names = paste0("chr", i), skip = 2)
+}
+do.call("cbind", res_list) %>% 
+  tibble::as_tibble() %>%
+  dplyr::mutate(total_var = rowSums(.)) %>%
+  dplyr::mutate(total_sd = sqrt(total_var))
+```
+
+
+
+
+
