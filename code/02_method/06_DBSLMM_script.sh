@@ -134,8 +134,8 @@ fi
 ## DBSLMM automatic version
 if [[ "$type" == "auto" ]]
 then
-for chr in `seq 1 22` 
-#for chr in 22
+#for chr in `seq 1 22` 
+for chr in 22
 do
 	BLOCK=${block_prefix}${chr}
 	summchr=${summary_file_prefix}${chr}
