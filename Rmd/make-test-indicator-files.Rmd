@@ -13,16 +13,46 @@ that Sheng Yang created for his study of UKB traits.
 # read the fam file from predictionProject dir.
 library(magrittr)
 fam <- readr::read_delim("/net/mulan/home/fredboe/research/predictionProject/plink_file/ukb/chr22.fam", col_names = FALSE)$X1 %>% tibble::as_tibble()
+```
+
+We have `fam`, a tibble with 337129 rows and 1 column. The one column contains the 
+family ids for the subjects. These are not numbered consecutively, since they 
+are taken from the larger data set (ie, with ~500k subjects).
 
 
+
+```{r}
 phe_num <- 1
 cross_num <- 1
-test_indices_filename <- paste0("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno", phe_num, "_cross", cross_num, ".txt")
-test_indices <- readr::read_table(test_indices_filename, col_names = FALSE)$X1 %>% tibble::as_tibble()
-my_binary_vec <- (fam$value %in% test_indices$value) %>% as.numeric()
+test_ids_filename <- paste0("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno", phe_num, "_cross", cross_num, ".txt")
+test_ids <- readr::read_table(test_ids_filename, col_names = FALSE)
+```
+
+`test_ids` has two columns, namely, the family id and the subject id for each subject 
+that's in the test set.
+
+
+
+```{r}
+my_binary_vec <- (fam$value %in% test_ids$X1) %>% as.numeric()
 sum(my_binary_vec)
+length(my_binary_vec)
+```
+
+```{r}
+fam %>%
+  dplyr::mutate(in_test_set = my_binary_vec) %>%
+  dplyr::filter(in_test_set == 1)
+
+```
+
+```{r}
+test_ids
+```
+
+```{r}
 outfn <- paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, ".txt")
-readr::write_delim(x = my_binary_vec %>% tibble::as_tibble(), file = outfn, col_names = FALSE)
+#readr::write_delim(x = my_binary_vec %>% tibble::as_tibble(), file = outfn, col_names = FALSE)
 ```
 
 We now make an indicator file with a small number of test subjects. We want to check the timing of the analysis with this small set of subjects.
@@ -35,7 +65,7 @@ n_test <- 10
 mbv <- numeric(length = length(my_binary_vec))
 mbv[which(my_binary_vec == 1)[1:10]] <- 1
 outfn <- paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest10.txt")
-readr::write_delim(x = mbv %>% tibble::as_tibble(), file = outfn, col_names = FALSE)
+#readr::write_delim(x = mbv %>% tibble::as_tibble(), file = outfn, col_names = FALSE)
 
 ```
 
@@ -45,7 +75,7 @@ n_test <- 1000
 mbv <- numeric(length = length(my_binary_vec))
 mbv[which(my_binary_vec == 1)[1:n_test]] <- 1
 outfn <- paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest", n_test, ".txt")
-readr::write_delim(x = mbv %>% tibble::as_tibble(), file = outfn, col_names = FALSE)
-
+#readr::write_delim(x = mbv %>% tibble::as_tibble(), file = outfn, col_names = FALSE)
+readr::read_table(outfn, col_names = FALSE)
 ```
 

@@ -5,21 +5,175 @@ date: "4/18/2022"
 output: html_document
 ---
 
-We want to read a collection of variance.txt files for analysis of a single trait. We have a collection of 22 files in results/pheno1/variances_cross1_1000test/. 
+We want to read a collection of variance.txt files for analysis of a single trait. We have a collection of 22 files in results/pheno1/variances_pheno1_cross1/. They were created with a test set of 1000 subjects.
+
+
 
 ```{r}
 library(magrittr)
 res_list <- list()
 for (i in 1:22){
-  res_list[[i]] <- readr::read_table(paste0("~/research/ukb-intervals/results/pheno1/variances_cross1_1000test/variance_chr", i, ".txt"), col_names = paste0("chr", i), skip = 2)
+  res_list[[i]] <- readr::read_table(paste0("~/research/ukb-intervals/results/pheno1/variances_pheno1_cross1/variance_chr", i, ".txt"), col_names = FALSE, skip = 2)
 }
-do.call("cbind", res_list) %>% 
+# fix column names
+for (chr in 1:22){
+  colnames(res_list[[chr]]) <- paste0("chr", chr, "_", colnames(res_list[[chr]]))
+}
+
+alpha = 0.1
+# calc sd
+dat <- do.call("cbind", res_list) %>% 
   tibble::as_tibble() %>%
   dplyr::mutate(total_var = rowSums(.)) %>%
-  dplyr::mutate(total_sd = sqrt(total_var))
+  dplyr::mutate(total_sd = sqrt(total_var)) %>%
+  dplyr::select(total_sd) %>%
+  dplyr::mutate(interval_half_width = qnorm(alpha / 2, lower.tail = FALSE) * total_sd)
 ```
 
+# Reading plink allele score outputs
+
+We now need to read the allele score outputs for the test set.
+
+To ensure that we're reading the files accurately, we'll also read the fam file, which contains the trait values.
+
+```{r}
+#read test indicator file
+test_indicator <- readr::read_table(file = "~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_1_cross_1_ntest1000.txt", col_names = FALSE)
+
+# read fam file
+fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE) %>% 
+  dplyr::mutate(test_indic = test_indicator$X1)
+fam2 <- fam %>%
+  dplyr::select(1,2,6,7, 131) %>%
+  dplyr::filter(test_indic == 1)
+```
+
+```{r}
+# read the profile files outputted by plink score allele
+scores <- list()
+for (i in 1:22){
+  fn <- paste0("~/research/ukb-intervals/results/pheno1/predicted_ukb_cross1_chr", i, "_auto.dbslmm.txt.profile")
+  scores[[i]] <- readr::read_table(fn, col_names = TRUE)
+  colnames(scores[[i]]) <- paste0(colnames(scores[[i]]), "_chr", i)
+}
+scores2 <- lapply(X = scores, FUN = function(x){
+  x %>% dplyr::select(6)
+})
+scores_df <- do.call("cbind", scores2) %>% tibble::as_tibble() %>%
+  dplyr::mutate(sum_scores = rowSums(.))
+s2 <- scores_df[1:1000,] %>%
+  dplyr::select(sum_scores)
+fam3 <- fam2 %>%
+  dplyr::mutate(predicted_value = s2$sum_scores) %>%
+  dplyr::mutate(interval_half_width = dat$interval_half_width)
+```
+
+```{r}
+fam3 %>%
+  dplyr::mutate(diff = abs(X7 - predicted_value),
+                in_interval = interval_half_width >= diff) %>%
+  dplyr::summarise(coverage = mean(in_interval))
+```
+
+## Use the validation set
+
+We borrow code from Sheng Yang's file, "code/03_internal/06_summ_ukb_c.R".
 
 
+```{r}
+library(plyr)
+library(bigreadr)
+library(Metrics)
+library(optparse)
 
+p <- 1
+
+##############################
+### summarize the result of validate
+##############################
+## summ function
+summPheno <- function(test_pheno, chr_path, lm_coef, type){
+  
+  require(bigreadr)
+  require(Metrics)
+  pred_tot <- vector()
+  for(chr in 1: 22){
+    pred_chr_str <- paste0(chr_path, chr, type, ".profile.gz")
+    if (file.exists(pred_chr_str)){
+      pred_chr <- fread2(pred_chr_str, header = T)[, 6]
+      pred_tot <- cbind(pred_tot, pred_chr)
+    } else {
+      cat (paste0("chr:", chr, " fail!\n"))
+    }
+  }
+  pheno_tot <- rowSums(pred_tot) 
+  pred <- cbind(1, pheno_tot) %*% lm_coef
+  r2 <- cor(test_pheno, pred[, 1])^2
+  mse <- mse(test_pheno, pred[, 1])
+  result <- list(r2, mse, pred)
+  return(result)
+}
+
+## val function
+summPheno_val <- function(valid_pheno, chr_path, type){
+  require(bigreadr)
+  require(Metrics)
+
+  pred_tot <- vector()
+  for(chr in 1: 22){
+    pred_chr_str <- as.character(paste0(chr_path, chr, type, ".profile.gz"))
+    
+    if (file.exists(pred_chr_str)){
+      pred_chr <- read.table(pred_chr_str, header = T)[, 6]
+      pred_tot <- cbind(pred_tot, pred_chr)
+    } else {
+      cat (paste0("chr:", chr, " fail!\n"))
+    }
+  }
+  pheno_tot <- rowSums(pred_tot)
+  lm_coef <- coef(lm(valid_pheno~pheno_tot))
+  return(lm_coef)
+}
+
+comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
+pheno <- 1
+method <- "DBSLMM"
+situ <- "_ukb"
+situ2 <- ""
+
+pheno_path <- paste0(comp_str, "05_internal_c/")
+val_pheno <- fread2(paste0(comp_str, "03_subsample/continuous/pheno", 
+                           p, "/val/ukb/02_pheno_c.txt"))[, 1]
+# c(1: length(method))
+for (m in 1){
+  cat (method[m], "\n")
+  for (cross in 1){
+
+    test_pheno <- fread2(paste0(comp_str, "02_pheno/03_test_c/pheno_pheno", 
+                                pheno[p], ".txt"), select = cross)[, 1]
+    test_pheno_na <- test_pheno[!is.na(test_pheno)]
+    
+    #val_chr_path <- paste0(pheno_path, "pheno", pheno[p], "/", method[m], 
+    #                       "/val", situ[m], "_cross", cross, "_chr") 
+    val_chr_path <- paste0(pheno_path, "pheno", pheno[p], "/", "DBSLMM", 
+                          "/val", "_ukb", "_cross", cross, "_chr")
+    chr_path <- paste0(pheno_path, "pheno", pheno[p], "/", method[m], 
+                       "/pred", situ[m], "_cross", cross, "_chr") 
+    
+    lm_coef <- try(summPheno_val(val_pheno, val_chr_path, situ2[m]), silent = T)
+    temp_res <- try(summPheno(test_pheno_na, chr_path, lm_coef, situ2[m]), silent = T)
+  }
+}
+
+temp_res[[3]][1:1000, 1]
+```
+
+```{r}
+fam3 %>%
+  dplyr::mutate(validated_predicted_value = temp_res[[3]][1:1000, 1]) %>%
+  dplyr::mutate(diff = abs(X7 - validated_predicted_value),
+                in_interval = interval_half_width >= diff) %>%
+  dplyr::summarise(coverage = mean(in_interval))
+
+```
 
