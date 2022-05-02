@@ -1,11 +1,7 @@
----
-title: "Reading variance.txt files"
-author: "Frederick J. Boehm"
-date: "4/18/2022"
-output: html_document
----
 
-We want to read a collection of variance.txt files for analysis of a single trait. We have a collection of 22 files in results/pheno1/variances_pheno1_cross1/. They were created with a test set of 1000 subjects.
+We want to read a collection of variance.txt files for analysis of a single trait. Within the results directory, we have a separate subdir for each phenotype, like pheno1. 
+
+Within each phenotype's subdir, we have the files "summary_ukb_cross_variance_chr.txt", where the cross number and chromosome number are included in the file names. 
 
 
 
@@ -13,7 +9,7 @@ We want to read a collection of variance.txt files for analysis of a single trai
 library(magrittr)
 res_list <- list()
 for (i in 1:22){
-  res_list[[i]] <- readr::read_table(paste0("~/research/ukb-intervals/results/pheno1/variances_pheno1_cross1/variance_chr", i, ".txt"), col_names = FALSE, skip = 2)
+  res_list[[i]] <- readr::read_table(paste0("~/research/ukb-intervals/results/pheno", phe_num, "/summary_ukb_cross", cross_num, "_variance_chr", i, ".txt"), col_names = FALSE, skip = 2)
 }
 # fix column names
 for (chr in 1:22){
@@ -38,7 +34,7 @@ To ensure that we're reading the files accurately, we'll also read the fam file,
 
 ```{r}
 #read test indicator file
-test_indicator <- readr::read_table(file = "~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_1_cross_1_ntest1000.txt", col_names = FALSE)
+test_indicator <- readr::read_table(file = "~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest1000.txt", col_names = FALSE)
 
 # read fam file
 fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE) %>% 
@@ -52,7 +48,7 @@ fam2 <- fam %>%
 # read the profile files outputted by plink score allele
 scores <- list()
 for (i in 1:22){
-  fn <- paste0("~/research/ukb-intervals/results/pheno1/predicted_ukb_cross1_chr", i, "_auto.dbslmm.txt.profile")
+  fn <- paste0("~/research/ukb-intervals/results/pheno", phe_num, "/predicted_ukb_cross", cross_num, "_chr", i, "_auto.dbslmm.txt.profile")
   scores[[i]] <- readr::read_table(fn, col_names = TRUE)
   colnames(scores[[i]]) <- paste0(colnames(scores[[i]]), "_chr", i)
 }
@@ -86,7 +82,7 @@ library(bigreadr)
 library(Metrics)
 library(optparse)
 
-p <- 1
+
 
 ##############################
 ### summarize the result of validate
@@ -136,36 +132,29 @@ summPheno_val <- function(valid_pheno, chr_path, type){
 }
 
 comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
-pheno <- 1
 method <- "DBSLMM"
 situ <- "_ukb"
 situ2 <- ""
 
 pheno_path <- paste0(comp_str, "05_internal_c/")
 val_pheno <- fread2(paste0(comp_str, "03_subsample/continuous/pheno", 
-                           p, "/val/ukb/02_pheno_c.txt"))[, 1]
+                           phe_num, "/val/ukb/02_pheno_c.txt"))[, 1]
 # c(1: length(method))
-for (m in 1){
-  cat (method[m], "\n")
-  for (cross in 1){
 
     test_pheno <- fread2(paste0(comp_str, "02_pheno/03_test_c/pheno_pheno", 
-                                pheno[p], ".txt"), select = cross)[, 1]
+                                phe_num, ".txt"), select = cross_num)[, 1]
     test_pheno_na <- test_pheno[!is.na(test_pheno)]
     
     #val_chr_path <- paste0(pheno_path, "pheno", pheno[p], "/", method[m], 
     #                       "/val", situ[m], "_cross", cross, "_chr") 
-    val_chr_path <- paste0(pheno_path, "pheno", pheno[p], "/", "DBSLMM", 
-                          "/val", "_ukb", "_cross", cross, "_chr")
-    chr_path <- paste0(pheno_path, "pheno", pheno[p], "/", method[m], 
-                       "/pred", situ[m], "_cross", cross, "_chr") 
+    val_chr_path <- paste0(pheno_path, "pheno", phe_num, "/", "DBSLMM", 
+                          "/val", "_ukb", "_cross", cross_num, "_chr")
+    chr_path <- paste0(pheno_path, "pheno", phe_num, "/", "DBSLMM", 
+                       "/pred", situ[1], "_cross", cross_num, "_chr") 
     
     lm_coef <- try(summPheno_val(val_pheno, val_chr_path, situ2[m]), silent = T)
     temp_res <- try(summPheno(test_pheno_na, chr_path, lm_coef, situ2[m]), silent = T)
-  }
-}
 
-temp_res[[3]][1:1000, 1]
 ```
 
 ```{r}
@@ -174,6 +163,36 @@ fam3 %>%
   dplyr::mutate(diff = abs(X7 - validated_predicted_value),
                 in_interval = interval_half_width >= diff) %>%
   dplyr::summarise(coverage = mean(in_interval))
+
+```
+
+
+## Using a calibration set
+
+
+We'll choose the first 500 subjects of the "test" set to be a calibration set. The last 500 will be the "true test" set.
+
+```{r}
+calibration_set <- fam3[1:500, ] %>%
+  dplyr::mutate(validated_predicted_value = temp_res[[3]][1:500, 1]) %>%
+  dplyr::mutate(diff = abs(X7 - validated_predicted_value),
+                in_interval = interval_half_width >= diff) %>%
+  dplyr::mutate(multiplicative_factor = diff / interval_half_width) %>%
+  dplyr::arrange(multiplicative_factor) %>% 
+  dplyr::mutate(overall_multiplicative_factor = .$multiplicative_factor[450]) %>%
+  dplyr::mutate(adjusted_interval_half_width = interval_half_width * overall_multiplicative_factor) %>%
+  dplyr::mutate(in_adjusted_interval = adjusted_interval_half_width >= diff)
+calibration_set %>% dplyr::summarise(coverage = mean(in_adjusted_interval))
+
+```
+
+```{r}
+fam3[501:1000, ] %>%
+  dplyr::mutate(validated_predicted_value = temp_res[[3]][501:1000, 1]) %>%
+  dplyr::mutate(diff = abs(X7 - validated_predicted_value)) %>%
+  dplyr::mutate(adjusted_interval_half_width = interval_half_width * calibration_set$overall_multiplicative_factor[1]) %>%
+  dplyr::mutate(in_adjusted_interval = adjusted_interval_half_width >= diff) %>%
+  dplyr::summarise(coverage = mean(in_adjusted_interval))
 
 ```
 
