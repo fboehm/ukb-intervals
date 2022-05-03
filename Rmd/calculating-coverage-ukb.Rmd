@@ -9,3 +9,20 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+We want to read a collection of variance.txt files for analysis of a single trait. Within the results directory, we have a separate subdir for each phenotype, like pheno1. 
+
+Within each phenotype's subdir, we have the files "summary_ukb_cross_variance_chr.txt", where the cross number and chromosome number are included in the file names. 
+
+```{r}
+#inputs <- tibble::tibble(phe_num = rep(1:25, each = 5), cross_num = rep(1:5, times = 25))
+inputs <- tibble::tibble(phe_num = rep(1:10, each = 5), 
+                         cross_num = rep(1:5, times = 10))
+res <- list()
+for (i in 1:50){
+res[[i]] <- knitr::knit_child(
+    "calculating-coverage-child.Rmd", envir = globalenv(), quiet = TRUE
+  )
+}
+cat(unlist(res), sep = '\n')
+```
+

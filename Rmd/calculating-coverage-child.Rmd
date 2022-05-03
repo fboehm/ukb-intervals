@@ -1,11 +1,9 @@
 
-We want to read a collection of variance.txt files for analysis of a single trait. Within the results directory, we have a separate subdir for each phenotype, like pheno1. 
-
-Within each phenotype's subdir, we have the files "summary_ukb_cross_variance_chr.txt", where the cross number and chromosome number are included in the file names. 
-
 
 
 ```{r}
+phe_num <- inputs$phe_num[i]
+cross_num <- inputs$cross_num[i]
 library(magrittr)
 res_list <- list()
 for (i in 1:22){
@@ -34,13 +32,16 @@ To ensure that we're reading the files accurately, we'll also read the fam file,
 
 ```{r}
 #read test indicator file
-test_indicator <- readr::read_table(file = "~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest1000.txt", col_names = FALSE)
+test_indicator <- readr::read_table(file = paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest1000.txt"), col_names = FALSE)
 
 # read fam file
 fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE) %>% 
   dplyr::mutate(test_indic = test_indicator$X1)
+## define col_num
+col_num <- phe_num * 5 + (cross_num %% 5) + 1 
+## 
 fam2 <- fam %>%
-  dplyr::select(1,2,6,7, 131) %>%
+  dplyr::select(1, 2, dplyr::all_of(col_num), 131) %>%
   dplyr::filter(test_indic == 1)
 ```
 
@@ -53,7 +54,7 @@ for (i in 1:22){
   colnames(scores[[i]]) <- paste0(colnames(scores[[i]]), "_chr", i)
 }
 scores2 <- lapply(X = scores, FUN = function(x){
-  x %>% dplyr::select(6)
+  x %>% dplyr::select(6) # choose the SCORESUM column
 })
 scores_df <- do.call("cbind", scores2) %>% tibble::as_tibble() %>%
   dplyr::mutate(sum_scores = rowSums(.))
@@ -66,7 +67,8 @@ fam3 <- fam2 %>%
 
 ```{r}
 fam3 %>%
-  dplyr::mutate(diff = abs(X7 - predicted_value),
+  dplyr::rename(true_pheno = 3) %>%
+  dplyr::mutate(diff = abs(true_pheno - predicted_value),
                 in_interval = interval_half_width >= diff) %>%
   dplyr::summarise(coverage = mean(in_interval))
 ```
@@ -135,7 +137,7 @@ comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
 method <- "DBSLMM"
 situ <- "_ukb"
 situ2 <- ""
-
+m <- 1
 pheno_path <- paste0(comp_str, "05_internal_c/")
 val_pheno <- fread2(paste0(comp_str, "03_subsample/continuous/pheno", 
                            phe_num, "/val/ukb/02_pheno_c.txt"))[, 1]
@@ -159,8 +161,9 @@ val_pheno <- fread2(paste0(comp_str, "03_subsample/continuous/pheno",
 
 ```{r}
 fam3 %>%
+  dplyr::rename(true_pheno = 3) %>%
   dplyr::mutate(validated_predicted_value = temp_res[[3]][1:1000, 1]) %>%
-  dplyr::mutate(diff = abs(X7 - validated_predicted_value),
+  dplyr::mutate(diff = abs(true_pheno - validated_predicted_value),
                 in_interval = interval_half_width >= diff) %>%
   dplyr::summarise(coverage = mean(in_interval))
 
@@ -174,8 +177,9 @@ We'll choose the first 500 subjects of the "test" set to be a calibration set. T
 
 ```{r}
 calibration_set <- fam3[1:500, ] %>%
+  dplyr::rename(true_pheno = 3) %>%
   dplyr::mutate(validated_predicted_value = temp_res[[3]][1:500, 1]) %>%
-  dplyr::mutate(diff = abs(X7 - validated_predicted_value),
+  dplyr::mutate(diff = abs(true_pheno - validated_predicted_value),
                 in_interval = interval_half_width >= diff) %>%
   dplyr::mutate(multiplicative_factor = diff / interval_half_width) %>%
   dplyr::arrange(multiplicative_factor) %>% 
@@ -188,8 +192,9 @@ calibration_set %>% dplyr::summarise(coverage = mean(in_adjusted_interval))
 
 ```{r}
 fam3[501:1000, ] %>%
+  dplyr::rename(true_pheno = 3) %>%
   dplyr::mutate(validated_predicted_value = temp_res[[3]][501:1000, 1]) %>%
-  dplyr::mutate(diff = abs(X7 - validated_predicted_value)) %>%
+  dplyr::mutate(diff = abs(true_pheno - validated_predicted_value)) %>%
   dplyr::mutate(adjusted_interval_half_width = interval_half_width * calibration_set$overall_multiplicative_factor[1]) %>%
   dplyr::mutate(in_adjusted_interval = adjusted_interval_half_width >= diff) %>%
   dplyr::summarise(coverage = mean(in_adjusted_interval))
