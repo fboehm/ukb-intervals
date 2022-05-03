@@ -1,31 +1,33 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,nomosix
-#SBATCH --time=7-00:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name=DBSLMM
-#SBATCH --mem=20G
+#SBATCH --mem=12G
 #SBATCH --cpus-per-task=5
-#SBATCH --array=1-125%20
-#SBATCH --output=06_DBSLMM_ukb_c_%a.out
-#SBATCH --error=06_DBSLMM_ukb_c_%a.err
+
+#SBATCH --array=1-5
+#SBATCH --output=06_DBSLMM_ukb_c_dbslmm2_%a.out
+#SBATCH --error=06_DBSLMM_ukb_c_dbslmm2_%a.err
 
 bash 
 let k=0
-let thread=${SLURM_CPUS_PER_TASK}
+let thread=5
 
 dat=continuous
 type=auto
 
 compstr=/net/mulan/disk2/yasheng/comparisonProject/
 plink=/usr/cluster/bin/plink-1.9
-DBSLMM=06_DBSLMM_script.sh
-DBSLMMpath=~/research/
+DBSLMM=06_DBSLMM_script-dbslmm2.sh
+DBSLMMpath=~/research/redo/
+#DBSLMMpath=/net/mulan/home/yasheng/predictionProject/code/
 blockf=${compstr}LDblock_EUR/chr
 ref=${compstr}04_reference/ukb/geno/chr
 
-for p in `seq 1 25`; do
-for cross in 1 2 3 4 5; do
-#for cross in 1; do
+for p in 1; do
+#for cross in 1 2 3 4 5; do
+for cross in 1; do
 let k=${k}+1
 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 
@@ -64,7 +66,7 @@ if [[ "$dat" == "continuous" ]]
 then
 herit=${compstr}05_internal_c/pheno${p}/herit/h2_ukb_cross${cross}.log
 summ=${compstr}05_internal_c/pheno${p}/output/summary_ukb_cross${cross}_chr
-outPath=~/research/ukb-intervals/results/pheno${p}/
+outPath=~/research/ukb-intervals/results/pheno${p}/dbslmm2/
 else
 herit=${compstr}06_internal_b/pheno${p}/herit/h2_ukb_cross${cross}.log
 summ=${compstr}06_internal_b/pheno${p}/output/summary_ukb_cross${cross}_chr
@@ -82,7 +84,7 @@ then
 sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
              -H ${herit} -G ${val} -R ${ref} -P ${phenoVal}\
              -l 1 -T ${type} -i ${index} -t ${thread} -o ${outPath}\
-             -C ~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_${p}_cross_${cross}_ntest1000.txt \
+             -C ~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_1_cross_1_ntest1000.txt \
              -d /net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr 
              
 else 

@@ -134,8 +134,8 @@ fi
 ## DBSLMM automatic version
 if [[ "$type" == "auto" ]]
 then
-for chr in `seq 1 22` 
-#for chr in 22
+#for chr in `seq 1 22` 
+for chr in 22
 do
 	BLOCK=${block_prefix}${chr}
 	summchr=${summary_file_prefix}${chr}
@@ -148,15 +148,14 @@ do
 	echo ${model}
 	Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outpath} --plink ${plink} --model ${model}\
 					  --dbslmm ${dbslmm} --ref ${ref_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
-					  --h2 ${h2} --thread ${thread}\
-					  --test_indicator_file ${test_indicator_file} \
-					  --dat_str ${dat_str}${chr}
+					  --h2 ${h2} --thread ${thread}
+
 	#				  --val ${val_geno}
 	summchr_prefix=`echo ${summchr##*/}`
 	summchr_prefix2=`echo ${summchr_prefix%_*}`
 	mv ${outpath}${summchr_prefix2}_chr${chr}.dbslmm.txt ${outpath}${summchr_prefix2}_chr${chr}_auto.dbslmm.txt
 	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
-	mv variance.txt ${outpath}${summchr_prefix2}_variance_chr${chr}.txt
+#	mv variance.txt variance_chr${chr}.txt
 
 done
 fi

@@ -183,34 +183,904 @@ fam &lt;- readr::read_delim(&quot;/net/mulan/home/fredboe/research/predictionPro
 <pre><code>## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>phe_num &lt;- 1
-cross_num &lt;- 1
-test_indices_filename &lt;- paste0(&quot;/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
-test_indices &lt;- readr::read_table(test_indices_filename, col_names = FALSE)$X1 %&gt;% tibble::as_tibble()</code></pre>
+<p>We have <code>fam</code>, a tibble with 337129 rows and 1 column. The one column contains the family ids for the subjects. These are not numbered consecutively, since they are taken from the larger data set (ie, with ~500k subjects).</p>
+<pre class="r"><code>for (phe_num in 1:25){
+for (cross_num in 1:5){  
+    
+    test_ids_filename &lt;- paste0(&quot;/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+    test_ids &lt;- readr::read_table(test_ids_filename, col_names = FALSE)
+    my_binary_vec &lt;- (fam$value %in% test_ids$X1) %&gt;% as.numeric()
+    sum(my_binary_vec)
+    length(my_binary_vec)
+    ##
+    fam %&gt;%
+      dplyr::mutate(in_test_set = my_binary_vec) %&gt;%
+      dplyr::filter(in_test_set == 1)
+    test_ids
+    outfn &lt;- paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;.txt&quot;)
+    #readr::write_delim(x = my_binary_vec %&gt;% tibble::as_tibble(), file = outfn, col_names = FALSE)
+    # n_test defines the number of test subjects
+    n_test &lt;- 1000
+    mbv &lt;- numeric(length = length(my_binary_vec))
+    mbv[which(my_binary_vec == 1)[1:n_test]] &lt;- 1
+    outfn &lt;- paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest&quot;, n_test, &quot;.txt&quot;)
+    readr::write_delim(x = mbv %&gt;% tibble::as_tibble(), file = outfn, col_names = FALSE)
+}
+}</code></pre>
 <pre><code>## 
 ## ── Column specification ────────────────────────────────────────────────────────
 ## cols(
 ##   X1 = col_double(),
 ##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
+## )
+## 
+## 
+## ── Column specification ────────────────────────────────────────────────────────
+## cols(
+##   X1 = col_double(),
+##   X2 = col_double()
 ## )</code></pre>
-<pre class="r"><code>my_binary_vec &lt;- (fam$value %in% test_indices$value) %&gt;% as.numeric()
-sum(my_binary_vec)</code></pre>
-<pre><code>## [1] 33784</code></pre>
-<pre class="r"><code>outfn &lt;- paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;.txt&quot;)
-readr::write_delim(x = my_binary_vec %&gt;% tibble::as_tibble(), file = outfn, col_names = FALSE)</code></pre>
-<p>We now make an indicator file with a small number of test subjects. We want to check the timing of the analysis with this small set of subjects.</p>
-<pre class="r"><code># n_test defines the number of test subjects
-n_test &lt;- 10
-mbv &lt;- numeric(length = length(my_binary_vec))
-mbv[which(my_binary_vec == 1)[1:10]] &lt;- 1
-outfn &lt;- paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest10.txt&quot;)
-readr::write_delim(x = mbv %&gt;% tibble::as_tibble(), file = outfn, col_names = FALSE)</code></pre>
-<pre class="r"><code># n_test defines the number of test subjects
-n_test &lt;- 1000
-mbv &lt;- numeric(length = length(my_binary_vec))
-mbv[which(my_binary_vec == 1)[1:n_test]] &lt;- 1
-outfn &lt;- paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest&quot;, n_test, &quot;.txt&quot;)
-readr::write_delim(x = mbv %&gt;% tibble::as_tibble(), file = outfn, col_names = FALSE)</code></pre>
 
 
 

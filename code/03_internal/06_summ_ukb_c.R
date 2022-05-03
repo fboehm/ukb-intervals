@@ -90,8 +90,10 @@ for (m in c(1:3, 8, 9)){
                                 pheno[p], ".txt"), select = cross)[, 1]
     test_pheno_na <- test_pheno[!is.na(test_pheno)]
     
-    val_chr_path <- paste0(pheno_path, "pheno", pheno[p], "/", method[m], 
-                           "/val", situ[m], "_cross", cross, "_chr") 
+    #val_chr_path <- paste0(pheno_path, "pheno", pheno[p], "/", method[m], 
+    #                       "/val", situ[m], "_cross", cross, "_chr") 
+    val_chr_path <- paste0(pheno_path, "pheno", pheno[p], "/", "DBSLMM", 
+                          "/val", "_ukb", "_cross", cross, "_chr")
     chr_path <- paste0(pheno_path, "pheno", pheno[p], "/", method[m], 
                        "/pred", situ[m], "_cross", cross, "_chr") 
     
