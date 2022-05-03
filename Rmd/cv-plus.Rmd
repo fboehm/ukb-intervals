@@ -1,0 +1,26 @@
+---
+title: "Understanding cross-validation-plus"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: html_document
+bibliography: my.bib
+---
+
+The goal here is to explain and understand the cross-validation-plus procedure from @barber2021predictive. We ultimately want to consider applying it to obtain prediction intervals for PGS in the UKB study.
+
+I initially thought that the notation was a little tricky, but it's really not that bad.
+
+
+
+
+
+
+
+
+
+# References
+
+
+
+
+
