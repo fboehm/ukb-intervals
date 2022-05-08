@@ -2,4 +2,5 @@
 *.err
 time-prediction-dbslmm-pheno1-crosses1-5.txt
 *.txt
+*.tm
 
