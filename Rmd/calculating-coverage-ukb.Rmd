@@ -14,11 +14,10 @@ We want to read a collection of variance.txt files for analysis of a single trai
 Within each phenotype's subdir, we have the files "summary_ukb_cross_variance_chr.txt", where the cross number and chromosome number are included in the file names. 
 
 ```{r}
-#inputs <- tibble::tibble(phe_num = rep(1:25, each = 5), cross_num = rep(1:5, times = 25))
-inputs <- tibble::tibble(phe_num = rep(1:10, each = 5), 
-                         cross_num = rep(1:5, times = 10))
+library(magrittr)
+inputs <- tibble::tibble(phe_num = rep(1:25, each = 5), cross_num = rep(1:5, times = 25))
 res <- list()
-for (i in 1:50){
+for (i in 1:nrow(inputs)){
 res[[i]] <- knitr::knit_child(
     "calculating-coverage-child.Rmd", envir = globalenv(), quiet = TRUE
   )

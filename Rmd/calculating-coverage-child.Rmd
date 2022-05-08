@@ -4,7 +4,6 @@
 ```{r}
 phe_num <- inputs$phe_num[i]
 cross_num <- inputs$cross_num[i]
-library(magrittr)
 res_list <- list()
 for (i in 1:22){
   res_list[[i]] <- readr::read_table(paste0("~/research/ukb-intervals/results/pheno", phe_num, "/summary_ukb_cross", cross_num, "_variance_chr", i, ".txt"), col_names = FALSE, skip = 2)
@@ -33,7 +32,9 @@ To ensure that we're reading the files accurately, we'll also read the fam file,
 ```{r}
 #read test indicator file
 test_indicator <- readr::read_table(file = paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest1000.txt"), col_names = FALSE)
+```
 
+```{r}
 # read fam file
 fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE) %>% 
   dplyr::mutate(test_indic = test_indicator$X1)
@@ -75,7 +76,7 @@ fam3 %>%
 
 ## Use the validation set
 
-We borrow code from Sheng Yang's file, "code/03_internal/06_summ_ukb_c.R".
+We borrow code from Sheng Yang's file, "comparisonProject/code/03_internal/06_summ_ukb_c.R".
 
 
 ```{r}
