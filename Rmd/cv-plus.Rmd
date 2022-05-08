@@ -2,19 +2,112 @@
 title: "Understanding cross-validation-plus"
 author: "Frederick J. Boehm"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  bookdown::html_document2:
+    number_sections: false
 bibliography: my.bib
 ---
+
+```{r}
+library(magrittr)
+```
 
 The goal here is to explain and understand the cross-validation-plus procedure from @barber2021predictive. We ultimately want to consider applying it to obtain prediction intervals for PGS in the UKB study.
 
 I initially thought that the notation was a little tricky, but it's really not that bad.
 
+## Overview of CV-plus
+
+Equation 3.1 in @barber2021predictive, which I reproduce below, defines the prediction interval for a single new point $Z_{n + 1} = (X_{n +1}, Y_{n+1})$.
+
+\begin{equation}
+\hat C_{n, K, \alpha}^{CV+}(X_{n + 1}) = \left[ \hat q_{n, \alpha}^-\lbrace \hat \mu_{- S_{k(i)}}(X_{n + 1}) - R_i^{CV}\rbrace, \hat q_{n, \alpha}^+\lbrace \hat \mu_{- S_{k(i)}}(X_{n + 1}) + R_i^{CV}\rbrace    \right]
+\end{equation}
+
+where 
+
+\begin{equation}
+R_i^{CV} = |Y_i - \hat\mu_{- S_{k(i)}}(X_i)|
+\end{equation}
+
+Note that we need the absolute values of the residuals. 
+
+Thus, we must apply the quantile function to each of two collections of numbers, where the size of each collection is the number of training samples:
+
+1. $\hat \mu_{- S_{k(i)}}(X_{n + 1}) - R_i^{CV}$  
+1. $\hat \mu_{- S_{k(i)}}(X_{n + 1}) + R_i^{CV}$
+
+For example, for $K = 5$, we have 5 distinct functions, $\hat \mu_{-1}$, ..., $\hat \mu_{-5}$, where the subscript designates which subset of subjects is removed when estimating function parameters. Note that @barber2021predictive assumes that the 5 folds have the exact same number of subjects in them. 
+
+## `ryantibs/conformal` repository
+
+We probably don't want to use Tibshirani's repo, as it seems to lack a function for CV+.
+
+
+## Custom R code
+
+It should be straightforward to use DBSLMM outputs and fam files to write custom code for CV+.
+
+Inputs needed: 
+
+- fam file to get true values for $Y$. We need trait values for both the validation and training sets.  
+- file that tells us which subjects are in the validation set for DBSLMM. We need this file to get the $Y_{n+1}$ values AND the $X_{n + 1}$ values.  
+- DBSLMM-based predicted values for a trait, for all subjects and for each of the five folds that Sheng created. We may need to create $K$ new folds, since Sheng's folds are not all of the same size. For a first pass, it might be okay to use Sheng's 5 folds.  
+
+Note that we also need to use Sheng's validation set, which means that we need to know which 
+subjects, from the ~340,000 total, are in the validation set. I believe that Sheng has text 
+files that indicate which 1000 subjects went into the validation set, but I need to verify this.
+
+In previous analyses, I've calculated predicted values for only the held-out subjects for each cross validation. 
+~~Here, for CV+, I essentially need the predicted values for all ~337,000 subjects for each cross validation fold.~~
+
+~~Thus, I'll need to create a new bash file that adapts my (ie, Sheng's) bash code to 
+ensure that all subjects get a predicted value calculated for each of the five folds.~~
+My current bash script calculates predicted values for only the held-out subjects for 
+each fold. I can change this by altering ~~(or removing?)~~ the `keep` argument when 
+calling plink's score function.
+
+So, it turns out that what I actually need is to use Sheng's "validation" set subjects as the $X_{n+1}$ and $Y_{n + 1}$
+
+I also need to evaluate $\mu_{- S_{k(i)}}(X_{n + 1})$ for each of the five (or $K$ for $K$-fold CV+) "mu-hat" functions. Thus, I'll need to treat what Sheng is calling the validation set as a "true test set". I'll need to read their genotypes and their true trait values. The true trait values are in a fam file, but I'm not sure which. I need to check on this. It's possible that I need to process the traits, but I'm guessing that Sheng has already done so. 
+
+First step is to find the file (in Sheng's directory) that tells me which subjects, from the nearly 340,000, go into the validation sets for each trait.
+
+Once I know which subjects go into the validation set, I can do the allele scoring in plink for their genotype data. Obviously, I need to know where to find their genotypes data. I seem to recall that Sheng has a directory with the validation genotype data. I'll look for it. Alternatively, he might just have it in the "predictionProject" directory, under "plink files". I could use them if I can get the indices for the "validation set" subjects.
+
+It looks like the directories that I need are in comparisonProject: 
+
+~/research/comparisonProject/03_subsample/continuous/pheno1/val/ukb/ and similarly named directories. The processed phenotypes, I think, for the validation set are here, as are the plink files for the validation set. The above files are written in Sheng's file, "comparisonProject/code/01_process_dat/05_get_subsample.sh"
+
+comparisonProject/03_subsample/continuous/pheno1/val/ukb/01_idx.txt (and similarly named) is the file that indicates which subjects are in the validation set for each trait. It contains two identical columns for identifying subjects.
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+### How to use the results files from DBSLMM
+
+
+```{r, echo = FALSE}
+alpha = 0.1
+res <- lapply(1:25, function(x) {
+  knitr::knit_child(
+    'cv-plus-child.Rmd', envir = environment(), quiet = TRUE
+  )
+})
+cat(unlist(res), sep = '\n')
+```
 
 
 
