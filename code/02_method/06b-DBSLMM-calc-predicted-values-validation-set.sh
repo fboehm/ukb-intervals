@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,nomosix
-#SBATCH --time=3-00:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name=DBSLMM-pred
-#SBATCH --mem=10G
+#SBATCH --mem=15G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-25
+#SBATCH --array=1-14
 #SBATCH --output=06b_DBSLMM_ukb_c_%a.out
 #SBATCH --error=06b_DBSLMM_ukb_c_%a.err
 #SBATCH --mail-type=ALL
@@ -13,7 +13,7 @@
 
 bash 
 let k=0
-for p in `seq 1 25`; do
+for p in `seq 12 25`; do
 let k=${k}+1
 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 for chr in `seq 1 22`;do

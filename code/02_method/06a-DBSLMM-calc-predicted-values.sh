@@ -3,7 +3,7 @@
 #SBATCH --partition=mulan,nomosix
 #SBATCH --time=12:00:00
 #SBATCH --job-name=DBSLMM-pred
-#SBATCH --mem=10G
+#SBATCH --mem=15G
 #SBATCH --cpus-per-task=1
 #SBATCH --array=1-25
 #SBATCH --output=06a_DBSLMM_ukb_c_%a.out
