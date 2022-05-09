@@ -11,7 +11,7 @@
 
 <meta name="author" content="Frederick J. Boehm" />
 
-<meta name="date" content="2022-05-07" />
+<meta name="date" content="2022-05-09" />
 
 <title>Understanding cross-validation-plus</title>
 
@@ -374,7 +374,7 @@ pre code {
 
 <h1 class="title toc-ignore">Understanding cross-validation-plus</h1>
 <h4 class="author">Frederick J. Boehm</h4>
-<h4 class="date">2022-05-07</h4>
+<h4 class="date">2022-05-09</h4>
 
 </div>
 
@@ -435,12 +435,6 @@ calling plink’s score function.</p>
 <p>comparisonProject/03_subsample/continuous/pheno1/val/ukb/01_idx.txt (and similarly named) is the file that indicates which subjects are in the validation set for each trait. It contains two identical columns for identifying subjects.</p>
 <div id="how-to-use-the-results-files-from-dbslmm" class="section level3">
 <h3>How to use the results files from DBSLMM</h3>
-<pre class="r"><code>alpha = 0.1
-res &lt;- lapply(1:11, function(x) {
-  knitr::knit_child(
-    &#39;cv-plus-child.Rmd&#39;, envir = environment(), quiet = TRUE
-  )
-})</code></pre>
 <pre><code>## 
 ## ── Column specification ────────────────────────────────────────────────────────
 ## cols(
@@ -27655,7 +27649,6 @@ res &lt;- lapply(1:11, function(x) {
 ##   CNT2 = col_double(),
 ##   SCORESUM = col_double()
 ## )</code></pre>
-<pre class="r"><code>cat(unlist(res), sep = &#39;\n&#39;)</code></pre>
 <pre><code>## 
 ## 
 ## 
@@ -27678,10 +27671,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -27811,10 +27805,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -27944,10 +27939,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -28077,10 +28073,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -28210,10 +28207,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -28343,10 +28341,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -28476,10 +28475,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -28609,10 +28609,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -28742,10 +28743,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -28875,10 +28877,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -29008,10 +29011,11 @@ res &lt;- lapply(1:11, function(x) {
 ##     dplyr::filter(test_indic == 1)
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
-##   for (i in 1:22){
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     scores[[i]] &lt;- readr::read_table(fn, col_names = TRUE)
-##     colnames(scores[[i]]) &lt;- paste0(colnames(scores[[i]]), &quot;_chr&quot;, i)
+##   for (chr_num in 1:22){
+##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
+##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
 ##   scores2 &lt;- lapply(X = scores, FUN = function(x){
 ##     x %&gt;% dplyr::select(6) # choose the SCORESUM column
@@ -29118,7 +29122,6 @@ res &lt;- lapply(1:11, function(x) {
 ## ##      &lt;dbl&gt;
 ## ## 1    0.938
 ## ```</code></pre>
-<p>Let’s read the files for cross1, pheno1. We need to calculate the residuals for the subjects in cross 1 holdout set. Thus, we need the predicted values and the true values for the cross 1 holdout set.</p>
 </div>
 </div>
 <div id="references" class="section level1 unnumbered">
