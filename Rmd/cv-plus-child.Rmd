@@ -1,6 +1,6 @@
 
 
-```{r, results = "hide", message = FALSE, message=FALSE}
+```{r, results = "hide", message = FALSE}
 phe_num <- x
 out <- list()
 for (cross_num in 1:5){
@@ -90,7 +90,7 @@ pred_vals_validation_set_tib <- do.call("cbind", pred_vals_validation_set) %>%
 
 
 
-```{r}
+```{r, message = FALSE}
 get_fitted <- function(index, fitted_vec){
   fitted_vec[index]
 }

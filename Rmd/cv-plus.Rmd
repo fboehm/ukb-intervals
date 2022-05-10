@@ -99,9 +99,10 @@ comparisonProject/03_subsample/continuous/pheno1/val/ukb/01_idx.txt (and similar
 ### How to use the results files from DBSLMM
 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, message = FALSE}
 alpha = 0.1
-res <- lapply(1:11, function(x) {
+
+res <- lapply(1:25, function(x) {
   knitr::knit_child(
     'cv-plus-child.Rmd', envir = environment(), quiet = TRUE
   )
