@@ -5,15 +5,15 @@
 #SBATCH --job-name=DBSLMM-pred
 #SBATCH --mem=15G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-14
-#SBATCH --output=06b_DBSLMM_ukb_c_%a.out
-#SBATCH --error=06b_DBSLMM_ukb_c_%a.err
+#SBATCH --array=1-25
+#SBATCH --output=06b_DBSLMM_ukb_c_extra%a.out
+#SBATCH --error=06b_DBSLMM_ukb_c_extra%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=fredboe@umich.edu
 
 bash 
 let k=0
-for p in `seq 12 25`; do
+for p in `seq 1 25`; do
 let k=${k}+1
 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 for chr in `seq 1 22`;do
@@ -26,12 +26,17 @@ bfile=/net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr${chr}
 idxval=~/research/comparisonProject/03_subsample/continuous/pheno${p}/val/ukb/01_idx.txt
 #idxtest=~/research/ukb-intervals/test_index_files/test_indices_pheno_${p}_cross_${cross}_ntest1000.txt
 #esteffdbslmmt=${compstr}05_internal_c/pheno${p}/DBSLMM/summary_hm3_cross${cross}_chr${chr}_best.dbslmm.txt
-esteffdbslmmt=~/research/ukb-intervals/results/pheno${p}/summary_ukb_cross${cross}_chr${chr}_auto.dbslmm.txt
+esteffdbslmmt=~/research/ukb-intervals/results/pheno${p}/yangdbslmm/summary_ukb_cross${cross}_chr${chr}_auto.dbslmm.txt
 #preddbslmmt=${compstr}05_internal_c/pheno${p}/DBSLMM/pred_hm3_best_cross${cross}_chr${chr}
 preddbslmmt=~/research/ukb-intervals/results/pheno${p}/validation-set_predicted_ukb_cross${cross}_chr${chr}_auto.dbslmm.txt
 # aggdbslmmt=${compstr}05_internal_c/pheno${p}/DBSLMM/agg_hm3_best_cross${cross}_chr${chr}
 #gunzip ${esteffdbslmmt}.gz
-time /usr/bin/time -v -o ~/research/ukb-intervals/cluster_outputs/time-validation-set-prediction-dbslmm-pheno${p}-chr${chr}-cross${cross}.txt plink-1.9 --silent --bfile ${bfile} --score ${esteffdbslmmt} 1 2 4 sum --keep ${idxval} --out ${preddbslmmt}
+if [ ! -f ${preddbslmmt}.profile ]; then
+#maxsize=10
+#actualsize=$(wc -c < "${preddbslmmt}.profile")
+#if [ ${maxsize}  -ge ${actualsize} ]; then
+  time /usr/bin/time -v -o ~/research/ukb-intervals/cluster_outputs/time-validation-set-prediction-dbslmm-pheno${p}-chr${chr}-cross${cross}.txt plink-1.9 --silent --bfile ${bfile} --score ${esteffdbslmmt} 1 2 4 sum --keep ${idxval} --out ${preddbslmmt}
+fi
 done
 done
 fi 
