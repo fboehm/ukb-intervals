@@ -4,23 +4,25 @@
 phe_num <- x
 out <- list()
 for (cross_num in 1:5){
-  #read test indicator file
-  test_indicator <- readr::read_table(file = paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest1000.txt"), col_names = FALSE)
   
   # read fam file
-  fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE) %>% 
-    dplyr::mutate(test_indic = test_indicator$X1)
+  fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE)
   ## define col_num
   col_num <- phe_num * 5 + (cross_num %% 5) + 1 
   ## 
   fam2 <- fam %>%
-    dplyr::select(1, 2, dplyr::all_of(col_num), 131) %>%
-    dplyr::filter(test_indic == 1)
+    dplyr::select(1, 2, dplyr::all_of(col_num)) 
   # read the profile files outputted by plink score allele
   scores <- list()
   for (chr_num in 1:22){
     #fn <- paste0("~/research/ukb-intervals/results/pheno", phe_num, "/predicted_ukb_cross", cross_num, "_chr", i, "_auto.dbslmm.txt.profile")
-    fn <- paste0("~/research/ukb-intervals/results/pheno", phe_num, "/yangdbslmm/predicted_ukb_cross", cross_num, "_chr", chr_num, "_auto.dbslmm.txt.profile")
+    fn <- paste0("~/research/ukb-intervals/results/pheno", 
+                 phe_num, 
+                 "/yangdbslmm/predicted_ukb_cross", 
+                 cross_num, 
+                 "_chr", 
+                 chr_num, 
+                 "_auto.dbslmm.txt.profile")
     scores[[chr_num]] <- readr::read_table(fn, col_names = TRUE)
     colnames(scores[[chr_num]]) <- paste0(colnames(scores[[chr_num]]), "_chr", chr_num)
   }
@@ -29,16 +31,23 @@ for (cross_num in 1:5){
   })
   scores_df <- do.call("cbind", scores2) %>% tibble::as_tibble() %>%
     dplyr::mutate(sum_scores = rowSums(.))
-  s2 <- scores_df[1:1000,] %>%
+  s2 <- scores_df %>%
     dplyr::select(sum_scores)
+  # read idx file
+  idx_fn <- paste0("~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno", phe_num, "_cross", cross_num, ".txt")
+  idx <- readr::read_table(idx_fn, col_names = FALSE) %>%
+    dplyr::rename(fam_id = 1, subject_id = 2) %>%
+    dplyr::select(fam_id)
   fam3 <- fam2 %>%
+    dplyr::rename(fam_id = 1) %>%
+    dplyr::right_join(idx, by = "fam_id") %>%
     dplyr::mutate(predicted_value = s2$sum_scores) 
   out[[cross_num]] <- fam3 %>%
-    dplyr::rename(true_pheno = 3)
+    dplyr::rename(true_pheno = 3) %>%
+    dplyr::mutate(cross_membership = cross_num)
 }  
 out_tib <- do.call("rbind", out) %>% 
   tibble::as_tibble() %>% 
-  dplyr::select(- test_indic) %>%
   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ```
 
@@ -97,8 +106,7 @@ get_fitted <- function(index, fitted_vec){
 intervals <- list()
 for (i in 1:1000){
   ### take one validation set observation
-  out2 <- out_tib %>%
-    dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+  out2 <- out_tib 
    o3 <- out2 %>% 
      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %>% # calculate mu hat (X_{n + 1})
      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -112,11 +120,13 @@ for (i in 1:1000){
 ## Coverage for Trait `r x`
 
 ```{r}
-do.call("rbind", intervals) %>% 
+(coverages[[x]] <- do.call("rbind", intervals) %>% 
   tibble::as_tibble() %>%
   dplyr::rename(left = 1, right = 2) %>%
   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %>%
   dplyr::mutate(in_interval = true_pheno <= right & true_pheno >= left) %>%
-  dplyr::summarise(coverage = mean(in_interval))
+  dplyr::summarise(coverage = mean(in_interval)) %>%
+  dplyr::mutate(trait_num = phe_num)
+)
 ```
 

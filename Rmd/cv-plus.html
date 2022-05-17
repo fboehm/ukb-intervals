@@ -11,7 +11,7 @@
 
 <meta name="author" content="Frederick J. Boehm" />
 
-<meta name="date" content="2022-05-09" />
+<meta name="date" content="2022-05-10" />
 
 <title>Understanding cross-validation-plus</title>
 
@@ -374,7 +374,7 @@ pre code {
 
 <h1 class="title toc-ignore">Understanding cross-validation-plus</h1>
 <h4 class="author">Frederick J. Boehm</h4>
-<h4 class="date">2022-05-09</h4>
+<h4 class="date">2022-05-10</h4>
 
 </div>
 
@@ -443,23 +443,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -468,16 +470,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -538,8 +547,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -554,19 +562,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.956
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.961         1
 ## ```
 ## 
 ## 
@@ -577,23 +587,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -602,16 +614,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -672,8 +691,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -688,19 +706,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.957
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.957         2
 ## ```
 ## 
 ## 
@@ -711,23 +731,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -736,16 +758,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -806,8 +835,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -822,19 +850,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.956
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1     0.96         3
 ## ```
 ## 
 ## 
@@ -845,23 +875,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -870,16 +902,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -940,8 +979,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -956,19 +994,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.963
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.962         4
 ## ```
 ## 
 ## 
@@ -979,23 +1019,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -1004,16 +1046,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -1074,8 +1123,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -1090,19 +1138,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.965
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.965         5
 ## ```
 ## 
 ## 
@@ -1113,23 +1163,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -1138,16 +1190,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -1208,8 +1267,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -1224,19 +1282,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.951
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.951         6
 ## ```
 ## 
 ## 
@@ -1247,23 +1307,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -1272,16 +1334,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -1342,8 +1411,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -1358,19 +1426,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.957
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.955         7
 ## ```
 ## 
 ## 
@@ -1381,23 +1451,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -1406,16 +1478,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -1476,8 +1555,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -1492,19 +1570,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.959
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.959         8
 ## ```
 ## 
 ## 
@@ -1515,23 +1595,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -1540,16 +1622,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -1610,8 +1699,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -1626,19 +1714,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.957
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.956         9
 ## ```
 ## 
 ## 
@@ -1649,23 +1739,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -1674,16 +1766,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -1744,8 +1843,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -1760,19 +1858,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.962
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.964        10
 ## ```
 ## 
 ## 
@@ -1783,23 +1883,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -1808,16 +1910,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -1878,8 +1987,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -1894,19 +2002,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.938
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.946        11
 ## ```
 ## 
 ## 
@@ -1917,23 +2027,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -1942,16 +2054,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -2012,8 +2131,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -2028,19 +2146,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.948
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.949        12
 ## ```
 ## 
 ## 
@@ -2051,23 +2171,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -2076,16 +2198,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -2146,8 +2275,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -2162,19 +2290,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.945
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.943        13
 ## ```
 ## 
 ## 
@@ -2185,23 +2315,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -2210,16 +2342,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -2280,8 +2419,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -2296,19 +2434,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.956
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.956        14
 ## ```
 ## 
 ## 
@@ -2319,23 +2459,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -2344,16 +2486,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -2414,8 +2563,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -2430,19 +2578,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.941
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1     0.95        15
 ## ```
 ## 
 ## 
@@ -2453,23 +2603,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -2478,16 +2630,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -2548,8 +2707,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -2564,19 +2722,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.949
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.947        16
 ## ```
 ## 
 ## 
@@ -2587,23 +2747,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -2612,16 +2774,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -2682,8 +2851,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -2698,19 +2866,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.959
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.956        17
 ## ```
 ## 
 ## 
@@ -2721,23 +2891,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -2746,16 +2918,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -2816,8 +2995,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -2832,19 +3010,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.958
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.953        18
 ## ```
 ## 
 ## 
@@ -2855,23 +3035,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -2880,16 +3062,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -2950,8 +3139,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -2966,19 +3154,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.958
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.953        19
 ## ```
 ## 
 ## 
@@ -2989,23 +3179,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -3014,16 +3206,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -3084,8 +3283,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -3100,19 +3298,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.952
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1     0.95        20
 ## ```
 ## 
 ## 
@@ -3123,23 +3323,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -3148,16 +3350,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -3218,8 +3427,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -3234,19 +3442,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.956
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.956        21
 ## ```
 ## 
 ## 
@@ -3257,23 +3467,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -3282,16 +3494,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -3352,8 +3571,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -3368,19 +3586,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.948
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1     0.95        22
 ## ```
 ## 
 ## 
@@ -3391,23 +3611,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -3416,16 +3638,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -3486,8 +3715,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -3502,19 +3730,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.957
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.961        23
 ## ```
 ## 
 ## 
@@ -3525,23 +3755,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -3550,16 +3782,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -3620,8 +3859,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -3636,19 +3874,21 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.965
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.963        24
 ## ```
 ## 
 ## 
@@ -3659,23 +3899,25 @@ calling plink’s score function.</p>
 ## phe_num &lt;- x
 ## out &lt;- list()
 ## for (cross_num in 1:5){
-##   #read test indicator file
-##   test_indicator &lt;- readr::read_table(file = paste0(&quot;~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_&quot;, phe_num, &quot;_cross_&quot;, cross_num, &quot;_ntest1000.txt&quot;), col_names = FALSE)
 ##   
 ##   # read fam file
-##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE) %&gt;% 
-##     dplyr::mutate(test_indic = test_indicator$X1)
+##   fam &lt;- readr::read_table(file = &quot;~/research/predictionProject/plink_file/ukb/chr1.fam&quot;, col_names = FALSE)
 ##   ## define col_num
 ##   col_num &lt;- phe_num * 5 + (cross_num %% 5) + 1 
 ##   ## 
 ##   fam2 &lt;- fam %&gt;%
-##     dplyr::select(1, 2, dplyr::all_of(col_num), 131) %&gt;%
-##     dplyr::filter(test_indic == 1)
+##     dplyr::select(1, 2, dplyr::all_of(col_num)) 
 ##   # read the profile files outputted by plink score allele
 ##   scores &lt;- list()
 ##   for (chr_num in 1:22){
 ##     #fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, i, &quot;_auto.dbslmm.txt.profile&quot;)
-##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, phe_num, &quot;/yangdbslmm/predicted_ukb_cross&quot;, cross_num, &quot;_chr&quot;, chr_num, &quot;_auto.dbslmm.txt.profile&quot;)
+##     fn &lt;- paste0(&quot;~/research/ukb-intervals/results/pheno&quot;, 
+##                  phe_num, 
+##                  &quot;/yangdbslmm/predicted_ukb_cross&quot;, 
+##                  cross_num, 
+##                  &quot;_chr&quot;, 
+##                  chr_num, 
+##                  &quot;_auto.dbslmm.txt.profile&quot;)
 ##     scores[[chr_num]] &lt;- readr::read_table(fn, col_names = TRUE)
 ##     colnames(scores[[chr_num]]) &lt;- paste0(colnames(scores[[chr_num]]), &quot;_chr&quot;, chr_num)
 ##   }
@@ -3684,16 +3926,23 @@ calling plink’s score function.</p>
 ##   })
 ##   scores_df &lt;- do.call(&quot;cbind&quot;, scores2) %&gt;% tibble::as_tibble() %&gt;%
 ##     dplyr::mutate(sum_scores = rowSums(.))
-##   s2 &lt;- scores_df[1:1000,] %&gt;%
+##   s2 &lt;- scores_df %&gt;%
 ##     dplyr::select(sum_scores)
+##   # read idx file
+##   idx_fn &lt;- paste0(&quot;~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno&quot;, phe_num, &quot;_cross&quot;, cross_num, &quot;.txt&quot;)
+##   idx &lt;- readr::read_table(idx_fn, col_names = FALSE) %&gt;%
+##     dplyr::rename(fam_id = 1, subject_id = 2) %&gt;%
+##     dplyr::select(fam_id)
 ##   fam3 &lt;- fam2 %&gt;%
+##     dplyr::rename(fam_id = 1) %&gt;%
+##     dplyr::right_join(idx, by = &quot;fam_id&quot;) %&gt;%
 ##     dplyr::mutate(predicted_value = s2$sum_scores) 
 ##   out[[cross_num]] &lt;- fam3 %&gt;%
-##     dplyr::rename(true_pheno = 3)
+##     dplyr::rename(true_pheno = 3) %&gt;%
+##     dplyr::mutate(cross_membership = cross_num)
 ## }  
 ## out_tib &lt;- do.call(&quot;rbind&quot;, out) %&gt;% 
 ##   tibble::as_tibble() %&gt;% 
-##   dplyr::select(- test_indic) %&gt;%
 ##   dplyr::mutate(residual = abs(true_pheno - predicted_value))
 ## ```
 ## 
@@ -3754,8 +4003,7 @@ calling plink’s score function.</p>
 ## intervals &lt;- list()
 ## for (i in 1:1000){
 ##   ### take one validation set observation
-##   out2 &lt;- out_tib %&gt;%
-##     dplyr::mutate(cross_membership = rep(1:5, each = 1000))
+##   out2 &lt;- out_tib 
 ##    o3 &lt;- out2 %&gt;% 
 ##      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %&gt;% # calculate mu hat (X_{n + 1})
 ##      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
@@ -3770,20 +4018,24 @@ calling plink’s score function.</p>
 ## 
 ## 
 ## ```r
-## do.call(&quot;rbind&quot;, intervals) %&gt;% 
+## (coverages[[x]] &lt;- do.call(&quot;rbind&quot;, intervals) %&gt;% 
 ##   tibble::as_tibble() %&gt;%
 ##   dplyr::rename(left = 1, right = 2) %&gt;%
 ##   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %&gt;%
 ##   dplyr::mutate(in_interval = true_pheno &lt;= right &amp; true_pheno &gt;= left) %&gt;%
-##   dplyr::summarise(coverage = mean(in_interval))
+##   dplyr::summarise(coverage = mean(in_interval)) %&gt;%
+##   dplyr::mutate(trait_num = phe_num)
+## )
 ## ```
 ## 
 ## ```
-## ## # A tibble: 1 × 1
-## ##   coverage
-## ##      &lt;dbl&gt;
-## ## 1    0.943
+## ## # A tibble: 1 × 2
+## ##   coverage trait_num
+## ##      &lt;dbl&gt;     &lt;int&gt;
+## ## 1    0.943        25
 ## ```</code></pre>
+<pre class="r"><code>coverages</code></pre>
+<pre><code>## list()</code></pre>
 </div>
 </div>
 <div id="references" class="section level1 unnumbered">

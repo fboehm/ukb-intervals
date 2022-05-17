@@ -101,6 +101,7 @@ comparisonProject/03_subsample/continuous/pheno1/val/ukb/01_idx.txt (and similar
 
 ```{r, echo = FALSE, message = FALSE}
 alpha = 0.1
+coverages <- list()
 
 res <- lapply(1:25, function(x) {
   knitr::knit_child(
@@ -110,7 +111,9 @@ res <- lapply(1:25, function(x) {
 cat(unlist(res), sep = '\n')
 ```
 
-
+```{r}
+coverages
+```
 
 # References
 
