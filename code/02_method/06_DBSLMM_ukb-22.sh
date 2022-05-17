@@ -1,13 +1,13 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,nomosix
-#SBATCH --time=7-00:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name=DBSLMM
 #SBATCH --mem=20G
 #SBATCH --cpus-per-task=5
 #SBATCH --array=1
-#SBATCH --output=06_DBSLMM_ukb_c_%a.out
-#SBATCH --error=06_DBSLMM_ukb_c_%a.err
+#SBATCH --output=06_DBSLMM_ukb_c_5cpu%a.out
+#SBATCH --error=06_DBSLMM_ukb_c_5cpu%a.err
 
 bash 
 let k=0
@@ -18,7 +18,7 @@ type=auto
 
 compstr=/net/mulan/disk2/yasheng/comparisonProject/
 plink=/usr/cluster/bin/plink-1.9
-DBSLMM=06_DBSLMM_script.sh
+DBSLMM=06_DBSLMM_script-22.sh
 DBSLMMpath=~/research/
 blockf=${compstr}LDblock_EUR/chr
 ref=${compstr}04_reference/ukb/geno/chr

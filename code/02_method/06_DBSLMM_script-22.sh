@@ -80,7 +80,8 @@ h2=`sed -n '26p' ${herit} | cut -d ":" -f 2 | cut -d '(' -f 1 | cut -d " " -f 2`
 # DBSLMM: tuning version
 if [[ "$type" == "t" ]]
 then
-	for chr in `seq 1 22`
+	#for chr in `seq 1 22`
+	for chr in 22
 	do
 
 		BLOCK=${block_prefix}${chr}
@@ -134,8 +135,8 @@ fi
 ## DBSLMM automatic version
 if [[ "$type" == "auto" ]]
 then
-for chr in `seq 1 22` 
-#for chr in 22
+#for chr in `seq 1 22` 
+for chr in 22
 do
 	BLOCK=${block_prefix}${chr}
 	summchr=${summary_file_prefix}${chr}

@@ -1,0 +1,23 @@
+---
+title: "Verifying missing values in bed file"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+From output from my C++ dbslmm code, it looked like there are missing values in a bed file. I want to read this bed file into R to verify that this is true. 
+
+```{r}
+bed_file <- "/net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr22.bed"
+test_indicator_file <- "~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_2_cross_2_ntest1000.txt"
+ti_tib <- readr::read_table(test_indicator_file, col_names = FALSE)
+indices <- which(ti_tib$X1 == 1) 
+```
+
+```{r}
+dat <- bigsnpr::snp_readBed2(bedfile = bed_file, 
+                      ind.row = indices[1])
+```
+
+
+
