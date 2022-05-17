@@ -2,3 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+.pversion
+plink.log
+plink.nosex
