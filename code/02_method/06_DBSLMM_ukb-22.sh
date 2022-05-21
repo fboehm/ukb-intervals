@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,nomosix
-#SBATCH --time=1-00:00:00
+#SBATCH --time=6:00:00
 #SBATCH --job-name=DBSLMM
 #SBATCH --mem=20G
 #SBATCH --cpus-per-task=5
@@ -24,10 +24,10 @@ blockf=${compstr}LDblock_EUR/chr
 ref=${compstr}04_reference/ukb/geno/chr
 
 #for p in `seq 1 25`; do
-for p in 2; do
+for p in 1; do
 #for cross in 1 2 3 4 5; do
 
-for cross in 2; do
+for cross in 1; do
 let k=${k}+1
 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 

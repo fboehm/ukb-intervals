@@ -23,7 +23,7 @@ outfile=~/research/ukb-intervals/dat/plink_files2/chr22
 
 
 
-tr -s ' ' ${infile}.fam | cut -d ' ' -f 1-5,12 > ${outfile}.fam
+cat ${infile}.fam | tr -s ' ' | cut -d ' ' -f 1-5 > ${outfile}.fam
 
 
 plink --bfile ${outfile} --missing
