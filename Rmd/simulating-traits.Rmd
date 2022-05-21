@@ -1,0 +1,15 @@
+---
+title: "Simulating traits with GCTA"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+We want to use GCTA software to simulate quantitative traits. Here is the
+documentation: https://yanglab.westlake.edu.cn/software/gcta/#GWASSimulation
+
+It's unclear to me how to specify the error distribution. Actually, the default error distribution is ok. What is more concerning is the effect size distribution. let's use R to simulate the effect sizes from the distributions that Sheng lists in the DBSLMM paper. We can then save them as text files for use with GCTA, via the `--simu-causal-loci` flag. 
+
+
+
+
