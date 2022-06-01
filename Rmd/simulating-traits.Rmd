@@ -13,3 +13,205 @@ It's unclear to me how to specify the error distribution. Actually, the default 
 
 
 
+
+## Simulation Scenario I effects
+
+We first read in a bim file to get the names of the SNPs for Chr 1 from the UKB data.
+
+```{r}
+library(magrittr)
+```
+
+```{r}
+sim_settings <- tibble::tibble(herit = rep(c(0.1, 0.2, 0.5), times = 3), 
+                               distribution = rep(c("normal", "scaled_t", "laplace"), each = 3)
+                               )
+```
+
+```{r}
+bim_file <- "~/research/ukb-intervals/dat/plink_files/ukb/chr1.bim"
+bim_tib <- vroom::vroom(bim_file, col_names = FALSE) %>%
+  dplyr::mutate(snp_index = 1:nrow(.)) %>%
+  dplyr::rename(chromosome = X1, snp_id = X2, pos_cm = X3, pos_bp = X4, a1 = X5, a2 = X6) %>%
+  dplyr::filter(snp_index <= 1e5)
+  
+```
+
+
+```{r}
+m <- nrow(bim_tib)
+hsq <- 0.1
+set.seed(2022-05-23)
+effects <- rnorm(n = m, mean = 0, sd = sqrt(hsq / m))
+# make causal.snplist for GCTA
+tibble::tibble(bim_tib$snp_id, effects) %>%
+  vroom::vroom_write(file = "../dat/simulations/scenarioI_normal_hsq0.1.txt", col_names = FALSE)
+#
+hsq <- 0.2
+effects <- rnorm(n = m, mean = 0, sd = sqrt(hsq / m))
+tibble::tibble(bim_tib$snp_id, effects) %>%
+  vroom::vroom_write(file = "../dat/simulations/scenarioI_normal_hsq0.2.txt", col_names = FALSE)
+# 
+hsq <- 0.5
+effects <- rnorm(n = m, mean = 0, sd = sqrt(hsq / m))
+tibble::tibble(bim_tib$snp_id, effects) %>%
+  vroom::vroom_write(file = "../dat/simulations/scenarioI_normal_hsq0.5.txt", col_names = FALSE)
+
+```
+
+
+### Simulate effects for all three heritability values, with scaled t distribution
+
+```{r}
+#
+set.seed(2022-05-23)
+hsq <- 0.1
+effects <- ggdist::rstudent_t(n = m, df = 4, sigma = hsq / m)
+tibble::tibble(bim_tib$snp_id, effects) %>%
+  vroom::vroom_write(file = "../dat/simulations/scenarioI_scaledt_hsq0.1.txt", col_names = FALSE)
+
+#
+hsq <- 0.2
+effects <- ggdist::rstudent_t(n = m, df = 4, sigma = hsq / m)
+tibble::tibble(bim_tib$snp_id, effects) %>%
+  vroom::vroom_write(file = "../dat/simulations/scenarioI_scaledt_hsq0.2.txt", col_names = FALSE)
+#
+hsq <- 0.5
+effects <- ggdist::rstudent_t(n = m, df = 4, sigma = hsq / m)
+tibble::tibble(bim_tib$snp_id, effects) %>%
+  vroom::vroom_write(file = "../dat/simulations/scenarioI_scaledt_hsq0.5.txt", col_names = FALSE)
+```
+
+```{r}
+#
+set.seed(2022-05-23)
+hsq <- 0.1
+effects <- jmuOutlier::rlaplace(n = m, sd = sqrt(hsq / m))
+tibble::tibble(bim_tib$snp_id, effects) %>%
+  vroom::vroom_write(file = "../dat/simulations/scenarioI_laplace_hsq0.1.txt", col_names = FALSE)
+
+#
+hsq <- 0.2
+effects <- jmuOutlier::rlaplace(n = m, sd = sqrt(hsq / m))
+tibble::tibble(bim_tib$snp_id, effects) %>%
+  vroom::vroom_write(file = "../dat/simulations/scenarioI_laplace_hsq0.2.txt", col_names = FALSE)
+#
+hsq <- 0.5
+effects <- jmuOutlier::rlaplace(n = m, sd = sqrt(hsq / m))
+tibble::tibble(bim_tib$snp_id, effects) %>%
+  vroom::vroom_write(file = "../dat/simulations/scenarioI_laplace_hsq0.5.txt", col_names = FALSE)
+```
+
+
+
+## Creating the plink files for input to GCTA
+
+We need to create a set of plink files - bim, bed, fam - for use with GCTA. We can start with the Chr1 set of files, and subset it, being sure to write the result to the appropriate file path. First, we make two files - one for subjects and one for SNPs - that will be used as arguments to plink when making the new trio of files.
+
+
+```{r}
+bim_tib %>%
+  dplyr::select(snp_id) %>%
+  vroom::vroom_write(file = "../dat/simulations/100k.snplist", col_names = FALSE)
+```
+
+Now, we read the fam file and randomly choose a subset of 12,000 subjects.
+
+```{r}
+fam_file <- "~/research/ukb-intervals/dat/plink_files/ukb/chr1.fam"
+fam_tib <- vroom::vroom(fam_file, col_names = FALSE) %>%
+  dplyr::select(1:2)
+set.seed(2022-05-23)
+sampled_ids <- sample(fam_tib$X1, size = 12000)  
+fam_tib %>%
+  dplyr::filter(X1 %in% sampled_ids) %>%
+  vroom::vroom_write(file = "../dat/simulations/12k.samplelist", col_names = FALSE)
+fam_tib2 <- vroom::vroom(fam_file, col_names = FALSE) %>%
+  dplyr::select(1:6) %>%
+  vroom::vroom_write(file = "../dat/simulations/chr1.fam", col_names = FALSE)
+```
+
+
+
+
+Now, we use 100k.snplist and 12k.samplelist with plink to create the trio of files.
+
+```{bash}
+#ln -s ../dat/plink_files/ukb/chr1.bed ../dat/simulations/chr1.bed
+#ln -s ../dat/plink_files/ukb/chr1.bim ../dat/simulations/chr1.bim
+
+
+plink --bfile ../dat/simulations/chr1 --extract ../dat/simulations/100k.snplist --keep ../dat/simulations/12k.samplelist --make-bed --out ../dat/simulations/chr1_100k_12k
+```
+
+The above code took about 80 minutes to run on the CSG cluster.
+
+Now, let's run GCTA to simulate traits.
+
+```{bash}
+mkdir ../dat/simulations/sim_traits
+# laplace
+gcta64 --bfile ../dat/simulations/chr1_100k_12k --simu-qt --simu-causal-loci ../dat/simulations/scenarioI_laplace_hsq0.2.txt --simu-hsq 0.2 --simu-rep 10 --out ../dat/simulations/sim_traits/scenarioI_laplace_hsq0.2
+
+gcta64 --bfile ../dat/simulations/chr1_100k_12k --simu-qt --simu-causal-loci ../dat/simulations/scenarioI_laplace_hsq0.1.txt --simu-hsq 0.1 --simu-rep 10 --out ../dat/simulations/sim_traits/scenarioI_laplace_hsq0.1
+
+gcta64 --bfile ../dat/simulations/chr1_100k_12k --simu-qt --simu-causal-loci ../dat/simulations/scenarioI_laplace_hsq0.5.txt --simu-hsq 0.5 --simu-rep 10 --out ../dat/simulations/sim_traits/scenarioI_laplace_hsq0.5
+# normal
+gcta64 --bfile ../dat/simulations/chr1_100k_12k --simu-qt --simu-causal-loci ../dat/simulations/scenarioI_normal_hsq0.2.txt --simu-hsq 0.2 --simu-rep 10 --out ../dat/simulations/sim_traits/scenarioI_normal_hsq0.2
+
+gcta64 --bfile ../dat/simulations/chr1_100k_12k --simu-qt --simu-causal-loci ../dat/simulations/scenarioI_normal_hsq0.1.txt --simu-hsq 0.1 --simu-rep 10 --out ../dat/simulations/sim_traits/scenarioI_normal_hsq0.1
+
+gcta64 --bfile ../dat/simulations/chr1_100k_12k --simu-qt --simu-causal-loci ../dat/simulations/scenarioI_normal_hsq0.5.txt --simu-hsq 0.5 --simu-rep 10 --out ../dat/simulations/sim_traits/scenarioI_normal_hsq0.5
+# scaled t
+gcta64 --bfile ../dat/simulations/chr1_100k_12k --simu-qt --simu-causal-loci ../dat/simulations/scenarioI_scaledt_hsq0.2.txt --simu-hsq 0.2 --simu-rep 10 --out ../dat/simulations/sim_traits/scenarioI_scaledt_hsq0.2
+
+gcta64 --bfile ../dat/simulations/chr1_100k_12k --simu-qt --simu-causal-loci ../dat/simulations/scenarioI_scaledt_hsq0.1.txt --simu-hsq 0.1 --simu-rep 10 --out ../dat/simulations/sim_traits/scenarioI_scaledt_hsq0.1
+
+gcta64 --bfile ../dat/simulations/chr1_100k_12k --simu-qt --simu-causal-loci ../dat/simulations/scenarioI_scaledt_hsq0.5.txt --simu-hsq 0.5 --simu-rep 10 --out ../dat/simulations/sim_traits/scenarioI_scaledt_hsq0.5
+
+```
+
+
+## Divide 12,000 subjects
+
+We next need to divide the 12,000 subjects into 10,000 training, 1,000 validation and 1,000 test subjects.
+
+We'll first read in the file 12k.samplelist to get the sample ids, then use R functions to sample from the ids.
+
+```{r}
+set.seed(2022-06-01)
+ids <- vroom::vroom(file = "../dat/simulations/12k.samplelist", col_names = FALSE)
+val_ids <- sample(x = ids$X1, size = 1000, replace = FALSE) 
+test_ids <- sample(x = setdiff(ids$X1, val_ids), size = 1000, replace = FALSE)
+training_ids <- setdiff(ids$X1, union(val_ids, test_ids))
+# Write to files
+val_ids %>%
+  tibble::tibble(.name_repair = "universal") %>%
+  dplyr::rename(X1 = 1) %>%
+  dplyr::arrange(X1) %>%
+  dplyr::mutate(X2 = X1) %>%
+  vroom::vroom_write(file = "../dat/simulations/1k_validation.txt", col_names = FALSE)
+test_ids %>%
+  tibble::tibble(.name_repair = "universal") %>%
+  dplyr::rename(X1 = 1) %>%
+  dplyr::arrange(X1) %>%
+  dplyr::mutate(X2 = X1) %>%
+  vroom::vroom_write(file = "../dat/simulations/1k_test.txt", col_names = FALSE)
+training_ids %>%
+  tibble::tibble(.name_repair = "universal") %>%
+  dplyr::rename(X1 = 1) %>%
+  dplyr::arrange(X1) %>%
+  dplyr::mutate(X2 = X1) %>%
+  vroom::vroom_write(file = "../dat/simulations/10k_training.txt", col_names = FALSE)
+
+```
+
+## Quantile normalization of the traits
+
+https://davetang.org/muse/2014/07/07/quantile-normalisation-in-r/
+
+
+
+
+
+

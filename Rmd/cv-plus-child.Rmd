@@ -2,7 +2,6 @@
 
 ```{r, results = "hide", message = FALSE}
 phe_num <- x
-out <- list()
 for (cross_num in 1:5){
   
   # read fam file
@@ -108,11 +107,20 @@ for (i in 1:1000){
   ### take one validation set observation
   out2 <- out_tib 
    o3 <- out2 %>% 
-     dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, .f = get_fitted, fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))) %>% # calculate mu hat (X_{n + 1})
-     dplyr::mutate(fitted_minus_residual = fitted_cv - residual, fitted_plus_residual = fitted_cv + residual)
+     dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, 
+                                               .f = get_fitted, 
+                                               fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))
+                   ) %>% # calculate mu hat (X_{n + 1})
+     dplyr::mutate(fitted_minus_residual = fitted_cv - residual, 
+                   fitted_plus_residual = fitted_cv + residual)
   ## determine quantiles - type 6?  of fitted_minus_residual and fitted_plus_residual
-  intervals[[i]]<- c(quantile(o3$fitted_minus_residual, prob = alpha / 2, type = 6), 
-  quantile(o3$fitted_plus_residual, prob = 1 - alpha / 2, type = 6))
+  intervals[[i]]<- c(quantile(o3$fitted_minus_residual, 
+                              prob = alpha / 2, 
+                              type = 6), 
+  quantile(o3$fitted_plus_residual, 
+           prob = 1 - alpha / 2, 
+           type = 6)
+  )
 }
 ```
 
@@ -120,13 +128,21 @@ for (i in 1:1000){
 ## Coverage for Trait `r x`
 
 ```{r}
-(coverages[[x]] <- do.call("rbind", intervals) %>% 
+mytib <- do.call("rbind", intervals) %>% 
   tibble::as_tibble() %>%
   dplyr::rename(left = 1, right = 2) %>%
   dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %>%
   dplyr::mutate(in_interval = true_pheno <= right & true_pheno >= left) %>%
-  dplyr::summarise(coverage = mean(in_interval)) %>%
-  dplyr::mutate(trait_num = phe_num)
-)
+  dplyr::mutate(interval_width = right - left)
+ 
+
 ```
+
+```{r}
+assign(x = "out", value = mytib)
+```
+
+
+
+
 

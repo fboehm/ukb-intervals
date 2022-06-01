@@ -99,20 +99,59 @@ comparisonProject/03_subsample/continuous/pheno1/val/ukb/01_idx.txt (and similar
 ### How to use the results files from DBSLMM
 
 
-```{r, echo = FALSE, message = FALSE}
+```{r, echo = TRUE, message = FALSE}
 alpha = 0.1
-coverages <- list()
-
+out <- list()
 res <- lapply(1:25, function(x) {
   knitr::knit_child(
-    'cv-plus-child.Rmd', envir = environment(), quiet = TRUE
+    'cv-plus-child.Rmd', 
+    envir = environment(), 
+    quiet = TRUE
   )
+  get("out")
 })
-cat(unlist(res), sep = '\n')
+saveRDS(res, file = "res.rds")
 ```
 
 ```{r}
-coverages
+coverages <- lapply(X = res, 
+                    FUN = function(mytib){
+  mytib %>%
+    dplyr::summarise(coverage = mean(in_interval))
+       }
+)
+do.call("rbind", coverages) %>%
+  tibble::as_tibble() %>%
+  dplyr::mutate(trait_num = 1:length(res))
+```
+
+## Boxplots of interval width
+
+```{r}
+for (i in 1:length(res)){
+  res[[i]] <- res[[i]] %>%
+    dplyr::mutate(trait_num = i)
+}
+dplyr::bind_rows(res) %>%
+  ggplot2::ggplot() + 
+  ggplot2::geom_boxplot(ggplot2::aes(x = trait_num, y = interval_width, group = trait_num))
+```
+
+## Incorporate estimated heritability of traits
+
+```{r}
+h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2.csv", col_names = FALSE) %>% dplyr::select(-26) # drop 26, which is due to presence of trailing commas
+pp <- h_tib %>% 
+  dplyr::summarise(dplyr::across(X1:X25, mean)) %>% 
+  tidyr::pivot_longer(X1:X25) %>%
+  dplyr::rename(mean_herit = value) %>%
+  dplyr::mutate(trait_num = 1:25) %>% 
+  dplyr::select(-name) %>%
+  dplyr::select(trait_num, mean_herit) %>%
+  dplyr::left_join(dplyr::bind_rows(res), by = "trait_num") %>%
+  ggplot2::ggplot() + ggplot2::geom_boxplot(ggplot2::aes(x = mean_herit, y = interval_width, group = trait_num, colour = as.factor(trait_num), label = trait_num), show.legend = FALSE) 
+pp %>%
+  plotly::ggplotly(tooltip = "label")
 ```
 
 # References
