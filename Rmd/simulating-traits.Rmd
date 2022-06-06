@@ -148,7 +148,7 @@ The above code took about 80 minutes to run on the CSG cluster.
 
 Now, let's run GCTA to simulate traits.
 
-```{bash}
+```{bash, eval = FALSE}
 mkdir ../dat/simulations/sim_traits
 # laplace
 gcta64 --bfile ../dat/simulations/chr1_100k_12k --simu-qt --simu-causal-loci ../dat/simulations/scenarioI_laplace_hsq0.2.txt --simu-hsq 0.2 --simu-rep 10 --out ../dat/simulations/sim_traits/scenarioI_laplace_hsq0.2
@@ -209,6 +209,65 @@ training_ids %>%
 ## Quantile normalization of the traits
 
 https://davetang.org/muse/2014/07/07/quantile-normalisation-in-r/
+
+https://en.wikipedia.org/wiki/Quantile_normalization
+
+http://jtleek.com/genstats/inst/doc/02_05_normalization.html
+
+We next need to quantile normalize the simulated traits. We can do this with the 
+function `preprocessCore::normalize.quantiles` from the Bioconductor R package
+`preprocessCore`. 
+
+```{r}
+# read a file containing simulated traits
+trait_file <- "../dat/simulations/sim_traits/scenarioI_laplace_hsq0.2.phen"
+trait_tib <- vroom::vroom(trait_file, col_names = FALSE) %>%
+  dplyr::select(-13) # drop the last column which contains only NAs
+```
+
+```{r}
+# read files to get ids for training, test, and validation sets
+val_ids <- vroom::vroom(file = "../dat/simulations/1k_validation.txt", col_names = FALSE)
+test_ids <- vroom::vroom(file = "../dat/simulations/1k_test.txt", col_names = FALSE)
+training_ids <- vroom::vroom(file = "../dat/simulations/10k_training.txt", col_names = FALSE)
+```
+
+
+The catch is that we want to use only the training set for quantile normalization. We then need to use those quantiles - from the training set - to normalize the test set and validation set.
+
+
+
+```{r, eval = FALSE}
+BiocManager::install(c("Biobase","preprocessCore"))
+preprocessCore::normalize.quantiles
+preprocessCore::normalize.quantiles.use.target
+preprocessCore::normalize.quantiles.determine.target
+```
+
+
+```{r}
+# use training set only to determine the distribution for quantile normalization
+# then, use the inferred distribution to quantile normalize, separately, the training and the validation and the test sets.
+trait_tib_training <- trait_tib %>%
+  dplyr::filter(X1 %in% training_ids$X1)
+trait_tib_test <- trait_tib %>%
+  dplyr::filter(X1 %in% test_ids$X1)
+
+
+```
+
+
+
+## ldsc to estimate trait heritability
+
+After quantile normalization, we need to use `ldsc` to estimate the traits' heritabilities. 
+Note that $\hat h^2$ is an input to DBSLMM, so this step is needed before running DBSLMM. 
+
+
+
+
+## DBSLMM for the simulated traits
+
 
 
 
