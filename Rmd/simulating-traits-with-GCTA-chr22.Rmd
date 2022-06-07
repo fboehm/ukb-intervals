@@ -1,0 +1,204 @@
+---
+title: "Simulating traits with GCTA"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+We want to use GCTA software to simulate quantitative traits. Here is the
+documentation: https://yanglab.westlake.edu.cn/software/gcta/#GWASSimulation
+
+The default error distribution is ok. What is more concerning is the effect size distribution. let's use R to simulate the effect sizes. We can then save them as text files for use with GCTA, via the `--simu-causal-loci` flag. 
+
+
+
+
+
+## Simulation effects
+
+We first read in a bim file to get the names of the SNPs for Chr 22 from the UKB data.
+
+```{r}
+library(magrittr)
+```
+
+
+```{r}
+bim_file <- "~/research/ukb-intervals/dat/plink_files/ukb/chr22.bim"
+bim_tib <- vroom::vroom(bim_file, col_names = FALSE) %>%
+  dplyr::mutate(snp_index = 1:nrow(.)) %>%
+  dplyr::rename(chromosome = X1, snp_id = X2, pos_cm = X3, pos_bp = X4, a1 = X5, a2 = X6)
+```
+
+
+```{r}
+m <- nrow(bim_tib)
+hsq <- 0.1
+p_causal <- 0.1
+set.seed(2022-05-23)
+bim_tib2 <- bim_tib %>%
+  dplyr::mutate(causal = rbinom(n = m, size = 1, prob = p_causal)) %>%
+  dplyr::mutate(effect = as.numeric(causal) * rnorm(n = m, mean = 0, sd = sqrt(hsq / (m * p_causal))))
+# make causal.snplist for GCTA
+bim_tib2 %>%
+  dplyr::select(snp_id, effect) %>%
+  vroom::vroom_write(file = "../dat/simulations-ding/snp_effects_Chr22_hsq0.1_pcausal0.1.txt",
+                     col_names = FALSE)
+#
+hsq <- 0.2
+bim_tib2 <- bim_tib %>%
+  dplyr::mutate(causal = rbinom(n = m, size = 1, prob = p_causal)) %>%
+  dplyr::mutate(effect = causal * rnorm(n = m, mean = 0, sd = sqrt(hsq / (m * p_causal))))
+# make causal.snplist for GCTA
+bim_tib2 %>%
+  dplyr::select(snp_id, effect) %>%
+  vroom::vroom_write(file = "../dat/simulations-ding/snp_effects_Chr22_hsq0.2_pcausal0.1.txt",
+                     col_names = FALSE)
+# 
+hsq <- 0.5
+bim_tib2 <- bim_tib %>%
+  dplyr::mutate(causal = rbinom(n = m, size = 1, prob = p_causal)) %>%
+  dplyr::mutate(effect = causal * rnorm(n = m, mean = 0, sd = sqrt(hsq / (m * p_causal))))
+# make causal.snplist for GCTA
+bim_tib2 %>%
+  dplyr::select(snp_id, effect) %>%
+  vroom::vroom_write(file = "../dat/simulations-ding/snp_effects_Chr22_hsq0.5_pcausal0.1.txt",
+                     col_names = FALSE)
+
+```
+
+## Write a new fam file for use with GCTA
+
+Sheng's fam files have too many columns for use with GCTA. We'll use it to write 
+a fam file in standard format.
+
+```{r}
+fam_file <- "../dat/plink_files/ukb/chr22.fam"
+vroom::vroom(fam_file, col_names = FALSE) %>%
+  dplyr::select(1:6) %>%
+  vroom::vroom_write(file = "../dat/simulations-ding/chr22.fam", col_names = FALSE)
+```
+
+Now, make symbolic links for bed and bim files
+
+```{bash, eval = FALSE}
+ln -s ../dat/plink_files/ukb/chr22.bed ../dat/simulations-ding/chr22.bed
+ln -s ../dat/plink_files/ukb/chr22.bim ../dat/simulations-ding/chr22.bim
+```
+
+## GCTA to simulate traits
+
+Now, let's run GCTA to simulate traits.
+
+```{bash, eval = TRUE}
+
+gcta64 --bfile ../dat/plink_files/ukb/chr22 --simu-qt --simu-causal-loci ../dat/simulations-ding/snp_effects_Chr22_hsq0.2_pcausal0.1.txt --simu-hsq 0.2 --simu-rep 10 --out ../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1
+
+gcta64 --bfile ../dat/plink_files/ukb/chr22 --simu-qt --simu-causal-loci ../dat/simulations-ding/snp_effects_Chr22_hsq0.1_pcausal0.1.txt --simu-hsq 0.1 --simu-rep 10 --out ../dat/simulations/sim_traits/sims_Chr22_hsq0.1_pcausal0.1
+
+gcta64 --bfile ../dat/plink_files/ukb/chr22 --simu-qt --simu-causal-loci ../dat/simulations-ding/snp_effects_Chr22_hsq0.5_pcausal0.1.txt --simu-hsq 0.5 --simu-rep 10 --out ../dat/simulations/sim_traits/sims_Chr22_hsq0.5_pcausal0.1
+```
+
+
+## Divide subjects
+
+We next need to divide the subjects into training, validation and test subjects.
+
+We'll first read in the fam file to get the sample ids, then use R functions to sample from the ids.
+
+```{r}
+set.seed(2022-06-01)
+ids <- vroom::vroom(file = "../dat/plink_files/ukb/chr22.fam", col_names = FALSE)
+val_ids <- sample(x = ids$X1, size = 29129, replace = FALSE) 
+test_ids <- sample(x = setdiff(ids$X1, val_ids), size = 28000, replace = FALSE)
+training_ids <- setdiff(ids$X1, union(val_ids, test_ids))
+# Write to files
+val_ids %>%
+  tibble::tibble(.name_repair = "universal") %>%
+  dplyr::rename(X1 = 1) %>%
+  dplyr::arrange(X1) %>%
+  dplyr::mutate(X2 = X1) %>%
+  vroom::vroom_write(file = "../dat/simulations-ding/validation-ids.txt", col_names = FALSE)
+test_ids %>%
+  tibble::tibble(.name_repair = "universal") %>%
+  dplyr::rename(X1 = 1) %>%
+  dplyr::arrange(X1) %>%
+  dplyr::mutate(X2 = X1) %>%
+  vroom::vroom_write(file = "../dat/simulations-ding/test-ids.txt", col_names = FALSE)
+training_ids %>%
+  tibble::tibble(.name_repair = "universal") %>%
+  dplyr::rename(X1 = 1) %>%
+  dplyr::arrange(X1) %>%
+  dplyr::mutate(X2 = X1) %>%
+  vroom::vroom_write(file = "../dat/simulations-ding/training-ids.txt", col_names = FALSE)
+
+```
+
+## Quantile normalization of the traits
+
+https://davetang.org/muse/2014/07/07/quantile-normalisation-in-r/
+
+https://en.wikipedia.org/wiki/Quantile_normalization
+
+http://jtleek.com/genstats/inst/doc/02_05_normalization.html
+
+We next need to quantile normalize the simulated traits. We can do this with the 
+function `preprocessCore::normalize.quantiles` from the Bioconductor R package
+`preprocessCore`. 
+
+```{r}
+# read a file containing simulated traits
+trait_file <- "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.phen"
+trait_tib <- vroom::vroom(trait_file, col_names = FALSE) %>%
+  dplyr::select(-13) # drop the last column which contains only NAs
+```
+
+```{r}
+# read files to get ids for training, test, and validation sets
+val_ids <- vroom::vroom(file = "../dat/simulations-ding/validation-ids.txt", col_names = FALSE)
+test_ids <- vroom::vroom(file = "../dat/simulations-ding/test-ids.txt", col_names = FALSE)
+training_ids <- vroom::vroom(file = "../dat/simulations-ding/training-ids.txt", col_names = FALSE)
+```
+
+
+The catch is that we want to use only the training set for quantile normalization. We then need to use those quantiles - from the training set - to normalize the test set and validation set.
+
+
+
+```{r, eval = FALSE}
+BiocManager::install(c("Biobase","preprocessCore"))
+preprocessCore::normalize.quantiles
+preprocessCore::normalize.quantiles.use.target
+preprocessCore::normalize.quantiles.determine.target
+```
+
+
+```{r}
+# use training set only to determine the distribution for quantile normalization
+# then, use the inferred distribution to quantile normalize, separately, the training and the validation and the test sets.
+trait_tib_training <- trait_tib %>%
+  dplyr::filter(X1 %in% training_ids$X1)
+trait_tib_test <- trait_tib %>%
+  dplyr::filter(X1 %in% test_ids$X1)
+
+
+```
+
+
+
+## ldsc to estimate trait heritability
+
+After quantile normalization, we need to use `ldsc` to estimate the traits' heritabilities. 
+Note that $\hat h^2$ is an input to DBSLMM, so this step is needed before running DBSLMM. 
+
+
+
+
+## DBSLMM for the simulated traits
+
+
+
+
+
+
+
