@@ -108,7 +108,7 @@ We'll first read in the fam file to get the sample ids, then use R functions to 
 
 ```{r}
 set.seed(2022-06-01)
-ids <- vroom::vroom(file = "../dat/plink_files/ukb/chr22.fam", col_names = FALSE)
+ids <- vroom::vroom(file = "../dat/simulations-ding/chr22.fam", col_names = FALSE)
 val_ids <- sample(x = ids$X1, size = 29129, replace = FALSE) 
 test_ids <- sample(x = setdiff(ids$X1, val_ids), size = 28000, replace = FALSE)
 training_ids <- setdiff(ids$X1, union(val_ids, test_ids))
@@ -180,9 +180,35 @@ trait_tib_training <- trait_tib %>%
   dplyr::filter(X1 %in% training_ids$X1)
 trait_tib_test <- trait_tib %>%
   dplyr::filter(X1 %in% test_ids$X1)
-
+trait_tib_validation <- trait_tib %>%
+  dplyr::filter(X1 %in% val_ids$X1)
 
 ```
+
+```{r}
+training_qn <- preprocessCore::normalize.quantiles(as.matrix(trait_tib_training[, 3:12]))
+target_test <- preprocessCore::normalize.quantiles.determine.target(x = training_qn, target.length = nrow(trait_tib_test))
+test_qn <- preprocessCore::normalize.quantiles.use.target(x = as.matrix(trait_tib_test[, 3:12]), target = target_test)
+target_validation <- preprocessCore::normalize.quantiles.determine.target(x = training_qn, target.length = nrow(trait_tib_validation))
+validation_qn <- preprocessCore::normalize.quantiles.use.target(x = as.matrix(trait_tib_validation[, 3:12]), target = target_validation)
+```
+
+```{r}
+# check to see that qn traits have similar distributions
+quantile(test_qn[, 1])
+quantile(validation_qn[, 1])
+quantile(test_qn[, 2])
+quantile(training_qn[, 1])
+hist(training_qn[, 1])
+hist(training_qn[, 10])
+qqplot(training_qn[, 10], test_qn[, 10])
+```
+
+## Write fam files
+
+We need to consider what we want the final fam file to look like. Should it have 
+every subject's quantile-normalized trait value? Do we want a single fam file with all ten traits (one trait per column)? 
+
 
 
 
