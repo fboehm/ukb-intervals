@@ -109,9 +109,10 @@ We'll first read in the fam file to get the sample ids, then use R functions to 
 ```{r}
 set.seed(2022-06-01)
 ids <- vroom::vroom(file = "../dat/simulations-ding/chr22.fam", col_names = FALSE)
-val_ids <- sample(x = ids$X1, size = 29129, replace = FALSE) 
-test_ids <- sample(x = setdiff(ids$X1, val_ids), size = 28000, replace = FALSE)
-training_ids <- setdiff(ids$X1, union(val_ids, test_ids))
+val_ids <- sample(x = ids$X1, size = 37129, replace = FALSE) 
+#test_ids <- sample(x = setdiff(ids$X1, val_ids), size = 28000, replace = FALSE)
+#training_ids <- setdiff(ids$X1, union(val_ids, test_ids))
+test_and_training_ids <- setdiff(ids$X1, val_ids)
 # Write to files
 val_ids %>%
   tibble::tibble(.name_repair = "universal") %>%
@@ -119,19 +120,26 @@ val_ids %>%
   dplyr::arrange(X1) %>%
   dplyr::mutate(X2 = X1) %>%
   vroom::vroom_write(file = "../dat/simulations-ding/validation-ids.txt", col_names = FALSE)
-test_ids %>%
-  tibble::tibble(.name_repair = "universal") %>%
-  dplyr::rename(X1 = 1) %>%
-  dplyr::arrange(X1) %>%
-  dplyr::mutate(X2 = X1) %>%
-  vroom::vroom_write(file = "../dat/simulations-ding/test-ids.txt", col_names = FALSE)
-training_ids %>%
-  tibble::tibble(.name_repair = "universal") %>%
-  dplyr::rename(X1 = 1) %>%
-  dplyr::arrange(X1) %>%
-  dplyr::mutate(X2 = X1) %>%
-  vroom::vroom_write(file = "../dat/simulations-ding/training-ids.txt", col_names = FALSE)
-
+# set up for 5-fold cv with the remaining 300,000 subjects
+set.seed(2022-06-10)
+ids_shuffled <- sample(x = test_and_training_ids, size = length(test_and_training_ids))
+folds <- cut(seq(1,length(ids_shuffled)),breaks=5,labels=FALSE)
+# https://stats.stackexchange.com/questions/61090/how-to-split-a-data-set-to-do-10-fold-cross-validation
+for (i in 1:5){
+  ids_tib <- tibble::tibble(ids_shuffled, folds) %>%
+    dplyr::arrange(ids_shuffled)
+  ids_tib %>%
+    dplyr::filter(folds == i) %>%
+    dplyr::mutate(X2 = ids_shuffled) %>%
+    dplyr::select(- folds) %>%
+    vroom::vroom_write(file = paste0("../dat/simulations-ding/test-ids-fold", i, ".txt"), col_names = FALSE)
+  ids_tib %>%
+    dplyr::filter(folds != i) %>%
+    dplyr::mutate(X2 = ids_shuffled) %>%
+    dplyr::select(- folds) %>%
+    vroom::vroom_write(file = paste0("../dat/simulations-ding/training-ids-fold", i, ".txt"), col_names = FALSE)
+  
+}
 ```
 
 ## Quantile normalization of the traits
@@ -156,8 +164,8 @@ trait_tib <- vroom::vroom(trait_file, col_names = FALSE) %>%
 ```{r}
 # read files to get ids for training, test, and validation sets
 val_ids <- vroom::vroom(file = "../dat/simulations-ding/validation-ids.txt", col_names = FALSE)
-test_ids <- vroom::vroom(file = "../dat/simulations-ding/test-ids.txt", col_names = FALSE)
-training_ids <- vroom::vroom(file = "../dat/simulations-ding/training-ids.txt", col_names = FALSE)
+test_ids <- vroom::vroom(file = "../dat/simulations-ding/test-ids-fold1.txt", col_names = FALSE)
+training_ids <- vroom::vroom(file = "../dat/simulations-ding/training-ids-fold1.txt", col_names = FALSE)
 ```
 
 
@@ -202,20 +210,80 @@ quantile(training_qn[, 1])
 hist(training_qn[, 1])
 hist(training_qn[, 10])
 qqplot(training_qn[, 10], test_qn[, 10])
+# put all 3 sets back together
+training_qn_tib <- training_ids %>%
+  dplyr::bind_cols(tibble::as_tibble(training_qn))
+test_qn_tib <- test_ids %>%
+  dplyr::bind_cols(tibble::as_tibble(test_qn))
+validation_qn_tib <- val_ids %>%
+  dplyr::bind_cols(tibble::as_tibble(validation_qn))
+qn_tib <- training_qn_tib %>%
+  dplyr::bind_rows(test_qn_tib) %>%
+  dplyr::bind_rows(validation_qn_tib) %>%
+  dplyr::arrange(X1) %>%
+  dplyr::left_join(ids, by = c("X1", "X2")) %>%
+  dplyr::select(X1, X2, X3, X4, X5, V1:V10)
+vroom::vroom_write(x = qn_tib, file = "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.fam", col_names = FALSE)
 ```
 
 ## Write fam files
 
 We need to consider what we want the final fam file to look like. Should it have 
-every subject's quantile-normalized trait value? Do we want a single fam file with all ten traits (one trait per column)? 
+every subject's quantile-normalized trait value? Do we want a single fam file with all ten traits (one trait per column)? This seems reasonable - just need to figure out how to use ldsc with 
+a fam file that has multiple traits
 
 
 
 
-## ldsc to estimate trait heritability
+## ldsc to estimate trait heritability in the validation set
 
 After quantile normalization, we need to use `ldsc` to estimate the traits' heritabilities. 
 Note that $\hat h^2$ is an input to DBSLMM, so this step is needed before running DBSLMM. 
+
+`--keep` flag to ldsc to use only a subset of the subjects. Does this flag behave like the `--keep` flag in plink??
+
+First, we sample 1000 subjects from the validation set for use in ldsc calculations.
+
+```{r}
+set.seed(2022-06-13)
+ldsc_ids <- sample(x = val_ids$X1, size = 1000, replace = FALSE)
+# write ldsc_ids file
+tibble::tibble(X1 = ldsc_ids, X2 = ldsc_ids) %>%
+  vroom::vroom_write(file = "../dat/simulations-ding/validation-ids-for-ldsc.txt")
+```
+
+We need to locate the files for use with ldsc. It looks like Sheng Yang runs ldsc on the gemma outputs, which means that I need to run gemma on the 1000 subjects' data, then run ldsc on that output.
+
+Let's make a fam file for the 1000 subjects chosen for ldsc. 
+
+```{r}
+qn1k <- vroom::vroom(file = "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.fam", col_names = FALSE) %>%
+  dplyr::filter(X1 %in% ldsc_ids)
+qn1k %>%
+  vroom::vroom_write(file = "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1_1k.fam", col_names = FALSE)
+```
+
+We make a new directory, then we create symbolic links to the UKB bed and bim files in Sheng's directory. Since 
+there are 22 pairs of bed and bim files, we'll also need 22 appropriately named fam files. In our case, the fam 
+files will be identical; differing only in filename.
+
+```{bash}
+mkdir ../dat/simulations-ding/gemma-for-ldsc
+cd ../dat/simulations-ding/gemma-for-ldsc
+for chr in `seq 2 22`
+#for chr in 1
+do
+ln -s /net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr${chr}.bed 
+ln -s /net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr${chr}.bim
+ln -s ../sim_traits/sims_Chr22_hsq0.2_pcausal0.1_1k.fam chr${chr}.fam
+done
+```
+
+```{bash, eval = FALSE}
+sbatch ../shell_scripts/gemma-for-ldsc.sh
+```
+
+we then needed to move the resulting gemma outputs to the desired directory. 
 
 
 
