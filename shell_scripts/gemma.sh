@@ -33,6 +33,7 @@ bfile=~/research/ukb-intervals/dat/simulations-ding/gemma/chr${chr}
 summ=summary_${type}_chr${chr}_pheno${p}_fold${fold}
 
 col=(${p} - 1) * 5 + ${fold}
+cd ~/research/ukb-intervals/dat/simulations-ding/gemma
 ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ}
 
 fi
