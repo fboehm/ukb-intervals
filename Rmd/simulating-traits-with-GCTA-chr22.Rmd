@@ -325,6 +325,14 @@ qn_tib2 %>%
 ```
 
 ```{bash}
+mkdir ../dat/simulations-ding/gemma 
+cd ../dat/simulations-ding/gemma
+for chr in `seq 1 22`
+do
+ln -s /net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr${chr}.bed 
+ln -s /net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr${chr}.bim
+ln -s ../sim_traits/sims_Chr22_hsq0.2_pcausal0.1-NAs.fam chr${chr}.fam
+done
 
 
 ```
