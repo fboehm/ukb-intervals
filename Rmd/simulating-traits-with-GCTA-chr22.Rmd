@@ -64,7 +64,26 @@ bim_tib2 %>%
   dplyr::select(snp_id, effect) %>%
   vroom::vroom_write(file = "../dat/simulations-ding/snp_effects_Chr22_hsq0.5_pcausal0.1.txt",
                      col_names = FALSE)
+#
+```
 
+```{r}
+hsq <- 0.2
+p_causal <- c(0.001, 0.01, 1)
+set.seed(2022-06-21)
+for (i in 1:length(p_causal)){
+  pc <- p_causal[i] 
+
+  bim_tib2 <- bim_tib %>%
+    dplyr::mutate(causal = rbinom(n = m, size = 1, prob = pc)) %>%
+    dplyr::mutate(effect = causal * rnorm(n = m, mean = 0, sd = sqrt(hsq / (m * pc))))
+  # make causal.snplist for GCTA
+  outfn <- paste0("../dat/simulations-ding/snp_effects_Chr22_hsq", hsq, "_pcausal", pc, ".txt")
+  bim_tib2 %>%
+    dplyr::select(snp_id, effect) %>%
+    vroom::vroom_write(file = outfn,
+                       col_names = FALSE)
+}
 ```
 
 ## Write a new fam file for use with GCTA
@@ -92,11 +111,19 @@ Now, let's run GCTA to simulate traits.
 
 ```{bash, eval = TRUE}
 
-gcta64 --bfile ../dat/simulations-ding/chr22 --simu-qt --simu-causal-loci ../dat/simulations-ding/snp_effects_Chr22_hsq0.2_pcausal0.1.txt --simu-hsq 0.2 --simu-rep 10 --out ../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1
+gcta64 --bfile ../dat/simulations-ding/chr22 --simu-qt --simu-causal-loci  ../dat/simulations-ding/snp_effects_Chr22_hsq0.2_pcausal0.1.txt --simu-hsq 0.2 --simu-rep 10 --out ../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1
 
 gcta64 --bfile ../dat/simulations-ding/chr22 --simu-qt --simu-causal-loci ../dat/simulations-ding/snp_effects_Chr22_hsq0.1_pcausal0.1.txt --simu-hsq 0.1 --simu-rep 10 --out ../dat/simulations/sim_traits/sims_Chr22_hsq0.1_pcausal0.1
 
 gcta64 --bfile ../dat/simulations-ding/chr22 --simu-qt --simu-causal-loci ../dat/simulations-ding/snp_effects_Chr22_hsq0.5_pcausal0.1.txt --simu-hsq 0.5 --simu-rep 10 --out ../dat/simulations/sim_traits/sims_Chr22_hsq0.5_pcausal0.1
+```
+
+```{bash}
+for pcausal in 0.001 0.01 1; do
+  gcta64 --bfile ../dat/simulations-ding/chr22 --simu-qt --simu-causal-loci   ../dat/simulations-ding/snp_effects_Chr22_hsq0.2_pcausal${pcausal}.txt --simu-hsq 0.2 --simu-rep 10 --out ../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal${pcausal}
+  
+done  
+  
 ```
 
 
@@ -155,21 +182,128 @@ function `preprocessCore::normalize.quantiles` from the Bioconductor R package
 `preprocessCore`. 
 
 ```{r}
-# read a file containing simulated traits
-trait_file <- "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.phen"
-trait_tib <- vroom::vroom(trait_file, col_names = FALSE) %>%
-  dplyr::select(-13) # drop the last column which contains only NAs
-```
+settings <- tibble::tibble(hsq = c(0.2, 0.2, 0.2, 0.1, 0.5), p_causal = c(0.001, 0.01, 1, 0.1, 0.1))
 
-```{r}
-# read files to get ids for training, test, and validation sets
-val_ids <- vroom::vroom(file = "../dat/simulations-ding/validation-ids.txt", col_names = FALSE)
-test_ids <- list()
-training_ids <- list()
-for (fold in 1:5){
-  test_ids[[fold]] <- vroom::vroom(file = paste0("../dat/simulations-ding/test-ids-fold", fold, ".txt"), col_names = FALSE)
-  training_ids[[fold]] <- vroom::vroom(file = paste0("../dat/simulations-ding/training-ids-fold", fold, ".txt"), col_names = FALSE)
-}
+# read a file containing simulated traits
+for (row in 1:nrow(settings)){
+  hsq <- settings$hsq[row]
+  p_causal <- settings$p_causal[row]
+  trait_file <- paste0("../dat/simulations-ding/sim_traits/sims_Chr22_hsq", hsq, "_pcausal", p_causal, ".phen")
+  trait_tib <- vroom::vroom(trait_file, col_names = FALSE) %>%
+    dplyr::select(-13) # drop the last column which contains only NAs
+  
+  # read files to get ids for training, test, and validation sets
+  val_ids <- vroom::vroom(file = "../dat/simulations-ding/validation-ids.txt", col_names = FALSE)
+  test_ids <- list()
+  training_ids <- list()
+  #
+  for (fold in 1:5){
+    test_ids[[fold]] <- vroom::vroom(file = paste0("../dat/simulations-ding/test-ids-fold", fold, ".txt"), col_names = FALSE)
+    training_ids[[fold]] <- vroom::vroom(file = paste0("../dat/simulations-ding/training-ids-fold", fold, ".txt"), col_names = FALSE)
+  
+  # use training set only to determine the distribution for quantile normalization
+  # then, use the inferred distribution to quantile normalize, separately, the training and the validation and the test sets.
+    trait_tib_training <- trait_tib %>%
+      dplyr::filter(X1 %in% training_ids[[fold]]$X1)
+    trait_tib_test <- trait_tib %>%
+      dplyr::filter(X1 %in% test_ids[[fold]]$X1)
+    trait_tib_validation <- trait_tib %>%
+      dplyr::filter(X1 %in% val_ids$X1)
+    training_qn <- preprocessCore::normalize.quantiles(as.matrix(trait_tib_training[, 3:12]))
+    target_test <- preprocessCore::normalize.quantiles.determine.target(x = training_qn, target.length = nrow(trait_tib_test))
+    test_qn <- preprocessCore::normalize.quantiles.use.target(x = as.matrix(trait_tib_test[, 3:12]), target = target_test)
+    target_validation <- preprocessCore::normalize.quantiles.determine.target(x = training_qn, target.length = nrow(trait_tib_validation))
+    validation_qn <- preprocessCore::normalize.quantiles.use.target(x = as.matrix(trait_tib_validation[, 3:12]), target = target_validation)
+    ######
+    training_qn_tib <- training_ids[[fold]] %>%
+      dplyr::bind_cols(tibble::as_tibble(training_qn))
+    test_qn_tib <- test_ids[[fold]] %>%
+      dplyr::bind_cols(tibble::as_tibble(test_qn))
+    validation_qn_tib <- val_ids %>%
+      dplyr::bind_cols(tibble::as_tibble(validation_qn))
+    qn_tib <- training_qn_tib %>%
+      dplyr::bind_rows(test_qn_tib) %>%
+      dplyr::bind_rows(validation_qn_tib) %>%
+      dplyr::arrange(X1) %>%
+      dplyr::left_join(ids, by = c("X1", "X2")) %>%
+      dplyr::select(X1, X2, X3, X4, X5, V1:V10)
+    vroom::vroom_write(x = qn_tib, file = paste0("../dat/simulations-ding/sim_traits/sims_Chr22_hsq", hsq, "_pcausal", p_causal, ".fam"), col_names = FALSE)
+} # end loop over folds
+
+    false_to_na <- function(vec){
+      vec[!vec] <- NA
+      return(vec)
+    }
+  # make binary indicators of membership in training set
+  tr_indic <- tibble::tibble(train1 = qn_tib$X1 %in% training_ids[[1]]$X1,
+                             train2 = qn_tib$X1 %in% training_ids[[2]]$X1,
+                             train3 = qn_tib$X1 %in% training_ids[[3]]$X1,
+                             train4 = qn_tib$X1 %in% training_ids[[4]]$X1,
+                             train5 = qn_tib$X1 %in% training_ids[[5]]$X1
+                             ) %>%
+    dplyr::mutate(fold1_na = false_to_na(train1),
+                  fold2_na = false_to_na(train2),
+                  fold3_na = false_to_na(train3),
+                  fold4_na = false_to_na(train4),
+                  fold5_na = false_to_na(train5)
+                  )
+  qn_tib2 <- qn_tib %>%
+    dplyr::mutate(tr1_fold1 = V1 * tr_indic$fold1_na,
+                  tr1_fold2 = V1 * tr_indic$fold2_na,
+                  tr1_fold3 = V1 * tr_indic$fold3_na,
+                  tr1_fold4 = V1 * tr_indic$fold4_na,
+                  tr1_fold5 = V1 * tr_indic$fold5_na,
+                  tr2_fold1 = V2 * tr_indic$fold1_na,
+                  tr2_fold2 = V2 * tr_indic$fold2_na,
+                  tr2_fold3 = V2 * tr_indic$fold3_na,
+                  tr2_fold4 = V2 * tr_indic$fold4_na,
+                  tr2_fold5 = V2 * tr_indic$fold5_na,
+                  tr3_fold1 = V3 * tr_indic$fold1_na,
+                  tr3_fold2 = V3 * tr_indic$fold2_na,
+                  tr3_fold3 = V3 * tr_indic$fold3_na,
+                  tr3_fold4 = V3 * tr_indic$fold4_na,
+                  tr3_fold5 = V3 * tr_indic$fold5_na,
+                  tr4_fold1 = V4 * tr_indic$fold1_na,
+                  tr4_fold2 = V4 * tr_indic$fold2_na,
+                  tr4_fold3 = V4 * tr_indic$fold3_na,
+                  tr4_fold4 = V4 * tr_indic$fold4_na,
+                  tr4_fold5 = V4 * tr_indic$fold5_na,
+                  tr5_fold1 = V5 * tr_indic$fold1_na,
+                  tr5_fold2 = V5 * tr_indic$fold2_na,
+                  tr5_fold3 = V5 * tr_indic$fold3_na,
+                  tr5_fold4 = V5 * tr_indic$fold4_na,
+                  tr5_fold5 = V5 * tr_indic$fold5_na,
+                  tr6_fold1 = V6 * tr_indic$fold1_na,
+                  tr6_fold2 = V6 * tr_indic$fold2_na,
+                  tr6_fold3 = V6 * tr_indic$fold3_na,
+                  tr6_fold4 = V6 * tr_indic$fold4_na,
+                  tr6_fold5 = V6 * tr_indic$fold5_na,
+                  tr7_fold1 = V7 * tr_indic$fold1_na,
+                  tr7_fold2 = V7 * tr_indic$fold2_na,
+                  tr7_fold3 = V7 * tr_indic$fold3_na,
+                  tr7_fold4 = V7 * tr_indic$fold4_na,
+                  tr7_fold5 = V7 * tr_indic$fold5_na,
+                  tr8_fold1 = V8 * tr_indic$fold1_na,
+                  tr8_fold2 = V8 * tr_indic$fold2_na,
+                  tr8_fold3 = V8 * tr_indic$fold3_na,
+                  tr8_fold4 = V8 * tr_indic$fold4_na,
+                  tr8_fold5 = V8 * tr_indic$fold5_na,
+                  tr9_fold1 = V9 * tr_indic$fold1_na,
+                  tr9_fold2 = V9 * tr_indic$fold2_na,
+                  tr9_fold3 = V9 * tr_indic$fold3_na,
+                  tr9_fold4 = V9 * tr_indic$fold4_na,
+                  tr9_fold5 = V9 * tr_indic$fold5_na,
+                  tr10_fold1 = V10 * tr_indic$fold1_na,
+                  tr10_fold2 = V10 * tr_indic$fold2_na,
+                  tr10_fold3 = V10 * tr_indic$fold3_na,
+                  tr10_fold4 = V10 * tr_indic$fold4_na,
+                  tr10_fold5 = V10 * tr_indic$fold5_na,
+                  ) %>%
+    dplyr::select(-V1, - V2, - V3, -V4, -V5, -V6, -V7, -V8, -V9, -V10) 
+  qn_tib2 %>%
+    vroom::vroom_write(file = paste0("../dat/simulations-ding/sim_traits/sims_Chr22_hsq", hsq, "_pcausal", p_causal, "-NAs.fam"), col_names = FALSE)
+}  
+  
 ```
 
 
@@ -186,23 +320,10 @@ preprocessCore::normalize.quantiles.determine.target
 
 
 ```{r}
-# use training set only to determine the distribution for quantile normalization
-# then, use the inferred distribution to quantile normalize, separately, the training and the validation and the test sets.
-trait_tib_training <- trait_tib %>%
-  dplyr::filter(X1 %in% training_ids$X1)
-trait_tib_test <- trait_tib %>%
-  dplyr::filter(X1 %in% test_ids$X1)
-trait_tib_validation <- trait_tib %>%
-  dplyr::filter(X1 %in% val_ids$X1)
 
 ```
 
 ```{r}
-training_qn <- preprocessCore::normalize.quantiles(as.matrix(trait_tib_training[, 3:12]))
-target_test <- preprocessCore::normalize.quantiles.determine.target(x = training_qn, target.length = nrow(trait_tib_test))
-test_qn <- preprocessCore::normalize.quantiles.use.target(x = as.matrix(trait_tib_test[, 3:12]), target = target_test)
-target_validation <- preprocessCore::normalize.quantiles.determine.target(x = training_qn, target.length = nrow(trait_tib_validation))
-validation_qn <- preprocessCore::normalize.quantiles.use.target(x = as.matrix(trait_tib_validation[, 3:12]), target = target_validation)
 ```
 
 ```{r}
@@ -215,19 +336,6 @@ hist(training_qn[, 1])
 hist(training_qn[, 10])
 qqplot(training_qn[, 10], test_qn[, 10])
 # put all 3 sets back together
-training_qn_tib <- training_ids %>%
-  dplyr::bind_cols(tibble::as_tibble(training_qn))
-test_qn_tib <- test_ids %>%
-  dplyr::bind_cols(tibble::as_tibble(test_qn))
-validation_qn_tib <- val_ids %>%
-  dplyr::bind_cols(tibble::as_tibble(validation_qn))
-qn_tib <- training_qn_tib %>%
-  dplyr::bind_rows(test_qn_tib) %>%
-  dplyr::bind_rows(validation_qn_tib) %>%
-  dplyr::arrange(X1) %>%
-  dplyr::left_join(ids, by = c("X1", "X2")) %>%
-  dplyr::select(X1, X2, X3, X4, X5, V1:V10)
-vroom::vroom_write(x = qn_tib, file = "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.fam", col_names = FALSE)
 ```
 
 ## Write fam files
@@ -236,9 +344,34 @@ We need to consider what we want the final fam file to look like. Should it have
 every subject's quantile-normalized trait value? Do we want a single fam file with all ten traits (one trait per column)? This seems reasonable - just need to figure out how to use ldsc with 
 a fam file that has multiple traits
 
+## Symbolic links for plink files
 
+We're now working with 5 settings of the simulation parameters. 
+Each setting has 10 traits * 5 folds in a single fam file. 
+We need to create, for each of 5 settings, a directory with the plink files. 
 
+```{bash}
+let k=0
 
+for pc in 0.001 0.01 1 0.1 0.1; do
+  let k=${k}+1
+    hsq=0.2
+    if [ ${k} -eq 4 ]; then
+      hsq=0.1
+    fi
+    if [ ${k} -eq 5 ]; then
+      hsq=0.5
+    fi
+    newdir=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}
+    mkdir ${newdir}
+    for chr in `seq 1 22`; do
+      ln -s /net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr${chr}.bed ${newdir}/chr${chr}.bed
+      ln -s /net/mulan/disk2/yasheng/predictionProject/plink_file/ukb/chr${chr}.bim ${newdir}/chr${chr}.bim
+      ln -s ../sim_traits/sims_Chr22_hsq${hsq}_pcausal${pc}-NAs.fam ${newdir}/chr${chr}.fam
+    done
+done
+    
+```
 ## ldsc to estimate trait heritability in the validation set
 
 After quantile normalization, we need to use `ldsc` to estimate the traits' heritabilities. 
@@ -250,78 +383,6 @@ First, we make a fam file with all training plus test set subjects (ie, excludin
 so that test set subjects, for a given fold, have missing values for the trait. The first five trait columns will all be simulated trait 1, then the next five are simulated trait 2, etc.
 
 ```{r}
-false_to_na <- function(vec){
-  vec[!vec] <- NA
-  return(vec)
-} 
-# make binary indicators of membership in training set
-tr_indic <- tibble::tibble(train1 = qn_tib$X1 %in% training_ids[[1]]$X1,
-                           train2 = qn_tib$X1 %in% training_ids[[2]]$X1,
-                           train3 = qn_tib$X1 %in% training_ids[[3]]$X1,
-                           train4 = qn_tib$X1 %in% training_ids[[4]]$X1,
-                           train5 = qn_tib$X1 %in% training_ids[[5]]$X1
-                           ) %>%
-  dplyr::mutate(fold1_na = false_to_na(train1),
-                fold2_na = false_to_na(train2),
-                fold3_na = false_to_na(train3),
-                fold4_na = false_to_na(train4),
-                fold5_na = false_to_na(train5)
-                )
-qn_tib2 <- qn_tib %>%
-  dplyr::mutate(tr1_fold1 = V1 * tr_indic$fold1_na,
-                tr1_fold2 = V1 * tr_indic$fold2_na,
-                tr1_fold3 = V1 * tr_indic$fold3_na,
-                tr1_fold4 = V1 * tr_indic$fold4_na,
-                tr1_fold5 = V1 * tr_indic$fold5_na,
-                tr2_fold1 = V2 * tr_indic$fold1_na,
-                tr2_fold2 = V2 * tr_indic$fold2_na,
-                tr2_fold3 = V2 * tr_indic$fold3_na,
-                tr2_fold4 = V2 * tr_indic$fold4_na,
-                tr2_fold5 = V2 * tr_indic$fold5_na,
-                tr3_fold1 = V3 * tr_indic$fold1_na,
-                tr3_fold2 = V3 * tr_indic$fold2_na,
-                tr3_fold3 = V3 * tr_indic$fold3_na,
-                tr3_fold4 = V3 * tr_indic$fold4_na,
-                tr3_fold5 = V3 * tr_indic$fold5_na,
-                tr4_fold1 = V4 * tr_indic$fold1_na,
-                tr4_fold2 = V4 * tr_indic$fold2_na,
-                tr4_fold3 = V4 * tr_indic$fold3_na,
-                tr4_fold4 = V4 * tr_indic$fold4_na,
-                tr4_fold5 = V4 * tr_indic$fold5_na,
-                tr5_fold1 = V5 * tr_indic$fold1_na,
-                tr5_fold2 = V5 * tr_indic$fold2_na,
-                tr5_fold3 = V5 * tr_indic$fold3_na,
-                tr5_fold4 = V5 * tr_indic$fold4_na,
-                tr5_fold5 = V5 * tr_indic$fold5_na,
-                tr6_fold1 = V6 * tr_indic$fold1_na,
-                tr6_fold2 = V6 * tr_indic$fold2_na,
-                tr6_fold3 = V6 * tr_indic$fold3_na,
-                tr6_fold4 = V6 * tr_indic$fold4_na,
-                tr6_fold5 = V6 * tr_indic$fold5_na,
-                tr7_fold1 = V7 * tr_indic$fold1_na,
-                tr7_fold2 = V7 * tr_indic$fold2_na,
-                tr7_fold3 = V7 * tr_indic$fold3_na,
-                tr7_fold4 = V7 * tr_indic$fold4_na,
-                tr7_fold5 = V7 * tr_indic$fold5_na,
-                tr8_fold1 = V8 * tr_indic$fold1_na,
-                tr8_fold2 = V8 * tr_indic$fold2_na,
-                tr8_fold3 = V8 * tr_indic$fold3_na,
-                tr8_fold4 = V8 * tr_indic$fold4_na,
-                tr8_fold5 = V8 * tr_indic$fold5_na,
-                tr9_fold1 = V9 * tr_indic$fold1_na,
-                tr9_fold2 = V9 * tr_indic$fold2_na,
-                tr9_fold3 = V9 * tr_indic$fold3_na,
-                tr9_fold4 = V9 * tr_indic$fold4_na,
-                tr9_fold5 = V9 * tr_indic$fold5_na,
-                tr10_fold1 = V10 * tr_indic$fold1_na,
-                tr10_fold2 = V10 * tr_indic$fold2_na,
-                tr10_fold3 = V10 * tr_indic$fold3_na,
-                tr10_fold4 = V10 * tr_indic$fold4_na,
-                tr10_fold5 = V10 * tr_indic$fold5_na,
-                ) %>%
-  dplyr::select(-V1, - V2, - V3, -V4, -V5, -V6, -V7, -V8, -V9, -V10) 
-qn_tib2 %>%
-  vroom::vroom_write(file = "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1-NAs.fam", col_names = FALSE)
 ```
 
 ```{bash}
@@ -340,8 +401,18 @@ done
 ## DBSLMM for the simulated traits
 
 
+We need to make the "validation pheno" files for use with DBSLMM. These consist of a single column in a text file. The column is the qn trait values for a single trait. Each row is one subject in the validation set, ordered by id number, from smallest (at the top of the file) to largest (at the bottom).
 
-
-
+```{r}
+qn_tib_val <- vroom::vroom(file = "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.fam", col_names = FALSE) %>%
+  dplyr::filter(X1 %in% val_ids$X1)
+#X6 through X15 are the ten traits
+for (col in 6:15){
+  fn <- paste0("../dat/simulations-ding/validation/pheno", (col - 5), ".txt")
+  qn_tib_val %>%
+    dplyr::select(dplyr::all_of(col)) %>%
+    vroom::vroom_write(file = fn, col_names = FALSE)
+}
+```
 
 

@@ -1,0 +1,40 @@
+---
+title: "Combining summary files for use with ldsc"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+The goal here is to take the per-chromosome gemma outputs and combine them into a 
+single file that can be read by ldsc.
+
+We draw on the code from Sheng Yang in the file code/02_method/04_mk_ldsc_summ.R
+
+```{r}
+fold <- 1
+dat <- list()
+pheno <- 1
+for (chr in 1:22){
+  fn <- paste0("../dat/simulations-ding/gemma/output/summary_ukb_chr", chr, "_pheno", pheno, "_fold", fold, ".assoc.txt")
+  dat[[chr]] <- vroom::vroom(fn, col_names = TRUE)
+}
+outfn <- paste0("../dat/simulations-ding/ldsc/summary_ukb_pheno", pheno, "_fold", fold, ".ldsc")
+dat %>%
+  dplyr::bind_rows() %>%
+  dplyr::select(2, 5, 6, 7, 9, 10) %>%
+  dplyr::rename(SNP = rs, N = n_obs, A1 = allele1, A2 = allele0) %>%
+  dplyr::mutate(Z = beta / se) %>%
+  dplyr::select(SNP, N, Z, A1, A2) %>%
+  vroom::vroom_write(file = outfn, col_names = TRUE)
+system (paste0("gzip -f ", outfn))
+```
+
+
+
+
+

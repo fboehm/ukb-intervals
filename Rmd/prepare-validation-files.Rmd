@@ -1,0 +1,26 @@
+---
+title: "Preparing validation files for simulated traits"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+The goal here is to prepare the validation files - genotype and phenotype - for the ten simulated traits.
+
+From examining the file "06_DBSLMM_ukb.sh" we see that we need chromosome-specific plink files for the validation subjects and a separate phenotype file, like that in phenoVal=${compstr}/03_subsample/${dat}/pheno${p}/val/ukb/02_pheno_c.txt
+
+The files "02_pheno_c.txt" contains no header and only the trait values for a single trait for the 1000 validation subjects.
+
+Q: How many subjects are in the chromosome-specific plink files? 
+
+A: 1000
+
+So these chromosome-specific plink files contain data *only* for the validation subjects.
+
+Note also that the chromosome-specific validation plink files have fam files with exactly six columns, and -9 as the trait value for all subjects.
+
+We'll use plink to subset the "full" 337,000+ subjects to the ~37,000+ subjects in the validation set.
+
+My bash script is ~/research/ukb-intervals/shell_scripts/subset-plink-files-for-validation-set.sh
+
+

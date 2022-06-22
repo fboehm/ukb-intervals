@@ -1,0 +1,16 @@
+---
+title: "Getting started with LDpred2"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+https://privefl.github.io/bigsnpr/articles/prs_uncertainty.html
+https://github.com/bogdanlab/prs-uncertainty
+https://doi.org/10.5281/zenodo.5527263
+
+
+
+
+

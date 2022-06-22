@@ -1,0 +1,66 @@
+---
+title: "Cross-validation-plus for Simulated traits"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::html_document2:
+    number_sections: false
+bibliography: my.bib
+---
+
+```{r}
+library(magrittr)
+```
+
+
+### How to use the results files from DBSLMM
+
+
+```{r, echo = TRUE, message = FALSE}
+n_traits <- 10
+alpha <- 0.1
+out <- list()
+res <- lapply(1:n_traits, function(x) {
+  knitr::knit_child(
+    'cv-plus-simulations-child.Rmd', 
+    envir = environment(), 
+    quiet = TRUE
+  )
+  get("out")
+})
+saveRDS(res, file = "../results/res-simulations.rds")
+```
+
+
+```{r}
+coverages <- lapply(X = res, 
+                    FUN = function(mytib){
+  mytib %>%
+    dplyr::summarise(coverage = mean(in_interval))
+       }
+)
+do.call("rbind", coverages) %>%
+  tibble::as_tibble() %>%
+  dplyr::mutate(trait_num = 1:length(res))
+```
+
+## Boxplots of interval width
+
+```{r}
+for (i in 1:length(res)){
+  res[[i]] <- res[[i]] %>%
+    dplyr::mutate(trait_num = i)
+}
+dplyr::bind_rows(res) %>%
+  ggplot2::ggplot() + 
+  ggplot2::geom_violin(ggplot2::aes(x = trait_num, y = interval_width, group = trait_num))
+```
+
+
+
+# References
+
+
+
+
+

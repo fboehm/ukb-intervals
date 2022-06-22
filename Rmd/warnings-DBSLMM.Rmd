@@ -1,0 +1,893 @@
+---
+title: "Warnings from DBSLMM"
+author: "Frederick J. Boehm"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+Do the warnings -- see below for examples - arise due to my failure to do 
+the "impute" step from the file code/01_process_dat/05_get_subsample.sh??
+
+To see if this might be the source of the issue, we'll write a shell script to 
+do the imputing and rerun DBSLMM with the resulting files.
+
+I did the imputing, but the warnings persisted afterward. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Text of cluster_outputs/06_DBSLMM_ukb_c_50.err
+
+
+
+Warning: 868 lines skipped in --score file (868 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr1_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 868 lines skipped in --score file (868 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr1_h2f1_pth1e-4.nopred
+for details.
+Warning: 868 lines skipped in --score file (868 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr1_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 868 lines skipped in --score file (868 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr1_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 868 lines skipped in --score file (868 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr1_h2f1_pth1e-5.nopred
+for details.
+Warning: 868 lines skipped in --score file (868 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr1_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 868 lines skipped in --score file (868 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr1_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 868 lines skipped in --score file (868 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr1_h2f1_pth1e-6.nopred
+for details.
+Warning: 868 lines skipped in --score file (868 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr1_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 'rs112066119' is missing from the main dataset, and is a top variant.
+Warning: 'rs112209025' is missing from the main dataset, and is a top variant.
+Warning: 'rs113254205' is missing from the main dataset, and is a top variant.
+1 more top variant ID missing; see log file.
+Warning: 861 lines skipped in --score file (861 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr2_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 861 lines skipped in --score file (861 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr2_h2f1_pth1e-4.nopred
+for details.
+Warning: 861 lines skipped in --score file (861 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr2_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 861 lines skipped in --score file (861 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr2_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 861 lines skipped in --score file (861 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr2_h2f1_pth1e-5.nopred
+for details.
+Warning: 861 lines skipped in --score file (861 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr2_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 861 lines skipped in --score file (861 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr2_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 861 lines skipped in --score file (861 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr2_h2f1_pth1e-6.nopred
+for details.
+Warning: 861 lines skipped in --score file (861 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr2_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 'rs539465717' is missing from the main dataset, and is a top variant.
+Warning: 'rs116291712' is missing from the main dataset, and is a top variant.
+Warning: 'rs150533388' is missing from the main dataset, and is a top variant.
+7 more top variant IDs missing; see log file.
+Warning: 884 lines skipped in --score file (884 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr3_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 884 lines skipped in --score file (884 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr3_h2f1_pth1e-4.nopred
+for details.
+Warning: 884 lines skipped in --score file (884 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr3_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 884 lines skipped in --score file (884 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr3_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 884 lines skipped in --score file (884 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr3_h2f1_pth1e-5.nopred
+for details.
+Warning: 884 lines skipped in --score file (884 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr3_h2f1.4_pth1e-5.nopred
+for details.
+Warning: 884 lines skipped in --score file (884 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr3_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 884 lines skipped in --score file (884 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr3_h2f1_pth1e-6.nopred
+for details.
+Warning: 884 lines skipped in --score file (884 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr3_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 699 lines skipped in --score file (699 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr4_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 699 lines skipped in --score file (699 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr4_h2f1_pth1e-4.nopred
+for details.
+Warning: 699 lines skipped in --score file (699 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr4_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 699 lines skipped in --score file (699 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr4_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 699 lines skipped in --score file (699 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr4_h2f1_pth1e-5.nopred
+for details.
+Warning: 699 lines skipped in --score file (699 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr4_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 699 lines skipped in --score file (699 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr4_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 699 lines skipped in --score file (699 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr4_h2f1_pth1e-6.nopred
+for details.
+Warning: 699 lines skipped in --score file (699 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr4_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 725 lines skipped in --score file (725 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr5_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 725 lines skipped in --score file (725 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr5_h2f1_pth1e-4.nopred
+for details.
+Warning: 725 lines skipped in --score file (725 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr5_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 725 lines skipped in --score file (725 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr5_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 725 lines skipped in --score file (725 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr5_h2f1_pth1e-5.nopred
+for details.
+Warning: 725 lines skipped in --score file (725 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr5_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 725 lines skipped in --score file (725 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr5_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 725 lines skipped in --score file (725 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr5_h2f1_pth1e-6.nopred
+for details.
+Warning: 725 lines skipped in --score file (725 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr5_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 597 lines skipped in --score file (597 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr6_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 597 lines skipped in --score file (597 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr6_h2f1_pth1e-4.nopred
+for details.
+Warning: 597 lines skipped in --score file (597 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr6_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 597 lines skipped in --score file (597 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr6_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 597 lines skipped in --score file (597 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr6_h2f1_pth1e-5.nopred
+for details.
+Warning: 597 lines skipped in --score file (597 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr6_h2f1.4_pth1e-5.nopred
+for details.
+Warning: 597 lines skipped in --score file (597 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr6_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 597 lines skipped in --score file (597 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr6_h2f1_pth1e-6.nopred
+for details.
+Warning: 597 lines skipped in --score file (597 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr6_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 516 lines skipped in --score file (516 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr7_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 516 lines skipped in --score file (516 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr7_h2f1_pth1e-4.nopred
+for details.
+Warning: 516 lines skipped in --score file (516 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr7_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 516 lines skipped in --score file (516 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr7_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 516 lines skipped in --score file (516 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr7_h2f1_pth1e-5.nopred
+for details.
+Warning: 516 lines skipped in --score file (516 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr7_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 516 lines skipped in --score file (516 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr7_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 516 lines skipped in --score file (516 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr7_h2f1_pth1e-6.nopred
+for details.
+Warning: 516 lines skipped in --score file (516 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr7_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 'rs149677903' is missing from the main dataset, and is a top variant.
+Warning: 546 lines skipped in --score file (546 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr8_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 546 lines skipped in --score file (546 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr8_h2f1_pth1e-4.nopred
+for details.
+Warning: 546 lines skipped in --score file (546 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr8_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 546 lines skipped in --score file (546 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr8_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 546 lines skipped in --score file (546 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr8_h2f1_pth1e-5.nopred
+for details.
+Warning: 546 lines skipped in --score file (546 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr8_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 546 lines skipped in --score file (546 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr8_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 546 lines skipped in --score file (546 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr8_h2f1_pth1e-6.nopred
+for details.
+Warning: 546 lines skipped in --score file (546 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr8_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 484 lines skipped in --score file (484 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr9_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 484 lines skipped in --score file (484 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr9_h2f1_pth1e-4.nopred
+for details.
+Warning: 484 lines skipped in --score file (484 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr9_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 484 lines skipped in --score file (484 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr9_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 484 lines skipped in --score file (484 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr9_h2f1_pth1e-5.nopred
+for details.
+Warning: 484 lines skipped in --score file (484 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr9_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 484 lines skipped in --score file (484 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr9_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 484 lines skipped in --score file (484 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr9_h2f1_pth1e-6.nopred
+for details.
+Warning: 484 lines skipped in --score file (484 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr9_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 447 lines skipped in --score file (447 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr10_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 447 lines skipped in --score file (447 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr10_h2f1_pth1e-4.nopred
+for details.
+Warning: 447 lines skipped in --score file (447 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr10_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 447 lines skipped in --score file (447 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr10_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 447 lines skipped in --score file (447 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr10_h2f1_pth1e-5.nopred
+for details.
+Warning: 447 lines skipped in --score file (447 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr10_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 447 lines skipped in --score file (447 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr10_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 447 lines skipped in --score file (447 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr10_h2f1_pth1e-6.nopred
+for details.
+Warning: 447 lines skipped in --score file (447 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr10_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 'rs117643802' is missing from the main dataset, and is a top variant.
+Warning: 461 lines skipped in --score file (461 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr11_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 461 lines skipped in --score file (461 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr11_h2f1_pth1e-4.nopred
+for details.
+Warning: 461 lines skipped in --score file (461 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr11_h2f1.4_pth1e-4.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 461 lines skipped in --score file (461 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr11_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 461 lines skipped in --score file (461 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr11_h2f1_pth1e-5.nopred
+for details.
+Warning: 461 lines skipped in --score file (461 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr11_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 461 lines skipped in --score file (461 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr11_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 461 lines skipped in --score file (461 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr11_h2f1_pth1e-6.nopred
+for details.
+Warning: 461 lines skipped in --score file (461 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr11_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 517 lines skipped in --score file (517 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr12_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 517 lines skipped in --score file (517 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr12_h2f1_pth1e-4.nopred
+for details.
+Warning: 517 lines skipped in --score file (517 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr12_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 517 lines skipped in --score file (517 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr12_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 517 lines skipped in --score file (517 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr12_h2f1_pth1e-5.nopred
+for details.
+Warning: 517 lines skipped in --score file (517 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr12_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 517 lines skipped in --score file (517 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr12_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 517 lines skipped in --score file (517 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr12_h2f1_pth1e-6.nopred
+for details.
+Warning: 517 lines skipped in --score file (517 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr12_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 342 lines skipped in --score file (342 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr13_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 342 lines skipped in --score file (342 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr13_h2f1_pth1e-4.nopred
+for details.
+Warning: 342 lines skipped in --score file (342 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr13_h2f1.4_pth1e-4.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 342 lines skipped in --score file (342 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr13_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 342 lines skipped in --score file (342 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr13_h2f1_pth1e-5.nopred
+for details.
+Warning: 342 lines skipped in --score file (342 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr13_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 342 lines skipped in --score file (342 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr13_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 342 lines skipped in --score file (342 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr13_h2f1_pth1e-6.nopred
+for details.
+Warning: 342 lines skipped in --score file (342 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr13_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 256 lines skipped in --score file (256 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr14_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 256 lines skipped in --score file (256 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr14_h2f1_pth1e-4.nopred
+for details.
+Warning: 256 lines skipped in --score file (256 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr14_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 256 lines skipped in --score file (256 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr14_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 256 lines skipped in --score file (256 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr14_h2f1_pth1e-5.nopred
+for details.
+Warning: 256 lines skipped in --score file (256 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr14_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 256 lines skipped in --score file (256 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr14_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 256 lines skipped in --score file (256 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr14_h2f1_pth1e-6.nopred
+for details.
+Warning: 256 lines skipped in --score file (256 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr14_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 253 lines skipped in --score file (253 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr15_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 253 lines skipped in --score file (253 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr15_h2f1_pth1e-4.nopred
+for details.
+Warning: 253 lines skipped in --score file (253 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr15_h2f1.4_pth1e-4.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 253 lines skipped in --score file (253 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr15_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 253 lines skipped in --score file (253 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr15_h2f1_pth1e-5.nopred
+for details.
+Warning: 253 lines skipped in --score file (253 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr15_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 253 lines skipped in --score file (253 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr15_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 253 lines skipped in --score file (253 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr15_h2f1_pth1e-6.nopred
+for details.
+Warning: 253 lines skipped in --score file (253 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr15_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 374 lines skipped in --score file (374 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr16_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 374 lines skipped in --score file (374 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr16_h2f1_pth1e-4.nopred
+for details.
+Warning: 374 lines skipped in --score file (374 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr16_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 374 lines skipped in --score file (374 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr16_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 374 lines skipped in --score file (374 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr16_h2f1_pth1e-5.nopred
+for details.
+Warning: 374 lines skipped in --score file (374 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr16_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 374 lines skipped in --score file (374 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr16_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 374 lines skipped in --score file (374 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr16_h2f1_pth1e-6.nopred
+for details.
+Warning: 374 lines skipped in --score file (374 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr16_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 239 lines skipped in --score file (239 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr17_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 239 lines skipped in --score file (239 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr17_h2f1_pth1e-4.nopred
+for details.
+Warning: 239 lines skipped in --score file (239 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr17_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 239 lines skipped in --score file (239 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr17_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 239 lines skipped in --score file (239 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr17_h2f1_pth1e-5.nopred
+for details.
+Warning: 239 lines skipped in --score file (239 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr17_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 239 lines skipped in --score file (239 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr17_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 239 lines skipped in --score file (239 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr17_h2f1_pth1e-6.nopred
+for details.
+Warning: 239 lines skipped in --score file (239 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr17_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 'rs117607294' is missing from the main dataset, and is a top variant.
+Warning: 338 lines skipped in --score file (338 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr18_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 338 lines skipped in --score file (338 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr18_h2f1_pth1e-4.nopred
+for details.
+Warning: 338 lines skipped in --score file (338 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr18_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 338 lines skipped in --score file (338 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr18_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 338 lines skipped in --score file (338 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr18_h2f1_pth1e-5.nopred
+for details.
+Warning: 338 lines skipped in --score file (338 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr18_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 338 lines skipped in --score file (338 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr18_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 338 lines skipped in --score file (338 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr18_h2f1_pth1e-6.nopred
+for details.
+Warning: 338 lines skipped in --score file (338 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr18_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 235 lines skipped in --score file (235 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr19_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 235 lines skipped in --score file (235 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr19_h2f1_pth1e-4.nopred
+for details.
+Warning: 235 lines skipped in --score file (235 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr19_h2f1.4_pth1e-4.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 235 lines skipped in --score file (235 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr19_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 235 lines skipped in --score file (235 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr19_h2f1_pth1e-5.nopred
+for details.
+Warning: 235 lines skipped in --score file (235 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr19_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 235 lines skipped in --score file (235 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr19_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 235 lines skipped in --score file (235 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr19_h2f1_pth1e-6.nopred
+for details.
+Warning: 235 lines skipped in --score file (235 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr19_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 333 lines skipped in --score file (333 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr20_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 333 lines skipped in --score file (333 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr20_h2f1_pth1e-4.nopred
+for details.
+Warning: 333 lines skipped in --score file (333 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr20_h2f1.4_pth1e-4.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 333 lines skipped in --score file (333 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr20_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 333 lines skipped in --score file (333 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr20_h2f1_pth1e-5.nopred
+for details.
+Warning: 333 lines skipped in --score file (333 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr20_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 333 lines skipped in --score file (333 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr20_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 333 lines skipped in --score file (333 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr20_h2f1_pth1e-6.nopred
+for details.
+Warning: 333 lines skipped in --score file (333 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr20_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 152 lines skipped in --score file (152 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr21_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 152 lines skipped in --score file (152 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr21_h2f1_pth1e-4.nopred
+for details.
+Warning: 152 lines skipped in --score file (152 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr21_h2f1.4_pth1e-4.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 152 lines skipped in --score file (152 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr21_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 152 lines skipped in --score file (152 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr21_h2f1_pth1e-5.nopred
+for details.
+Warning: 152 lines skipped in --score file (152 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr21_h2f1.4_pth1e-5.nopred
+for details.
+Warning: No significant --clump results.  Skipping.
+Warning: 152 lines skipped in --score file (152 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr21_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 152 lines skipped in --score file (152 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr21_h2f1_pth1e-6.nopred
+for details.
+Warning: 152 lines skipped in --score file (152 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr21_h2f1.4_pth1e-6.nopred
+for details.
+Warning: 'rs150290252' is missing from the main dataset, and is a top variant.
+Warning: 'rs66735226' is missing from the main dataset, and is a top variant.
+Warning: 'rs8135475' is missing from the main dataset, and is a top variant.
+1235 more top variant IDs missing; see log file.
+Warning: 1078 lines skipped in --score file (1078 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr22_h2f0.7_pth1e-4.nopred
+for details.
+Warning: 1078 lines skipped in --score file (1078 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr22_h2f1_pth1e-4.nopred
+for details.
+Warning: 1078 lines skipped in --score file (1078 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr22_h2f1.4_pth1e-4.nopred
+for details.
+Warning: 'rs150290252' is missing from the main dataset, and is a top variant.
+Warning: 'rs66735226' is missing from the main dataset, and is a top variant.
+Warning: 'rs8135475' is missing from the main dataset, and is a top variant.
+1064 more top variant IDs missing; see log file.
+Warning: 1078 lines skipped in --score file (1078 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr22_h2f0.7_pth1e-5.nopred
+for details.
+Warning: 1078 lines skipped in --score file (1078 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr22_h2f1_pth1e-5.nopred
+for details.
+Warning: 1078 lines skipped in --score file (1078 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr22_h2f1.4_pth1e-5.nopred
+for details.
+Warning: 'rs150290252' is missing from the main dataset, and is a top variant.
+Warning: 'rs66735226' is missing from the main dataset, and is a top variant.
+Warning: 'rs8135475' is missing from the main dataset, and is a top variant.
+944 more top variant IDs missing; see log file.
+Warning: 1078 lines skipped in --score file (1078 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr22_h2f0.7_pth1e-6.nopred
+for details.
+Warning: 1078 lines skipped in --score file (1078 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr22_h2f1_pth1e-6.nopred
+for details.
+Warning: 1078 lines skipped in --score file (1078 due to variant ID mismatch, 0
+due to allele code mismatch); see
+/net/mulan/home/fredboe/research/ukb-intervals/dat/simulations-ding/DBSLMM/summary_ukb_pheno10_fold5_chr22_h2f1.4_pth1e-6.nopred
+for details.
+Loading required package: scoring
+Warning message:
+In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called ‘scoring’
+Loading required package: pROC
+Type 'citation("pROC")' for a citation.
+
+Attaching package: ‘pROC’
+
+The following object is masked from ‘package:Metrics’:
+
+    auc
+
+The following objects are masked from ‘package:stats’:
+
+    cov, smooth, var
+
+
+real	432m58.597s
+user	1080m17.091s
+sys	299m35.535s
