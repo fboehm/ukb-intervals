@@ -89,6 +89,8 @@ Outputs:
 /net/mulan/disk2/yasheng/comparisonProject/03_subsample/${dat}/pheno${p}/val_ukb/impute/chr${chr}
 
 
+## 06_merge_subsample.sh
+
 
 
 
