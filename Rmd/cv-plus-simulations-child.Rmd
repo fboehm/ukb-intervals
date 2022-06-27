@@ -55,17 +55,21 @@ out_tib <- do.call("rbind", out) %>%
 ```
 
 Now, we read in the plink score outputs and sum to get predicted values for the 
-subjects belonging to the validation set.
+subjects belonging to the verification set.
 
 
 ```{r, results='hide', message = FALSE}
-val_fn <- here::here("dat", "simulations-ding", "validation", paste0("pheno", phe_num, ".txt"))
-validation_true_pheno_tib <- readr::read_table(val_fn, col_names = FALSE)
+verif_ids_fn <- here::here("dat", "simulations-ding", "verification-ids.txt")
+verif_ids <- vroom::vroom(verif_ids_fn, col_names = FALSE)
+verif_fn <- here::here("dat", "simulations-ding", "verification", paste0("pheno", phe_num, ".txt"))
+# above file contains phenotype values for the verification set
+verification_true_pheno_tib <- readr::read_table(verif_fn, col_names = FALSE) %>%
+  dplyr::bind_cols(verif_ids)
 ```
 
 ```{r}
 
-# get the five versions of predicted values for the validation set subjects
+# get the five versions of predicted values for the verification set subjects
 out <- list()
 for (cross_num in 1:5){
   foo <- list()
@@ -77,13 +81,13 @@ for (cross_num in 1:5){
     #           "_chr", 
     #           chr_num, 
     #           "_auto.dbslmm.txt.profile")
-    fn <- paste0("~/research/ukb-intervals/dat/simulations-ding/validation/allele-scores/pred_ukb_pheno", phe_num, "_fold", cross_num, "_chr", chr_num, "_best.dbslmm.txt.profile")
-    foo[[chr_num]] <- readr::read_table(fn)
+    fn <- paste0("~/research/ukb-intervals/dat/simulations-ding/verification/allele-scores/pred_ukb_pheno", phe_num, "_fold", cross_num, "_chr", chr_num, "_best.dbslmm.txt.profile")
+    foo[[chr_num]] <- readr::read_table(fn) 
   }
   out[[cross_num]] <- foo 
 }
 # sum for each cross num
-pred_vals_validation_set <- list()
+pred_vals_verification_set <- list()
 for (cross_num in 1:5){
   # rename cols in each list's elements (tibbles)
   s2 <- list()
@@ -98,11 +102,11 @@ for (cross_num in 1:5){
     dplyr::select(sum_scores) %>%
     dplyr::rename(predicted_value = sum_scores)
   colnames(scores_df) <- paste0(colnames(scores_df), "_cross", cross_num)
-  pred_vals_validation_set[[cross_num]] <- scores_df
+  pred_vals_verification_set[[cross_num]] <- scores_df
 }
-pred_vals_validation_set_tib <- do.call("cbind", pred_vals_validation_set) %>%
-  tibble::as_tibble() %>%
-  dplyr::mutate(true_pheno = validation_true_pheno_tib$X1)
+pred_vals_verification_set_tib <- do.call("cbind", pred_vals_verification_set) %>%
+  tibble::as_tibble() #%>%
+  dplyr::mutate(true_pheno = verification_true_pheno_tib$X1)
 ```
 
 
@@ -112,15 +116,15 @@ get_fitted <- function(index, fitted_vec){
   fitted_vec[index]
 }
 
-n_validation <- nrow(pred_vals_validation_set_tib)
+n_verification <- nrow(pred_vals_verification_set_tib)
 intervals <- list()
-for (i in 1:n_validation){
-  ### take one validation set observation
+for (i in 1:n_verification){
+  ### take one verification set observation
   out2 <- out_tib 
    o3 <- out2 %>% 
      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, 
                                                .f = get_fitted, 
-                                               fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))
+                                               fitted_vec = as.vector(unlist(pred_vals_verification_set_tib[i, 1:5])))
                    ) %>% # calculate mu hat (X_{n + 1})
      dplyr::mutate(fitted_minus_residual = fitted_cv - residual, 
                    fitted_plus_residual = fitted_cv + residual)
@@ -142,7 +146,7 @@ for (i in 1:n_validation){
 mytib <- do.call("rbind", intervals) %>% 
   tibble::as_tibble() %>%
   dplyr::rename(left = 1, right = 2) %>%
-  dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %>%
+  dplyr::mutate(true_pheno = pred_vals_verification_set_tib$true_pheno) %>%
   dplyr::mutate(in_interval = true_pheno <= right & true_pheno >= left) %>%
   dplyr::mutate(interval_width = right - left)
  

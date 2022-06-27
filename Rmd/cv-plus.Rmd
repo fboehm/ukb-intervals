@@ -122,7 +122,9 @@ coverages <- lapply(X = res,
 )
 do.call("rbind", coverages) %>%
   tibble::as_tibble() %>%
-  dplyr::mutate(trait_num = 1:length(res))
+  dplyr::mutate(trait_num = 1:length(res)) %>%
+  gt::gt()
+
 ```
 
 ## Boxplots of interval width
@@ -149,7 +151,7 @@ pp <- h_tib %>%
   dplyr::select(-name) %>%
   dplyr::select(trait_num, mean_herit) %>%
   dplyr::left_join(dplyr::bind_rows(res), by = "trait_num") %>%
-  ggplot2::ggplot() + ggplot2::geom_violin(ggplot2::aes(x = mean_herit, y = interval_width, group = trait_num, colour = as.factor(trait_num), label = trait_num), show.legend = FALSE) 
+  ggplot2::ggplot() + ggplot2::geom_boxplot(ggplot2::aes(x = mean_herit, y = interval_width, group = trait_num, colour = as.factor(trait_num), label = trait_num), show.legend = FALSE) 
 pp %>%
   plotly::ggplotly(tooltip = "label")
 ```

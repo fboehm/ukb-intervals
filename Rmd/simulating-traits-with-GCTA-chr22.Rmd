@@ -136,10 +136,11 @@ We'll first read in the fam file to get the sample ids, then use R functions to 
 ```{r}
 set.seed(2022-06-01)
 ids <- vroom::vroom(file = "../dat/simulations-ding/chr22.fam", col_names = FALSE)
-val_ids <- sample(x = ids$X1, size = 37129, replace = FALSE) 
-#test_ids <- sample(x = setdiff(ids$X1, val_ids), size = 28000, replace = FALSE)
-#training_ids <- setdiff(ids$X1, union(val_ids, test_ids))
-test_and_training_ids <- setdiff(ids$X1, val_ids)
+pre_val_ids <- sample(x = ids$X1, size = 37129, replace = FALSE) 
+# split pre_val_ids into two - one validation set and a "verification" set of, say, 1000.
+# verification set is used in the cv, as the X_{n+1}, while validation is used in the tuning of parameters for DBSLMM
+verif_ids <- sample(pre_val_ids, size = 1000, replace = FALSE)
+val_ids <- setdiff(pre_val_ids, verif_ids)
 # Write to files
 val_ids %>%
   tibble::tibble(.name_repair = "universal") %>%
@@ -147,6 +148,18 @@ val_ids %>%
   dplyr::arrange(X1) %>%
   dplyr::mutate(X2 = X1) %>%
   vroom::vroom_write(file = "../dat/simulations-ding/validation-ids.txt", col_names = FALSE)
+verif_ids %>%
+  tibble::tibble(.name_repair = "universal") %>%
+  dplyr::rename(X1 = 1) %>%
+  dplyr::arrange(X1) %>%
+  dplyr::mutate(X2 = X1) %>%
+  vroom::vroom_write(file = "../dat/simulations-ding/verification-ids.txt", col_names = FALSE)
+
+```
+
+
+```{r}
+test_and_training_ids <- setdiff(ids$X1, val_ids)
 # set up for 5-fold cv with the remaining 300,000 subjects
 set.seed(2022-06-10)
 ids_shuffled <- sample(x = test_and_training_ids, size = length(test_and_training_ids))
@@ -194,6 +207,7 @@ for (row in 1:nrow(settings)){
   
   # read files to get ids for training, test, and validation sets
   val_ids <- vroom::vroom(file = "../dat/simulations-ding/validation-ids.txt", col_names = FALSE)
+  verif_ids <- vroom::vroom(file = "../dat/simulations-ding/verification-ids.txt", col_names = FALSE)
   test_ids <- list()
   training_ids <- list()
   #
@@ -202,18 +216,25 @@ for (row in 1:nrow(settings)){
     training_ids[[fold]] <- vroom::vroom(file = paste0("../dat/simulations-ding/training-ids-fold", fold, ".txt"), col_names = FALSE)
   
   # use training set only to determine the distribution for quantile normalization
-  # then, use the inferred distribution to quantile normalize, separately, the training and the validation and the test sets.
+  # then, use the inferred distribution to quantile normalize, separately, the training and the validation and the verification and the test sets.
     trait_tib_training <- trait_tib %>%
       dplyr::filter(X1 %in% training_ids[[fold]]$X1)
     trait_tib_test <- trait_tib %>%
       dplyr::filter(X1 %in% test_ids[[fold]]$X1)
     trait_tib_validation <- trait_tib %>%
       dplyr::filter(X1 %in% val_ids$X1)
+    trait_tib_verification <- trait_tib %>%
+      dplyr::filter(X1 %in% verif_ids$X1)
+    
+    
     training_qn <- preprocessCore::normalize.quantiles(as.matrix(trait_tib_training[, 3:12]))
     target_test <- preprocessCore::normalize.quantiles.determine.target(x = training_qn, target.length = nrow(trait_tib_test))
     test_qn <- preprocessCore::normalize.quantiles.use.target(x = as.matrix(trait_tib_test[, 3:12]), target = target_test)
     target_validation <- preprocessCore::normalize.quantiles.determine.target(x = training_qn, target.length = nrow(trait_tib_validation))
     validation_qn <- preprocessCore::normalize.quantiles.use.target(x = as.matrix(trait_tib_validation[, 3:12]), target = target_validation)
+    target_verification <- preprocessCore::normalize.quantiles.determine.target(x = training_qn, target.length = nrow(trait_tib_verification))
+    verification_qn <- preprocessCore::normalize.quantiles.use.target(x = as.matrix(trait_tib_verification[, 3:12]), target = target_verification)
+
     ######
     training_qn_tib <- training_ids[[fold]] %>%
       dplyr::bind_cols(tibble::as_tibble(training_qn))
@@ -221,9 +242,13 @@ for (row in 1:nrow(settings)){
       dplyr::bind_cols(tibble::as_tibble(test_qn))
     validation_qn_tib <- val_ids %>%
       dplyr::bind_cols(tibble::as_tibble(validation_qn))
+    verification_qn_tib <- verif_ids %>%
+      dplyr::bind_cols(tibble::as_tibble(verification_qn))
+    
     qn_tib <- training_qn_tib %>%
       dplyr::bind_rows(test_qn_tib) %>%
       dplyr::bind_rows(validation_qn_tib) %>%
+      dplyr::bind_rows(verification_qn_tib) %>%
       dplyr::arrange(X1) %>%
       dplyr::left_join(ids, by = c("X1", "X2")) %>%
       dplyr::select(X1, X2, X3, X4, X5, V1:V10)
@@ -319,12 +344,6 @@ preprocessCore::normalize.quantiles.determine.target
 ```
 
 
-```{r}
-
-```
-
-```{r}
-```
 
 ```{r}
 # check to see that qn traits have similar distributions
@@ -382,8 +401,6 @@ Note that $\hat h^2$ is an input to DBSLMM, so this step is needed before runnin
 First, we make a fam file with all training plus test set subjects (ie, excluding the validation set subjects). We need to prepare the file 
 so that test set subjects, for a given fold, have missing values for the trait. The first five trait columns will all be simulated trait 1, then the next five are simulated trait 2, etc.
 
-```{r}
-```
 
 ```{bash}
 mkdir ../dat/simulations-ding/gemma 
@@ -410,6 +427,15 @@ qn_tib_val <- vroom::vroom(file = "../dat/simulations-ding/sim_traits/sims_Chr22
 for (col in 6:15){
   fn <- paste0("../dat/simulations-ding/validation/pheno", (col - 5), ".txt")
   qn_tib_val %>%
+    dplyr::select(dplyr::all_of(col)) %>%
+    vroom::vroom_write(file = fn, col_names = FALSE)
+}
+qn_tib_verif <- vroom::vroom(file = "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.fam", col_names = FALSE) %>%
+  dplyr::filter(X1 %in% verif_ids$X1)
+#X6 through X15 are the ten traits
+for (col in 6:15){
+  fn <- paste0("../dat/simulations-ding/verification/pheno", (col - 5), ".txt")
+  qn_tib_verif %>%
     dplyr::select(dplyr::all_of(col)) %>%
     vroom::vroom_write(file = fn, col_names = FALSE)
 }

@@ -1,0 +1,13 @@
+rule simulate_traits:
+	input:
+		"~/research/ukb-intervals/dat/simulations-ding/chr22.bed"
+		"~/research/ukb-intervals/dat/simulations-ding/chr22.bim"
+		"~/research/ukb-intervals/dat/simulations-ding/chr22.fam"
+		"~/research/ukb-intervals/dat/simulations-ding/snp_effects_Chr22_hsq0.2_pcausal0.1.txt"
+
+		
+	output:
+		"~/research/ukb-intervals/dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.phen"
+
+
+

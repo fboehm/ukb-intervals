@@ -2,11 +2,11 @@
 
 
 #SBATCH --partition=mulan,nomosix
-#SBATCH --time=1-00:00:00
+#SBATCH --time=5-00:00:00
 #SBATCH --job-name=gemma
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-5500%1000
+#SBATCH --array=1-5500%200
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_%a.err
 #SBATCH --mail-user=fredboe@umich.edu  
@@ -44,8 +44,10 @@ summ=summary_${type}_pheno${p}_fold${fold}_chr${chr}
 
 col=(${p} - 1) * 5 + ${fold}
 cd ~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}
+file=output/${summ}.assoc.txt
+if [ ! -f "$file" ]; then # check if file doesn't exist
 ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ}
-
+fi
 fi
 
 done 

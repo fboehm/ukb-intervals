@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,nomosix
-#SBATCH --time=2-00:00:00
+#SBATCH --time=3-00:00:00
 #SBATCH --job-name=cvplus
 #SBATCH --mem=16G
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/render-rmd_%a.out

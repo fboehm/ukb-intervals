@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,nomosix
-#SBATCH --time=10:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name=subset-plink
 #SBATCH --mem=2G
 

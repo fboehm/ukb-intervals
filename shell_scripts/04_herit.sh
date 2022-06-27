@@ -5,7 +5,7 @@
 #SBATCH --job-name=herit
 #SBATCH --mem-per-cpu=10G
 
-#SBATCH --array=1-50
+#SBATCH --array=1-250
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.err
 
@@ -37,7 +37,7 @@ ref=/net/mulan/disk2/yasheng/comparisonProject/04_reference/${reftype}/ldsc/
 
 if [[ "$dat" == "c" ]]
 then
-summ1=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}/output/summary_ukb_chr
+summ1=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}/output/summary_ukb_pheno${p}_fold${cross}_chr
 summ2=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}/output/summary_ukb_pheno${p}_fold${cross}
 
 #summ=${compstr}05_internal_c/pheno${p}/output/summary_${reftype}_cross${cross}
@@ -49,7 +49,7 @@ h2=${compstr}06_internal_b/pheno${p}/herit/h2_${reftype}_cross${cross}
 fi
 
 ## summary data for ldsc
-cat ${summ1}*_pheno${p}_fold${cross}.assoc.txt > ${summ2}.assoc.txt
+cat ${summ1}*.assoc.txt > ${summ2}.assoc.txt
 sed -i '/chr/d' ${summ2}.assoc.txt
 Rscript ${mkldsc} --summgemma ${summ2}.assoc.txt --summldsc ${summ2}.ldsc
 
