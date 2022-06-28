@@ -5,7 +5,7 @@
 #SBATCH --job-name=herit
 #SBATCH --mem-per-cpu=10G
 
-#SBATCH --array=1-250
+#SBATCH --array=1-50
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.err
 
@@ -18,15 +18,19 @@ compstr=/net/mulan/disk2/yasheng/comparisonProject/
 dat=c
 reftype=ukb
 
-for pc in 0.001 0.01 1 0.1 0.1; do
-  let pc_ctr=${pc_ctr}+1
-    hsq=0.2
-    if [ ${pc_ctr} -eq 4 ]; then
-      hsq=0.1
-    fi
-    if [ ${pc_ctr} -eq 5 ]; then
-      hsq=0.5
-    fi
+#for pc in 0.001 0.01 1 0.1 0.1; do
+
+#  let pc_ctr=${pc_ctr}+1
+#    hsq=0.2
+#    if [ ${pc_ctr} -eq 4 ]; then
+#      hsq=0.1
+#    fi
+#    if [ ${pc_ctr} -eq 5 ]; then
+#      hsq=0.5
+#    fi
+
+pc=0.001
+hsq=0.2
 
 for p in `seq 1 10`; do
 for cross in `seq 1 5`; do
