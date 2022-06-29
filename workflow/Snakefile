@@ -1,13 +1,21 @@
+rule simulate_snp_effects:
+  input: 
+		bim='~/research/ukb-intervals/dat/simulations-ding/chr22.bim'
+    Rscript='~/research/ukb-intervals/Rscript/simulate_snp_effects.R'
+  output:
+    '~/research/ukb-intervals/dat/simulations-ding/snp_effects_Chr22_hsq0.2_pcausal0.1.txt'
+  shell:
+    "~/research/ukb-intervals/Rscript/simulate_snp_effects.R"
+
 rule simulate_traits:
 	input:
-		"~/research/ukb-intervals/dat/simulations-ding/chr22.bed"
-		"~/research/ukb-intervals/dat/simulations-ding/chr22.bim"
-		"~/research/ukb-intervals/dat/simulations-ding/chr22.fam"
-		"~/research/ukb-intervals/dat/simulations-ding/snp_effects_Chr22_hsq0.2_pcausal0.1.txt"
-
-		
+		bed='~/research/ukb-intervals/dat/simulations-ding/chr22.bed'
+		bim='~/research/ukb-intervals/dat/simulations-ding/chr22.bim'
+		fam='~/research/ukb-intervals/dat/simulations-ding/chr22.fam'
+		snp_effects='~/research/ukb-intervals/dat/simulations-ding/snp_effects_Chr22_hsq0.2_pcausal0.1.txt'
 	output:
-		"~/research/ukb-intervals/dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.phen"
-
+		'~/research/ukb-intervals/dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.phen'
+  shell:
+    'gcta64 --bfile ../dat/simulations-ding/chr22 --simu-qt --simu-causal-loci  {input.snp_effects} --simu-hsq 0.2 --simu-rep 10 --out {output}'
 
 
