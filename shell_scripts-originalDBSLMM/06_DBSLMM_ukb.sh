@@ -7,8 +7,8 @@
 #SBATCH --cpus-per-task=5
 
 #SBATCH --array=1-50%25
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM-impute-val_ukb_c_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM-impute-val_ukb_c_%a.err
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM-val_ukb_c_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM-val_ukb_c_%a.err
 
 bash 
 let k=0
@@ -23,6 +23,9 @@ DBSLMM=${compstr}code/02_method/06_DBSLMM_script.sh
 DBSLMMpath=/net/mulan/home/yasheng/predictionProject/code/
 blockf=${compstr}LDblock_EUR/chr
 ref=${compstr}04_reference/ukb/geno/chr
+
+hsq=0.2
+pcausal=0.001
 
 for p in `seq 1 10`; do
 for cross in 1 2 3 4 5; do
@@ -65,11 +68,11 @@ fi
 if [[ "$dat" == "continuous" ]]
 then
 #herit=${compstr}05_internal_c/pheno${p}/herit/h2_ukb_cross${cross}.log
-herit=~/research/ukb-intervals/dat/simulations-ding/ldsc/h2_ukb_fold${cross}_pheno${p}.log
+herit=~/research/ukb-intervals/dat/simulations-ding/ldsc/h2_ukb_fold${cross}_pheno${p}_hsq${hsq}_pcausal${pcausal}.log
 #summ=${compstr}05_internal_c/pheno${p}/output/summary_ukb_cross${cross}_chr
-summ=~/research/ukb-intervals/dat/simulations-ding/gemma/output/summary_ukb_pheno${p}_fold${cross}_chr
+summ=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pcausal}/output/summary_ukb_pheno${p}_fold${cross}_chr
 #outPath=/net/mulan/disk2/yasheng/comparisonProject/05_internal_c/pheno${p}/DBSLMM/
-outPath=~/research/ukb-intervals/dat/simulations-ding/DBSLMM/
+outPath=~/research/ukb-intervals/dat/simulations-ding/DBSLMM_hsq${hsq}_pcausal${pcausal}/
 else
 herit=${compstr}06_internal_b/pheno${p}/herit/h2_ukb_cross${cross}.log
 summ=${compstr}06_internal_b/pheno${p}/output/summary_ukb_cross${cross}_chr
@@ -79,7 +82,7 @@ fi
 
 
 ## DBSLMM
-esttime=~/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_${dat}_pheno${p}_cross${cross}_thread${thread}.tm
+esttime=~/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_${dat}_pheno${p}_cross${cross}_hsq${hsq}_pcausal${pcausal}_thread${thread}.tm
 if [[ "$dat" == "continuous" ]]
 then
 time /usr/bin/time -v -o ${esttime} sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
