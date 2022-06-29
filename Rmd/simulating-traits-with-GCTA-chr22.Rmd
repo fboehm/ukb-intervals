@@ -421,6 +421,9 @@ done
 We need to make the "validation pheno" files for use with DBSLMM. These consist of a single column in a text file. The column is the qn trait values for a single trait. Each row is one subject in the validation set, ordered by id number, from smallest (at the top of the file) to largest (at the bottom).
 
 ```{r}
+val_ids <- vroom::vroom(file = "../dat/simulations-ding/validation-ids.txt", col_names = TRUE)
+
+
 qn_tib_val <- vroom::vroom(file = "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.1.fam", col_names = FALSE) %>%
   dplyr::filter(X1 %in% val_ids$X1)
 #X6 through X15 are the ten traits
