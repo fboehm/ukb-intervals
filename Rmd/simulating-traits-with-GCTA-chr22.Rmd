@@ -272,19 +272,6 @@ for (row in 1:nrow(settings)){
                   fold4_na = false_to_na(train4),
                   fold5_na = false_to_na(train5)
                   )
-  mutate_product <- function(data, trait_num, fold_num){
-    for (trait in seq_along(trait_num)){
-      for (fold in seq_along(fold_num)){
-        trait_col_indic <- paste0("fold", fold, "_na")
-        trait_col <- paste0("V", trait)
-        data <- data %>%
-          dplyr::mutate(
-            "tr{{trait}}_fold{{fold}}" := .data[[trait_col]] * tr_indic[[trait_col_indic]]
-          )
-      }
-    }
-    return(data)
-  }
   qn_tib2 <- qn_tib %>%
     dplyr::mutate(tr1_fold1 = V1 * tr_indic$fold1_na,
                   tr1_fold2 = V1 * tr_indic$fold2_na,
