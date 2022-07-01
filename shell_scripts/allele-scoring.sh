@@ -2,7 +2,7 @@
 
 #SBATCH --partition=mulan,nomosix
 #SBATCH --time=1-00:00:00
-#SBATCH --job-name=DBSLMM
+#SBATCH --job-name=allele-scoring
 #SBATCH --mem=2G
 #SBATCH --array=1-1100%100
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring_%a.out
@@ -11,7 +11,8 @@
 bash 
 let k=0
 
-
+hsq=0.2
+pcausal=0.001
 
 
 

@@ -206,8 +206,8 @@ for (row in 1:nrow(settings)){
     dplyr::select(-13) # drop the last column which contains only NAs
   
   # read files to get ids for training, test, and validation sets
-  val_ids <- vroom::vroom(file = "../dat/simulations-ding/validation-ids.txt", col_names = FALSE)
-  verif_ids <- vroom::vroom(file = "../dat/simulations-ding/verification-ids.txt", col_names = FALSE)
+  val_ids <- vroom::vroom(file = "../dat/simulations-ding/validation-ids.txt", col_names = TRUE)
+  verif_ids <- vroom::vroom(file = "../dat/simulations-ding/verification-ids.txt", col_names = TRUE)
   test_ids <- list()
   training_ids <- list()
   #
@@ -245,11 +245,12 @@ for (row in 1:nrow(settings)){
     verification_qn_tib <- verif_ids %>%
       dplyr::bind_cols(tibble::as_tibble(verification_qn))
     
-    qn_tib <- training_qn_tib %>%
+    qn_tib_pre <- training_qn_tib %>%
       dplyr::bind_rows(test_qn_tib) %>%
       dplyr::bind_rows(validation_qn_tib) %>%
       dplyr::bind_rows(verification_qn_tib) %>%
-      dplyr::arrange(X1) %>%
+      dplyr::arrange(X1) #%>%
+    qn_tib <- qn_tib_pre %>%
       dplyr::left_join(ids, by = c("X1", "X2")) %>%
       dplyr::select(X1, X2, X3, X4, X5, V1:V10)
     vroom::vroom_write(x = qn_tib, file = paste0("../dat/simulations-ding/sim_traits/sims_Chr22_hsq", hsq, "_pcausal", p_causal, ".fam"), col_names = FALSE)
@@ -325,6 +326,13 @@ for (row in 1:nrow(settings)){
                   tr10_fold5 = V10 * tr_indic$fold5_na,
                   ) %>%
     dplyr::select(-V1, - V2, - V3, -V4, -V5, -V6, -V7, -V8, -V9, -V10) 
+  qn_tib3 <- qn_tib %>%
+    mutate_product(trait_num = 1:10, fold_num = 1:5) %>%
+    dplyr::select(-V1, - V2, - V3, -V4, -V5, -V6, -V7, -V8, -V9, -V10) 
+  identical(qn_tib2, qn_tib3)
+  colnames(qn_tib2) == colnames(qn_tib3)
+  qn_tib2$X1 %>% duplicated %>% sum()
+  #####
   qn_tib2 %>%
     vroom::vroom_write(file = paste0("../dat/simulations-ding/sim_traits/sims_Chr22_hsq", hsq, "_pcausal", p_causal, "-NAs.fam"), col_names = FALSE)
 }  

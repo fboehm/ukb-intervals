@@ -1,0 +1,31 @@
+---
+title: "Untitled"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+val <- vroom::vroom("../dat/simulations-ding/validation-ids.txt")
+ver <- vroom::vroom("../dat/simulations-ding/verification-ids.txt")
+tr <- vroom::vroom("../dat/simulations-ding/training-ids-fold1.txt", col_names = FALSE)
+te <- vroom::vroom("../dat/simulations-ding/test-ids-fold1.txt", col_names = FALSE)
+```
+
+
+```{r}
+intersect(tr, te)
+intersect(ver, val)
+intersect(te, ver)
+intersect(te, val)
+intersect(tr, ver)
+intersect(tr, val)
+```
+
+```{r}
+# read a fam file & check for duplicate ids
+fam_file <- "../dat/simulations-ding/chr22.fam"
+fam_tib <- vroom::vroom(fam_file, col_names = FALSE)
+fam_file2 <- "../dat/simulations-ding/sim_traits/sims_Chr22_hsq0.2_pcausal0.001-NAs.fam"
+vroom::vroom(fam_file2, col_names = FALSE)
+```

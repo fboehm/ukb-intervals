@@ -7,8 +7,8 @@
 #SBATCH --cpus-per-task=5
 
 #SBATCH --array=1-50%25
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM-val_ukb_c_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM-val_ukb_c_%a.err
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM-tuning_ukb_c_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM-tuning_ukb_c_%a.err
 
 bash 
 let k=0
@@ -20,6 +20,7 @@ type=t
 compstr=/net/mulan/disk2/yasheng/comparisonProject/
 plink=/usr/cluster/bin/plink-1.9
 DBSLMM=${compstr}code/02_method/06_DBSLMM_script.sh
+#DBSLMM=06_DBSLMM_script.sh
 DBSLMMpath=/net/mulan/home/yasheng/predictionProject/code/
 blockf=${compstr}LDblock_EUR/chr
 ref=${compstr}04_reference/ukb/geno/chr
@@ -51,7 +52,7 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 
 # 
 #val=${compstr}03_subsample/${dat}/pheno${p}/val/ukb/impute_inter/chr
-val=~/research/ukb-intervals/dat/simulations-ding/validation/impute/chr
+val=~/research/ukb-intervals/dat/simulations-ding/validation/chr
 
 if [[ "$dat" == "continuous" ]]
 then
