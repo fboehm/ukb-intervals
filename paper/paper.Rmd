@@ -1,0 +1,17 @@
+---
+title: "Polygenic score prediction intervals with cross-validation+"
+author: "Frederick J. Boehm & Xiang Zhou"
+date: "`r Sys.Date()`"
+output: pdf_document
+bibliography: polygenic.bib
+---
+
+The abundance of summary statistics from genome-wide association studies (GWASs) has enabled 
+new methods for genetic predictions (polygenic scores, PGS) of quantitative and binary 
+complex traits in humans. A PGS for a trait of interest is calculated by summing the . As such, a PGS is a statistic, a function of the observed data. Recent research has demonstrated large uncertainties associated with PGS. Yet, most current PGS methods provide only point estimates. In this 
+work, we develop a general strategy for construction of well calibrated prediction intervals for PGS. Our approach is both computationally scaleable and efficient. We adapt a new method for prediction interval calculation called cross-validation+ [@barber2021predictive]. We simulated quantitative and binary traits to study prediction interval calibration under a variety of heritability and polygenicity settings. We then applied our method to 25 traits (16 continuous and nine binary) from the UK Biobank study. 
+
+
+
+
+
