@@ -69,7 +69,7 @@ fi
 if [[ "$dat" == "continuous" ]]
 then
 #herit=${compstr}05_internal_c/pheno${p}/herit/h2_ukb_cross${cross}.log
-herit=~/research/ukb-intervals/dat/simulations-ding/ldsc/h2_ukb_fold${cross}_pheno${p}_hsq${hsq}_pcausal${pcausal}.log
+herit=~/research/ukb-intervals/dat/simulations-ding/ldsc/hsq${hsq}_pcausal${pcausal}/h2_ukb_fold${cross}_pheno${p}_hsq${hsq}_pcausal${pcausal}.log
 #summ=${compstr}05_internal_c/pheno${p}/output/summary_ukb_cross${cross}_chr
 summ=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pcausal}/output/summary_ukb_pheno${p}_fold${cross}_chr
 #outPath=/net/mulan/disk2/yasheng/comparisonProject/05_internal_c/pheno${p}/DBSLMM/
