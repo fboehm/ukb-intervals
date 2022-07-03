@@ -5,7 +5,7 @@
 #SBATCH --job-name=herit
 #SBATCH --mem-per-cpu=10G
 
-#SBATCH --array=1-50
+#SBATCH --array=1-50%25
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.err
 
@@ -46,7 +46,7 @@ summ2=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}
 
 #summ=${compstr}05_internal_c/pheno${p}/output/summary_${reftype}_cross${cross}
 #h2=${compstr}05_internal_c/pheno${p}/herit/h2_${reftype}_cross${cross}
-h2=~/research/ukb-intervals/dat/simulations-ding/ldsc/h2_${reftype}_fold${cross}_pheno${p}_hsq${hsq}_pcausal${pc}
+h2=~/research/ukb-intervals/dat/simulations-ding/ldsc/hsq${hsq}_pcausal${pc}/h2_${reftype}_fold${cross}_pheno${p}_hsq${hsq}_pcausal${pc}
 else
 summ=${compstr}06_internal_b/pheno${p}/output/summary_hm3_cross${cross}
 h2=${compstr}06_internal_b/pheno${p}/herit/h2_${reftype}_cross${cross}
