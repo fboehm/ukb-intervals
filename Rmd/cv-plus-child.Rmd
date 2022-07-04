@@ -7,7 +7,8 @@ for (cross_num in 1:5){
   # read fam file
   fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE)
   ## define col_num
-  col_num <- phe_num * 5 + (cross_num %% 5) + 1 
+  #col_num <- phe_num * 5 + (cross_num %% 5) + 1 
+  col_num <- phe_num * 5 + cross_num
   ## 
   fam2 <- fam %>%
     dplyr::select(1, 2, dplyr::all_of(col_num)) 
