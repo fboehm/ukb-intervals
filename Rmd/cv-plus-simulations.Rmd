@@ -17,6 +17,8 @@ library(magrittr)
 
 
 ```{r, echo = TRUE, message = FALSE}
+hsq <- 0.2
+pcausal <- 0.001
 n_traits <- 10
 alpha <- 0.1
 out <- list()
@@ -28,7 +30,8 @@ res <- lapply(1:n_traits, function(x) {
   )
   get("out")
 })
-saveRDS(res, file = "../results/res-simulations-hsq0.2-pcausal0.001.rds")
+resfn <- paste0("../results/res-simulations-hsq", hsq, "-pcausal", pcausal, ".rds")
+saveRDS(res, file = resfn)
 ```
 
 
