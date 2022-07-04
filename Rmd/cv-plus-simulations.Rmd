@@ -6,6 +6,11 @@ output:
   bookdown::html_document2:
     number_sections: false
 bibliography: my.bib
+params:
+  hsq: 0.2
+  pcausal: 0.001
+  alpha: 0.1
+  n_traits: 10
 ---
 
 ```{r}
@@ -17,15 +22,16 @@ library(magrittr)
 
 
 ```{r, echo = TRUE, message = FALSE}
-hsq <- 0.2
-pcausal <- 0.001
-n_traits <- 10
-alpha <- 0.1
+hsq <- params$hsq
+pcausal <- params$pcausal
+n_traits <- params$n_traits
+alpha <- params$alpha
 out <- list()
 res <- lapply(1:n_traits, function(x) {
   knitr::knit_child(
     'cv-plus-simulations-child.Rmd', 
-    envir = environment(), 
+    #envir = environment(), 
+    envir = list(hsq = hsq, pcausal = pcausal),
     quiet = TRUE
   )
   get("out")
