@@ -5,8 +5,8 @@
 #SBATCH --job-name=allele-verif
 #SBATCH --mem=2G
 #SBATCH --array=1-1100%100
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring-verif_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring-verif_%a.err
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring-verif/allele-scoring-verif_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring-verif/allele-scoring-verif_%a.err
 
 bash 
 let k=0
