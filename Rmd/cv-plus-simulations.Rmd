@@ -28,7 +28,7 @@ res <- lapply(1:n_traits, function(x) {
   )
   get("out")
 })
-saveRDS(res, file = "../results/res-simulations.rds")
+saveRDS(res, file = "../results/res-simulations-hsq0.2-pcausal0.001.rds")
 ```
 
 

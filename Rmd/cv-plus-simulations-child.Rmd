@@ -2,7 +2,7 @@
 
 ```{r, results = "hide", message = FALSE}
 phe_num <- x
-fam_file <- here::here("dat/simulations-ding/gemma/chr1.fam")
+fam_file <- here::here("dat/simulations-ding/gemma_hsq0.2_pcausal0.001/chr1.fam")
 for (cross_num in 1:5){
   # read fam file
   fam <- readr::read_table(file = fam_file, col_names = FALSE)
@@ -22,7 +22,7 @@ for (cross_num in 1:5){
                  chr_num, 
                  "_best.dbslmm.txt.profile")
     
-    profile_fn <- here::here("dat", "simulations-ding", "DBSLMM", pfn)
+    profile_fn <- here::here("dat", "simulations-ding", "DBSLMM_hsq0.2_pcausal0.001", pfn)
     scores[[chr_num]] <- readr::read_table(profile_fn, col_names = TRUE)
     colnames(scores[[chr_num]]) <- paste0(colnames(scores[[chr_num]]), "_chr", chr_num)
   }
@@ -81,7 +81,7 @@ for (cross_num in 1:5){
     #           "_chr", 
     #           chr_num, 
     #           "_auto.dbslmm.txt.profile")
-    fn <- paste0("~/research/ukb-intervals/dat/simulations-ding/verification/allele-scores/pred_ukb_pheno", phe_num, "_fold", cross_num, "_chr", chr_num, "_best.dbslmm.txt.profile")
+    fn <- paste0("~/research/ukb-intervals/dat/simulations-ding/verification/allele-scores_hsq0.2_pcausal0.001/pred_ukb_pheno", phe_num, "_fold", cross_num, "_chr", chr_num, "_best.dbslmm.txt.profile")
     foo[[chr_num]] <- readr::read_table(fn) 
   }
   out[[cross_num]] <- foo 
