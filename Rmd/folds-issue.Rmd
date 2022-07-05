@@ -1,0 +1,38 @@
+---
+title: "Untitled"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+It seems that my DBSLMM results are the same across folds for a given trait. 
+
+In fact, it also looks like the gemma results are the same across folds. 
+
+Let's look at a fam file for the gemma analysis.
+
+```{r}
+fam_tib <- vroom::vroom("../dat/simulations-ding/gemma_hsq0.2_pcausal0.001/chr1.fam", col_names = FALSE)
+```
+
+```{r}
+gemma_fold1_tib <- vroom::vroom("../dat/simulations-ding/gemma_hsq0.2_pcausal0.001/output/summary_ukb_pheno1_fold1_chr22.assoc.txt")
+gemma_fold2_tib <- vroom::vroom("../dat/simulations-ding/gemma_hsq0.2_pcausal0.001/output/summary_ukb_pheno1_fold2_chr22.assoc.txt")
+
+```
+
+
+## Reviewing gemma-check dir results
+
+```{r}
+f1 <- vroom::vroom("../dat/simulations-ding/gemma-check/output/summary_ukb_pheno1_fold1_chr22.assoc.txt")
+f2 <- vroom::vroom("../dat/simulations-ding/gemma-check/output/summary_ukb_pheno1_fold2_chr22.assoc.txt")
+
+```
+
+We see that `f1` and `f2` are indeed different.
+
+This whole issue may be related to my failure to use `let` in my bash script when doing arithmetic.
+
+
+
