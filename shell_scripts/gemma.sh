@@ -42,7 +42,7 @@ then
 bfile=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}/chr${chr}
 summ=summary_${type}_pheno${p}_fold${fold}_chr${chr}
 
-let col=(${p}-1)*5+${fold}
+let col=(${p}-1)\*5+${fold}
 echo ${col}
 cd ~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}
 #file=output/${summ}.assoc.txt
