@@ -11,7 +11,7 @@
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.2_pcausal0.001/gemma_%a.err
 
 
-bash
+
 let k=0
 #let pc_ctr=0
 type=ukb

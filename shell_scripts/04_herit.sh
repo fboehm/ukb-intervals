@@ -9,7 +9,6 @@
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.err
 
-bash
 let k=0
 
 ldsc=/net/mulan/home/yasheng/comparisonProject/program/ldsc/ldsc.py
