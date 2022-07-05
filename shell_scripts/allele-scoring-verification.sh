@@ -16,9 +16,7 @@ pcausal=0.001
 
 for chr in `seq 1 22`;do
 
-#for p in `seq 14 25`; do
 for p in `seq 1 10`; do
-#for cross in 1 2 3 4 5; do
 for fold in `seq 1 5`; do
 let k=${k}+1
 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then

@@ -26,11 +26,11 @@ gemma=/net/mulan/home/yasheng/comparisonProject/program/gemma-0.98.1-linux-stati
 #    if [ ${pc_ctr} -eq 5 ]; then
 #      hsq=0.5
 #    fi
-pc=0.001
-hsq=0.2
+let pc=0.001
+let hsq=0.2
 for p in `seq 1 10`
 do
-for fold in `seq 1 5`
+for fold in 1 2 3 4 5
 do 
 for chr in `seq 1 22`
 do
@@ -42,15 +42,15 @@ then
 bfile=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}/chr${chr}
 summ=summary_${type}_pheno${p}_fold${fold}_chr${chr}
 
-col=(${p} - 1) * 5 + ${fold}
+let col=(${p} - 1) * 5 + ${fold}
+echo ${col}
 cd ~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}
-file=output/${summ}.assoc.txt
+#file=output/${summ}.assoc.txt
 #if [ ! -f "$file" ]; then # check if file doesn't exist
 ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ}
 #fi
 fi
 
 done 
-done
 done
 done
