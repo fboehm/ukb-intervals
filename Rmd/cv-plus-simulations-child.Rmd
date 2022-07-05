@@ -1,16 +1,19 @@
 
 
 ```{r, results = "hide", message = FALSE}
+## read fam file with qn trait values for all subjects & all traits
+fam_all <- vroom::vroom(here::here("dat", "simulations-ding", "sim_traits", "fam_all_subjects", paste0("qn_traits_all_subjects_hsq", h2, "_pcausal", pc, ".fam")), col_names = FALSE)
+##
 phe_num <- x
-fam_file <- here::here("dat", "simulations-ding", paste0("gemma_hsq", hsq, "_pcausal", pcausal), "chr1.fam")
+fam_file <- here::here("dat", "simulations-ding", paste0("gemma_hsq", h2, "_pcausal", pc), "chr1.fam")
   # read fam file
 fam <- readr::read_table(file = fam_file, col_names = FALSE)
 for (cross_num in 1:5){
   ## define col_num
   #col_num <- phe_num * 5 + (cross_num %% 5) + 1 
-  col_num <- phe_num * 5 + cross_num
+  col_num <- phe_num + 5
   ## 
-  fam2 <- fam %>%
+  fam2 <- fam_all %>%
     dplyr::select(1, 2, dplyr::all_of(col_num)) 
   # read the profile files outputted by plink score allele
   scores <- list()
@@ -23,7 +26,7 @@ for (cross_num in 1:5){
                  chr_num, 
                  "_best.dbslmm.txt.profile")
     
-    profile_fn <- here::here("dat", "simulations-ding", "DBSLMM_hsq0.2_pcausal0.001", pfn)
+    profile_fn <- here::here("dat", "simulations-ding", paste0("DBSLMM_hsq", h2, "_pcausal", pc), pfn)
     scores[[chr_num]] <- readr::read_table(profile_fn, col_names = TRUE)
     colnames(scores[[chr_num]]) <- paste0(colnames(scores[[chr_num]]), "_chr", chr_num)
   }
@@ -61,11 +64,13 @@ subjects belonging to the verification set.
 
 ```{r, results='hide', message = FALSE}
 verif_ids_fn <- here::here("dat", "simulations-ding", "verification-ids.txt")
-verif_ids <- vroom::vroom(verif_ids_fn, col_names = FALSE)
+verif_ids <- vroom::vroom(verif_ids_fn, col_names = TRUE)
 verif_fn <- here::here("dat", "simulations-ding", "verification", paste0("pheno", phe_num, ".txt"))
 # above file contains phenotype values for the verification set
 verification_true_pheno_tib <- readr::read_table(verif_fn, col_names = FALSE) %>%
-  dplyr::bind_cols(verif_ids)
+  dplyr::bind_cols(verif_ids) %>%
+  dplyr::rename(fam_id = 2, true_pheno = 1, subject_id = 3) %>%
+  dplyr::select(2,3,1)
 ```
 
 ```{r}
@@ -75,14 +80,7 @@ out <- list()
 for (cross_num in 1:5){
   foo <- list()
   for (chr_num in 1:22){
-    #fn <- paste0("~/research/ukb-intervals/results/pheno", 
-    #           phe_num, 
-    #           "/validation-set_predicted_ukb_cross", 
-    #           cross_num, 
-    #           "_chr", 
-    #           chr_num, 
-    #           "_auto.dbslmm.txt.profile")
-    fn <- here::here("dat", "simulations-ding", "verification", paste0("allele-scores_hsq", hsq, "_pcausal", pcausal), paste0("pred_ukb_pheno", phe_num, "_fold", cross_num, "_chr", chr_num, "_best.dbslmm.txt.profile"))
+    fn <- here::here("dat", "simulations-ding", "verification", paste0("allele-scores_hsq", h2, "_pcausal", pc), paste0("pred_ukb_pheno", phe_num, "_fold", cross_num, "_chr", chr_num, "_best.dbslmm.txt.profile"))
     foo[[chr_num]] <- readr::read_table(fn) 
   }
   out[[cross_num]] <- foo 
@@ -106,8 +104,8 @@ for (cross_num in 1:5){
   pred_vals_verification_set[[cross_num]] <- scores_df
 }
 pred_vals_verification_set_tib <- do.call("cbind", pred_vals_verification_set) %>%
-  tibble::as_tibble() #%>%
-  dplyr::mutate(true_pheno = verification_true_pheno_tib$X1)
+  tibble::as_tibble() %>%
+  dplyr::mutate(true_pheno = verification_true_pheno_tib$true_pheno)
 ```
 
 

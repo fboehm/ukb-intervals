@@ -27,11 +27,10 @@ pcausal <- params$pcausal
 n_traits <- params$n_traits
 alpha <- params$alpha
 out <- list()
-res <- lapply(1:n_traits, function(x) {
+res <- lapply(1:n_traits, function(x, h2 = hsq, pc = pcausal) {
   knitr::knit_child(
     'cv-plus-simulations-child.Rmd', 
-    #envir = environment(), 
-    envir = list(hsq = hsq, pcausal = pcausal),
+    envir = environment(), 
     quiet = TRUE
   )
   get("out")
