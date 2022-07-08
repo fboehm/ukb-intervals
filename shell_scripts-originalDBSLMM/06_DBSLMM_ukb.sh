@@ -7,8 +7,8 @@
 #SBATCH --cpus-per-task=5
 
 #SBATCH --array=1-50%25
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM-tuning_ukb_c_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/06_DBSLMM-tuning_ukb_c_%a.err
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/DBSLMM/06_DBSLMM-tuning_ukb_c_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/DBSLMM/06_DBSLMM-tuning_ukb_c_%a.err
 
 bash 
 let k=0
