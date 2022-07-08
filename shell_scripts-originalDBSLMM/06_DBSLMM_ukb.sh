@@ -83,7 +83,7 @@ fi
 
 
 ## DBSLMM
-esttime=~/research/ukb-intervals/cluster_outputs/06_DBSLMM_ukb_${dat}_pheno${p}_cross${cross}_hsq${hsq}_pcausal${pcausal}_thread${thread}.tm
+esttime=~/research/ukb-intervals/cluster_outputs/DBSLMM/06_DBSLMM_ukb_${dat}_pheno${p}_cross${cross}_hsq${hsq}_pcausal${pcausal}_thread${thread}.tm
 if [[ "$dat" == "continuous" ]]
 then
 time /usr/bin/time -v -o ${esttime} sh ${DBSLMM} -D ${DBSLMMpath} -p ${plink} -B ${blockf} -s ${summ} -m DBSLMM\
