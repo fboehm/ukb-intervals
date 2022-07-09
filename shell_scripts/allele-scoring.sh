@@ -4,7 +4,7 @@
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name=allele-scoring
 #SBATCH --mem=2G
-#SBATCH --array=1-1100%100
+#SBATCH --array=1-1100%200
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring/allele-scoring_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring/allele-scoring_%a.err
 
