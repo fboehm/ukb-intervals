@@ -8,7 +8,6 @@
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring-verif/allele-scoring-verif_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring-verif/allele-scoring-verif_%a.err
 
-bash 
 let k=0
 
 hsq=0.2
