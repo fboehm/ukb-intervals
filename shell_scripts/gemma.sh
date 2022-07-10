@@ -2,13 +2,13 @@
 
 
 #SBATCH --partition=mulan,nomosix
-#SBATCH --time=5-00:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --job-name=gemma
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
 #SBATCH --array=1-1100%200
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.2_pcausal0.001/gemma_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.2_pcausal0.001/gemma_%a.err
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.5_pcausal0.1/gemma_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.5_pcausal0.1/gemma_%a.err
 
 
 
@@ -26,8 +26,10 @@ gemma=/net/mulan/home/yasheng/comparisonProject/program/gemma-0.98.1-linux-stati
 #    if [ ${pc_ctr} -eq 5 ]; then
 #      hsq=0.5
 #    fi
-pc=0.001
-hsq=0.2
+#pc=0.001
+pc=0.1
+#hsq=0.2
+hsq=0.5
 for p in `seq 1 10`
 do
 for fold in 1 2 3 4 5
