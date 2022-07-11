@@ -7,8 +7,8 @@
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
 #SBATCH --array=1-1100%200
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.5_pcausal0.1/gemma_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.5_pcausal0.1/gemma_%a.err
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.1_pcausal0.1/gemma_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.1_pcausal0.1/gemma_%a.err
 
 
 # parse command line args
@@ -21,6 +21,7 @@
 #        p) pc=${OPTARG};;
 #    esac
 #done
+# h and p are passed as command line args
 hsq=${h}
 pc=${p}
 

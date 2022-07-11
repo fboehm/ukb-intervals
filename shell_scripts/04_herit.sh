@@ -27,9 +27,9 @@ reftype=ukb
 #    if [ ${pc_ctr} -eq 5 ]; then
 #      hsq=0.5
 #    fi
-
-pc=0.001
-hsq=0.2
+# h and p are passed as command line args
+pc=${p}
+hsq=${h}
 
 for p in `seq 1 10`; do
 for cross in `seq 1 5`; do
