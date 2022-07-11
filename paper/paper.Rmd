@@ -6,10 +6,37 @@ output: pdf_document
 bibliography: polygenic.bib
 ---
 
+## Abstract
+
 The abundance of summary statistics from genome-wide association studies (GWASs) has enabled 
 new methods for genetic predictions (polygenic scores, PGS) of quantitative, binary, and other  
 complex traits in humans. PGS are calculated by summing the genomewide products of estimated SNP effects and SNP genotypes. As such, a PGS is a statistic, a function of the observed data. Recent research has demonstrated large uncertainties associated with PGS [@ding2022large]. Yet, most current PGS methods provide only point estimates. In this 
-work, we develop a general strategy for construction of well calibrated prediction intervals for PGS. Our approach is both computationally scaleable and efficient. We adapt a new method for prediction interval calculation called cross-validation+ [@barber2021predictive]. We simulated quantitative and binary traits to study prediction interval calibration under a variety of heritability and polygenicity settings. We then applied our method to 25 traits (16 continuous and nine binary) from the UK Biobank study. 
+work, we develop a general strategy for construction of well calibrated prediction intervals for PGS. Our approach is both computationally scaleable and efficient. We adapt a new method for prediction interval calculation called cross-validation+ [@barber2021predictive]. By applying cross-validation+ to simulated and observed traits, we provide a strategy for constructing well calibrated prediction intervals with theoretical coverage guarantees.
+
+We simulated quantitative and binary traits to study prediction interval calibration under a variety of heritability and polygenicity settings. We then applied our method to 25 traits (16 continuous and nine binary) from the UK Biobank study. 
+
+## Introduction
+
+Genome-wide association study data is now widely available in the form of summary statistics. GWAS summary statistics, such as estimated SNP effect sizes with an estimated SNP correlation matrix, have encouraged scientists to address innovative questions. One major focus of these questions  
+is genomic prediction via polygenic scores (PGS). A PGS collects genome-wide SNP
+effect data and subject-specific genotype calls to output a single numeric 
+prediction for the trait of interest. Often this is done by calculating for each SNP the product of the estimated SNP effect and the genotype. Summing these products over all SNPs yields the PGS.
+
+
+
+Widely studied traits include a variety of cancers, cardiovascular
+disease, blood pressure, and many intermediate molecular traits. 
+
+## Methods
+
+### Cross-validation+
+
+### Simulations
+
+### UKB Data analysis
+
+
+
 
 
 
