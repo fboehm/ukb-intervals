@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --partition=mulan,nomosix
+#SBATCH --partition=mulan,main
 #SBATCH --time=04:00:00
 #SBATCH --job-name=herit
 #SBATCH --mem-per-cpu=10G
