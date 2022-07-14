@@ -17,17 +17,6 @@ compstr=/net/mulan/disk2/yasheng/comparisonProject/
 dat=c
 reftype=ukb
 
-#for pc in 0.001 0.01 1 0.1 0.1; do
-
-#  let pc_ctr=${pc_ctr}+1
-#    hsq=0.2
-#    if [ ${pc_ctr} -eq 4 ]; then
-#      hsq=0.1
-#    fi
-#    if [ ${pc_ctr} -eq 5 ]; then
-#      hsq=0.5
-#    fi
-# h and p are passed as command line args
 pc=${p}
 hsq=${h}
 

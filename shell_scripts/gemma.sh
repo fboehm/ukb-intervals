@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-#SBATCH --partition=mulan,nomosix
+#SBATCH --partition=mulan
 #SBATCH --time=2-00:00:00
 #SBATCH --job-name=gemma
 #SBATCH --mem=2G
@@ -62,10 +62,10 @@ summ=summary_${type}_pheno${p}_fold${fold}_chr${chr}
 let col=(${p}-1)\*5+${fold}
 echo ${col}
 cd ~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}
-#file=output/${summ}.assoc.txt
-#if [ ! -f "$file" ]; then # check if file doesn't exist
+file=output/${summ}.assoc.txt
+if [ ! -f "$file" ]; then # check if file doesn't exist
 ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ}
-#fi
+fi
 fi
 
 done 
