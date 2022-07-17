@@ -33,7 +33,9 @@ bfile=~/research/ukb-intervals/dat/simulations-ding/verification/chr${chr}
 esteffdbslmmt=~/research/ukb-intervals/dat/simulations-ding/DBSLMM_hsq${hsq}_pcausal${pcausal}/summary_ukb_pheno${p}_fold${fold}_chr${chr}_best.dbslmm.txt
 #preddbslmmt=${compstr}05_internal_c/pheno${p}/DBSLMM/pred_hm3_best_cross${cross}_chr${chr}
 # aggdbslmmt=${compstr}05_internal_c/pheno${p}/DBSLMM/agg_hm3_best_cross${cross}_chr${chr}
-preddbslmmt=~/research/ukb-intervals/dat/simulations-ding/verification/allele-scores_hsq${hsq}_pcausal${pcausal}/pred_ukb_pheno${p}_fold${fold}_chr${chr}_best.dbslmm.txt
+outpath=~/research/ukb-intervals/dat/simulations-ding/verification/allele-scores_hsq${hsq}_pcausal${pcausal}
+mkdir -p ${outpath}
+preddbslmmt=${outpath}/pred_ukb_pheno${p}_fold${fold}_chr${chr}_best.dbslmm.txt
 #gunzip ${esteffdbslmmt}.gz
 plink-1.9 --silent --bfile ${bfile} --score ${esteffdbslmmt} 1 2 4 sum  --out ${preddbslmmt}
 # plink-1.9 --silent --bfile ${bfile} --score ${esteffdbslmmt} 1 2 4 sum --keep ${idxagg} --out ${aggdbslmm
