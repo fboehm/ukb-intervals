@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-#SBATCH --partition=mulan,nomosix
+#SBATCH --partition=mulan,main
 #SBATCH --time=2-0:00:00
 #SBATCH --job-name=cvplus
 #SBATCH --mem=16G

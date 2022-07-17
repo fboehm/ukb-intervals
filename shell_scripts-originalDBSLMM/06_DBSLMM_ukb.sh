@@ -7,8 +7,8 @@
 #SBATCH --cpus-per-task=5
 
 #SBATCH --array=1-50%25
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/DBSLMM/06_DBSLMM-tuning_ukb_c_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/DBSLMM/06_DBSLMM-tuning_ukb_c_%a.err
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/DBSLMM/06_DBSLMM-tuning_sims_h0.1_p0.1_c_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/DBSLMM/06_DBSLMM-tuning_sims_h0.1_p0.1_c_%a.err
 
 bash 
 let k=0
@@ -25,8 +25,9 @@ DBSLMMpath=/net/mulan/home/yasheng/predictionProject/code/
 blockf=${compstr}LDblock_EUR/chr
 ref=${compstr}04_reference/ukb/geno/chr
 
-hsq=0.2
-pcausal=0.001
+# h and p are command line args
+hsq=${h}
+pcausal=${p}
 
 for p in `seq 1 10`; do
 for cross in 1 2 3 4 5; do

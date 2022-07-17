@@ -10,8 +10,9 @@
 
 let k=0
 
-hsq=0.2
-pcausal=0.001
+# h & p are command line args
+hsq=${h}
+pcausal=${p}
 
 
 
