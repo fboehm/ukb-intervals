@@ -34,7 +34,8 @@ summ2=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}
 
 #summ=${compstr}05_internal_c/pheno${p}/output/summary_${reftype}_cross${cross}
 #h2=${compstr}05_internal_c/pheno${p}/herit/h2_${reftype}_cross${cross}
-h2=~/research/ukb-intervals/dat/simulations-ding/ldsc/hsq${hsq}_pcausal${pc}/h2_${reftype}_fold${cross}_pheno${p}_hsq${hsq}_pcausal${pc}
+h2path=~/research/ukb-intervals/dat/simulations-ding/ldsc/hsq${hsq}_pcausal${pc}
+h2=${h2path}/h2_${reftype}_fold${cross}_pheno${p}_hsq${hsq}_pcausal${pc}
 else
 summ=${compstr}06_internal_b/pheno${p}/output/summary_hm3_cross${cross}
 h2=${compstr}06_internal_b/pheno${p}/herit/h2_${reftype}_cross${cross}
@@ -47,6 +48,7 @@ Rscript ${mkldsc} --summgemma ${summ2}.assoc.txt --summldsc ${summ2}.ldsc
 
 ## heritability
 #source activate /net/mulan/home/yasheng/py3/envs/ldsc
+mkdir -p ${h2path}
 python2 ${ldsc} --h2 ${summ2}.ldsc.gz --ref-ld-chr ${ref} --w-ld-chr ${ref} --out ${h2}
 fi
 done

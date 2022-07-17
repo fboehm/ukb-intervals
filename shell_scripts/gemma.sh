@@ -61,7 +61,9 @@ summ=summary_${type}_pheno${p}_fold${fold}_chr${chr}
 
 let col=(${p}-1)\*5+${fold}
 echo ${col}
-cd ~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}
+outpath=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}
+mkdir -p ${outpath}
+cd ${outpath}
 #file=output/${summ}.assoc.txt
 #if [ ! -f "$file" ]; then # check if file doesn't exist
 ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ}

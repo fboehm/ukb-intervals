@@ -82,7 +82,7 @@ outPath=/net/mulan/disk2/yasheng/comparisonProject/06_internal_b/pheno${p}/DBSLM
 cov=${compstr}03_subsample/${dat}/pheno${p}/val/ukb/03_cov_eff.txt
 fi
 
-
+mkdir -p ${outPath}
 ## DBSLMM
 esttime=~/research/ukb-intervals/cluster_outputs/DBSLMM/06_DBSLMM_ukb_${dat}_pheno${p}_cross${cross}_hsq${hsq}_pcausal${pcausal}_thread${thread}.tm
 if [[ "$dat" == "continuous" ]]
