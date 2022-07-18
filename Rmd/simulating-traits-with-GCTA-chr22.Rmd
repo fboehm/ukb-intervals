@@ -416,7 +416,7 @@ for pc in 0.001 0.01 1 0.1 0.1; do
 done
     
 ```
-## ldsc to estimate trait heritability in the validation set
+## ldsc to estimate trait heritability in the training set
 
 After quantile normalization, we need to use `ldsc` to estimate the traits' heritabilities. 
 Note that $\hat h^2$ is an input to DBSLMM, so this step is needed before running DBSLMM. 
