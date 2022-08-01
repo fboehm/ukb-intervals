@@ -7,12 +7,11 @@
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
 #SBATCH --array=1-1100%75
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.5_pcausal0.1/gemma_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.5_pcausal0.1/gemma_%a.err
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.1_pcausal0.1/gemma_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma_hsq0.1_pcausal0.1/gemma_%a.err
 
 
-# h and p are passed as command line args
-hsq=0.5
+hsq=0.1
 pc=0.1
 
 
@@ -41,10 +40,10 @@ echo ${col}
 outpath=~/research/ukb-intervals/dat/simulations-ding/gemma_hsq${hsq}_pcausal${pc}
 mkdir -p ${outpath}
 cd ${outpath}
-#file=output/${summ}.assoc.txt
-#if [ ! -f "$file" ]; then # check if file doesn't exist
+file=output/${summ}.assoc.txt
+if [ ! -f "$file" ]; then # check if file doesn't exist
 ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ}
-#fi
+fi
 fi
 
 done 
