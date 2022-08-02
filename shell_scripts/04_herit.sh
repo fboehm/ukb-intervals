@@ -5,9 +5,9 @@
 #SBATCH --job-name=herit
 #SBATCH --mem-per-cpu=10G
 
-#SBATCH --array=1-50%25
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.err
+#SBATCH --array=1-50%10
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%j_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%j_%a.err
 
 let k=0
 
@@ -17,8 +17,8 @@ compstr=/net/mulan/disk2/yasheng/comparisonProject/
 dat=c
 reftype=ukb
 
-pc=${p}
-hsq=${h}
+pc=0.1
+hsq=0.5
 
 for p in `seq 1 10`; do
 for cross in `seq 1 5`; do
