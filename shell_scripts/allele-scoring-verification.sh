@@ -4,15 +4,15 @@
 #SBATCH --time=1-00:00:00
 #SBATCH --job-name=allele-verif
 #SBATCH --mem=2G
-#SBATCH --array=1-1100%100
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring-verif/allele-scoring-verif_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring-verif/allele-scoring-verif_%a.err
+#SBATCH --array=1-1100%30
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring-verif/allele-scoring-verif_%j_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/allele-scoring-verif/allele-scoring-verif_%j_%a.err
 
 let k=0
 
 # h & p are command line args
-hsq=${h}
-pcausal=${p}
+hsq=0.5
+pcausal=0.1
 
 for chr in `seq 1 22`;do
 
