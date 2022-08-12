@@ -129,7 +129,7 @@ done
 
 ## Divide subjects
 
-We next need to divide the subjects into training, validation and test subjects.
+We next need to divide the subjects into training, validation, verification, and test subjects.
 
 We'll first read in the fam file to get the sample ids, then use R functions to sample from the ids.
 
@@ -195,7 +195,7 @@ function `preprocessCore::normalize.quantiles` from the Bioconductor R package
 `preprocessCore`. 
 
 ```{r}
-settings <- tibble::tibble(hsq = c(0.2, 0.2, 0.2, 0.1, 0.5), p_causal = c(0.001, 0.01, 1, 0.1, 0.1))
+settings <- tibble::tibble(hsq = c(0.2, 0.2, 0.2, 0.1, 0.5), p_causal = c(0.1, 0.01, 1, 0.1, 0.1))
 
 # read a file containing simulated traits
 for (row in 1:nrow(settings)){
@@ -326,15 +326,25 @@ for (row in 1:nrow(settings)){
                   tr10_fold5 = V10 * tr_indic$fold5_na,
                   ) %>%
     dplyr::select(-V1, - V2, - V3, -V4, -V5, -V6, -V7, -V8, -V9, -V10) 
-  qn_tib3 <- qn_tib %>%
-    mutate_product(trait_num = 1:10, fold_num = 1:5) %>%
-    dplyr::select(-V1, - V2, - V3, -V4, -V5, -V6, -V7, -V8, -V9, -V10) 
-  identical(qn_tib2, qn_tib3)
-  colnames(qn_tib2) == colnames(qn_tib3)
+#  qn_tib3 <- qn_tib %>%
+#    mutate_product(trait_num = 1:10, fold_num = 1:5) %>%
+#    dplyr::select(-V1, - V2, - V3, -V4, -V5, -V6, -V7, -V8, -V9, -V10) 
+#  identical(qn_tib2, qn_tib3)
+#  colnames(qn_tib2) == colnames(qn_tib3)
   qn_tib2$X1 %>% duplicated %>% sum()
   #####
   qn_tib2 %>%
     vroom::vroom_write(file = paste0("../dat/simulations-ding/sim_traits/sims_Chr22_hsq", hsq, "_pcausal", p_causal, "-NAs.fam"), col_names = FALSE)
+  # write qn traits for all subjects in a single fam fil
+  qn_tib %>%
+    vroom::vroom_write(here::here("dat", 
+                                  "simulations-ding", 
+                                  "sim_traits", 
+                                  "fam_all_subjects", 
+                                  paste0("qn_traits_all_subjects_hsq", hsq, "_pcausal", p_causal, ".fam")
+                                  ), 
+                       col_names = FALSE)
+
 }  
   
 ```
@@ -351,11 +361,7 @@ for (col_num in 6:15){
 }
 ```
 
-```{r}
-# write qn traits for all subjects in a single fam file
-qn_tib %>%
-  vroom::vroom_write(here::here("dat", "simulations-ding", "sim_traits", "fam_all_subjects", "qn_traits_all_subjects_hsq0.2_pcausal0.001.fam"), col_names = FALSE)
-```
+
 
 The catch is that we want to use only the training set for quantile normalization. We then need to use those quantiles - from the training set - to normalize the test set and validation set.
 
