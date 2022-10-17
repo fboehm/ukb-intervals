@@ -103,8 +103,9 @@ pred_vals_validation_set_tib <- do.call("cbind", pred_vals_validation_set) %>%
 get_fitted <- function(index, fitted_vec){
   fitted_vec[index]
 }
+n_verif <- 1000
 intervals <- list()
-for (i in 1:1000){
+for (i in 1:n_verif){
   ### take one validation set observation
   out2 <- out_tib 
    o3 <- out2 %>% 
