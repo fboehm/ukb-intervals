@@ -100,7 +100,7 @@ comparisonProject/03_subsample/continuous/pheno1/val/ukb/01_idx.txt (and similar
 
 
 ```{r, echo = TRUE, message = FALSE}
-alpha = 0.2
+alpha = 0.1
 out <- list()
 res_file <- "res.rds"
 if (!file.exists(res_file)){
