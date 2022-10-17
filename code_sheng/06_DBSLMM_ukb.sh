@@ -32,7 +32,7 @@ if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 
 # validation set genotypes, ie, plink file
 #val=${compstr}03_subsample/${dat}/pheno${p}/val/ukb/impute_inter/chr
-val=${fbstr}03_subsample/${dat}/pheno${p}/val/ukb/impute_inter/chr
+val=${fbstr}03_subsample/${dat}/pheno${p}/val/ukb/geno/chr
 
 if [[ "$dat" == "continuous" ]]
 then
@@ -52,7 +52,7 @@ summ=${compstr}05_internal_c/pheno${p}/output/summary_ukb_cross${cross}_chr
 outPath=${fbstr}/05_internal_c/pheno${p}/DBSLMM/
 else
 herit=${compstr}06_internal_b/pheno${p}/herit/h2_ukb_cross${cross}.log
-summ=${compstr}06_internal_b/pheno${p}/output/summary_ukb_cross${cross}_chr
+summ=${fbstr}06_internal_b/pheno${p}/output/summary_ukb_cross${cross}_chr
 outPath=${fbstr}/06_internal_b/pheno${p}/DBSLMM/
 # covariates for validation set
 cov=${fbstr}03_subsample/${dat}/pheno${p}/val/ukb/03_cov_eff.txt
