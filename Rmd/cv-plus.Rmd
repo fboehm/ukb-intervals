@@ -102,15 +102,20 @@ comparisonProject/03_subsample/continuous/pheno1/val/ukb/01_idx.txt (and similar
 ```{r, echo = TRUE, message = FALSE}
 alpha = 0.2
 out <- list()
-res <- lapply(1:25, function(x) {
-  knitr::knit_child(
-    'cv-plus-child.Rmd', 
-    envir = environment(), 
-    quiet = TRUE
-  )
-  get("out")
-})
-saveRDS(res, file = "res.rds")
+res_file <- "res.rds"
+if (!file.exists(res_file)){
+  res <- lapply(1:25, function(x) {
+    knitr::knit_child(
+      'cv-plus-child.Rmd', 
+      envir = environment(), 
+      quiet = TRUE
+    )
+    get("out")
+  })
+  saveRDS(res, file = res_file)
+} else {
+  res <- readRDS(res_file)
+}
 ```
 
 ```{r}
@@ -120,9 +125,10 @@ coverages <- lapply(X = res,
     dplyr::summarise(coverage = mean(in_interval))
        }
 )
-do.call("rbind", coverages) %>%
+coverage_tib <- do.call("rbind", coverages) %>%
   tibble::as_tibble() %>%
-  dplyr::mutate(trait_num = 1:length(res)) %>%
+  dplyr::mutate(trait_num = 1:length(res))
+coverage_tib %>%
   gt::gt()
 
 ```
@@ -147,14 +153,38 @@ pp <- h_tib %>%
   dplyr::summarise(dplyr::across(X1:X25, mean)) %>% 
   tidyr::pivot_longer(X1:X25) %>%
   dplyr::rename(mean_herit = value) %>%
-  dplyr::mutate(trait_num = 1:25) %>% 
+  dplyr::mutate(trait_num = 1:25) %>%
   dplyr::select(-name) %>%
   dplyr::select(trait_num, mean_herit) %>%
-  dplyr::left_join(dplyr::bind_rows(res), by = "trait_num") %>%
-  ggplot2::ggplot() + ggplot2::geom_boxplot(ggplot2::aes(x = mean_herit, y = interval_width, group = trait_num, colour = as.factor(trait_num), label = trait_num), show.legend = FALSE) 
-pp %>%
-  plotly::ggplotly(tooltip = "label")
+  dplyr::left_join(dplyr::bind_rows(res), by = "trait_num") 
+pp2 <- pp %>%
+  ggplot2::ggplot() + ggplot2::geom_boxplot(ggplot2::aes(x = mean_herit, y = interval_width, group = trait_num, colour = as.factor(trait_num), label = trait_num), show.legend = FALSE)
+  pp2 %>% plotly::ggplotly(tooltip = "label")
 ```
+
+
+# Plot coverage vs (mean) heritability 
+
+```{r}
+pp2 <- pp %>%
+  dplyr::group_by(trait_num) %>%
+  dplyr::summarise(mean_herit = mean(mean_herit), coverage = mean(in_interval)) %>%
+  ggplot2::ggplot() + ggplot2::geom_point(ggplot2::aes(x = mean_herit, y = coverage, colour = as.factor(trait_num))) 
+pp2 %>%
+  plotly::ggplotly()
+
+```
+
+## Check correlation between (mean) heritability and coverage
+
+
+```{r}
+summ <- pp %>%
+  dplyr::group_by(trait_num) %>%
+  dplyr::summarise(mean_herit = mean(mean_herit), coverage = mean(in_interval))
+cor(summ$mean_herit, summ$coverage)
+```
+
 
 # References
 

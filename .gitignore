@@ -5,3 +5,6 @@
 .pversion
 plink.log
 plink.nosex
+03_subsample
+05_internal_c
+06_internal_b
