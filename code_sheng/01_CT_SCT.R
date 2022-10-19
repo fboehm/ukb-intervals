@@ -48,15 +48,15 @@ if (opt$dat == "continuous"){
   ref_str <- paste0(comp_str, "04_reference/", opt$reftype,
                     "/geno_inter/merge_c")
   val_str <- paste0(fb_str, "03_subsample/", opt$dat, "/pheno", opt$pheno,
-                    "/val/",opt$reftype,"/geno/")
+                    "/val/", opt$reftype, "/geno/")
 }
 ref_sub_str <- paste0(ref_str, "_sub-", as.numeric(as.POSIXlt(Sys.time())))
 val_sub_str <- paste0(val_str, "_sub-", as.numeric(as.POSIXlt(Sys.time())))
 
-# interect val and ref data
+# intersect val and ref data
 # start <- proc.time()
 # ref_bed <- snp_readBed(paste0(ref_str, ".bed"))
-if(file.exists(paste0(val_str, ".rds")) == F | file.exists(paste0(val_str, ".bk")) == F){
+if(file.exists(paste0(val_str, ".rds")) == FALSE || file.exists(paste0(val_str, ".bk")) == FALSE){
   if(file.exists(paste0(val_str, ".bk"))){
     system(paste0("rm ", val_str, ".bk"))
   }
@@ -69,14 +69,15 @@ ref_bed <- snp_attach(paste0(ref_str, ".rds"))
 val_bed <- snp_attach(paste0(val_str, ".rds"))
 cat("ref and val are loaded!\n")
 # val_snp <- fread2(paste0(val_str, ".bim"))
-if(all(ref_bed$map$marker.ID == val_bed$map$marker.ID) == F){
+if(all(ref_bed$map$marker.ID == val_bed$map$marker.ID) == FALSE){
   snp_inter <- intersect(ref_bed$map$marker.ID, val_bed$map$marker.ID)
   ref_bed <- snp_attach(snp_subset(ref_bed, 
-                                   ind.col = which(ref_bed$map$marker.ID%in%snp_inter), 
+                                   ind.col = which(ref_bed$map$marker.ID %in% snp_inter), 
                                    backingfile = ref_sub_str))
   val_bed <- snp_attach(snp_subset(val_bed,
-                                   ind.col = which(val_bed$map$marker.ID%in%snp_inter),
-                                   backingfile = val_sub_str))
+                                   ind.col = which(val_bed$map$marker.ID%in%snp_inter), # nolint
+                                   backingfile = val_sub_str)
+                                   )
 }
 
 # process ref data
@@ -92,7 +93,7 @@ names(ref_map) <- c("chr", "rsid", "pos", "a1", "a0")
 summstats <- fread2(opt$summ, select =  c(1, 2, 3, 7, 6, 9, 10))
 colnames(summstats) <- c("chr", "rsid", "pos", "a0", "a1", "beta", "se") # calculate P
 t <- summstats$beta/summstats$se
-p_val <- ifelse(t < 0, pnorm(t), pnorm(t, lower.tail = F))*2
+p_val <- ifelse(t < 0, pnorm(t), pnorm(t, lower.tail = FALSE))*2
 summstats$pval <- ifelse(p_val == 0,
                          min(p_val[-which(p_val==0)]),
                          p_val)
@@ -101,8 +102,8 @@ summstats$pval <- ifelse(p_val == 0,
 info_snp <- snp_match(summstats, ref_map)
 beta <- rep(0, ref_n_snp)
 lp_val <- rep(0, ref_n_snp)
-beta[ref_map[, 2]%in%info_snp[, 5]] <- info_snp$beta
-lp_val[ref_map[, 2]%in%info_snp[, 5]] <- -log10(info_snp$pval)
+beta[ref_map[, 2] %in% info_snp[, 5]] <- info_snp$beta
+lp_val[ref_map[, 2] %in% info_snp[, 5]] <- -log10(info_snp$pval)
 
 # clump
 all_keep <- snp_grid_clumping(ref_G,

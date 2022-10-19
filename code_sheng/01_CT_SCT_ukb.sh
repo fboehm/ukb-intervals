@@ -5,9 +5,9 @@
 #SBATCH --job-name=SCT_u
 #SBATCH --mem=60G
 #SBATCH --cpus-per-task=5
-#SBATCH --array=1-125
-#SBATCH --output=/net/mulan/disk2/yasheng/comparisonProject/00_cluster_file/01_CT_ukb_b_thread5_%a.out
-#SBATCH --error=/net/mulan/disk2/yasheng/comparisonProject/00_cluster_file/01_CT_ukb_b_thread5_%a.err
+#SBATCH --array=1-125%25
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/01_CT_ukb_c_thread5_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/01_CT_ukb_c_thread5_%a.err
 
 let k=0
 
@@ -39,8 +39,8 @@ fi
 mkdir -p ${path}/CT
 mkdir -p ${path}/SCT
 
-# cat ${summ}_chr*.assoc.txt > ${summ}.assoc.txt
-# sed -i '/chr/d' ${summ}.assoc.txt
+cat ${summ}_chr*.assoc.txt > ${summ}.assoc.txt
+sed -i '/chr/d' ${summ}.assoc.txt
 
 #esttime=${compstr}01_time_file/01_SCT_CT_ukb_${dat}_pheno${p}_cross${cross}_thread${thread}.tm
 #time /usr/bin/time -v -o ${esttime} 
