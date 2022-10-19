@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --partition=nomosix
+#SBATCH --partition=mulan,main
 #SBATCH --time=6-00:00:00
 #SBATCH --job-name=SCT_u
 #SBATCH --mem=60G
@@ -28,10 +28,12 @@ then
 if [[ "$dat" == "continuous" ]]
 then
 echo continuous
-summ=${fbstr}05_internal_c/pheno${p}/output/summary_ukb_cross${cross}
+# use sheng's gemma outputs, so prefix is compstr
+summ=${compstr}05_internal_c/pheno${p}/output/summary_ukb_cross${cross}
 path=${fbstr}05_internal_c/pheno${p}/
 else
 echo binary
+# don't use sheng's gemma outputs, since they're not in the expected location
 summ=${fbstr}06_internal_b/pheno${p}/output/summary_ukb_cross${cross}
 path=${fbstr}06_internal_b/pheno${p}/
 fi
@@ -39,8 +41,8 @@ fi
 mkdir -p ${path}/CT
 mkdir -p ${path}/SCT
 
-cat ${summ}_chr*.assoc.txt > ${summ}.assoc.txt
-sed -i '/chr/d' ${summ}.assoc.txt
+#cat ${summ}_chr*.assoc.txt > ${summ}.assoc.txt
+#sed -i '/chr/d' ${summ}.assoc.txt
 
 #esttime=${compstr}01_time_file/01_SCT_CT_ukb_${dat}_pheno${p}_cross${cross}_thread${thread}.tm
 #time /usr/bin/time -v -o ${esttime} 
