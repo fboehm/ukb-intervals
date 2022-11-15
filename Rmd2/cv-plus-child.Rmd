@@ -3,19 +3,15 @@
 ```{r, results = "hide", message = FALSE}
 phe_num <- x
 for (cross_num in 1:5){
-  
   # read fam file
   fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE)
   ## define col_num
-  #col_num <- phe_num * 5 + (cross_num %% 5) + 1 
   col_num <- phe_num * 5 + cross_num
-  ## 
   fam2 <- fam %>%
     dplyr::select(1, 2, dplyr::all_of(col_num)) 
   # read the profile files outputted by plink score allele
   scores <- list()
   for (chr_num in 1:22){
-    #fn <- paste0("~/research/ukb-intervals/results/pheno", phe_num, "/predicted_ukb_cross", cross_num, "_chr", i, "_auto.dbslmm.txt.profile")
     fn <- paste0("~/research/ukb-intervals/results/pheno", 
                  phe_num, 
                  "/yangdbslmm/predicted_ukb_cross", 
@@ -52,24 +48,24 @@ out_tib <- do.call("rbind", out) %>%
 ```
 
 Now, we read in the plink score outputs and sum to get predicted values for the 
-1000 subjects belonging to the validation set.
+500 subjects belonging to the verification set.
 
 ```{r, results='hide', message = FALSE}
 # read true pheno file for validation set
 fn <- paste0("~/research/comparisonProject/03_subsample/continuous/pheno", phe_num, "/val/ukb/02_pheno_c.txt")
 validation_true_pheno_tib <- readr::read_table(fn, col_names = FALSE)
-# get the five versions of predicted values for the validation set subjects
+# get the five versions of predicted values for the verification set subjects
 out <- list()
 for (cross_num in 1:5){
   foo <- list()
   for (chr_num in 1:22){
-    fn <- paste0("~/research/ukb-intervals/results/pheno", 
+    fn <- paste0("~/research/ukb-intervals/05_internal_c/pheno", 
                phe_num, 
-               "/validation-set_predicted_ukb_cross", 
+               "/DBSLMM/verif_pred_ukb_best_cross", 
                cross_num, 
                "_chr", 
                chr_num, 
-               "_auto.dbslmm.txt.profile")
+               ".profile")
     foo[[chr_num]] <- readr::read_table(fn)
   }
   out[[cross_num]] <- foo 
@@ -103,7 +99,7 @@ pred_vals_validation_set_tib <- do.call("cbind", pred_vals_validation_set) %>%
 get_fitted <- function(index, fitted_vec){
   fitted_vec[index]
 }
-n_verif <- 1000
+n_verif <- 500
 intervals <- list()
 for (i in 1:n_verif){
   ### take one validation set observation
