@@ -1,0 +1,121 @@
+---
+title: "Understanding cross-validation-plus"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::html_document2:
+    number_sections: false
+bibliography: my.bib
+---
+
+```{r}
+library(magrittr)
+```
+
+
+## Custom R code
+
+It should be straightforward to use DBSLMM outputs and fam files to write custom code for CV+.
+
+Inputs needed: 
+
+- fam file to get true values for $Y$. We need trait values for both the validation and training sets.  
+- file that tells us which subjects are in the validation set for DBSLMM. We need this file to get the $Y_{n+1}$ values AND the $X_{n + 1}$ values.  
+- DBSLMM-based predicted values for a trait, for all subjects and for each of the five folds that Sheng created. 
+
+
+
+
+```{r, echo = TRUE, message = FALSE}
+alpha <- 0.1
+out <- list()
+res_file <- "res-continuous.rds"
+if (!file.exists(res_file)){
+  res <- lapply(1:25, function(x) {
+    knitr::knit_child(
+      'cv-plus-child.Rmd', 
+      envir = environment(), 
+      quiet = TRUE
+    )
+    get("out")
+  })
+  saveRDS(res, file = res_file)
+} else {
+  res <- readRDS(res_file)
+}
+```
+
+```{r}
+coverages <- lapply(X = res, 
+                    FUN = function(mytib){
+  mytib %>%
+    dplyr::summarise(coverage = mean(in_interval))
+       }
+)
+coverage_tib <- do.call("rbind", coverages) %>%
+  tibble::as_tibble() %>%
+  dplyr::mutate(trait_num = 1:length(res))
+coverage_tib %>%
+  gt::gt()
+
+```
+
+## Boxplots of interval width
+
+```{r}
+for (i in 1:length(res)){
+  res[[i]] <- res[[i]] %>%
+    dplyr::mutate(trait_num = i)
+}
+dplyr::bind_rows(res) %>%
+  ggplot2::ggplot() + 
+  ggplot2::geom_boxplot(ggplot2::aes(x = trait_num, y = interval_width, group = trait_num))
+```
+
+## Incorporate estimated heritability of traits
+
+```{r}
+h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2.csv", col_names = FALSE) %>% dplyr::select(-26) # drop 26, which is due to presence of trailing commas
+pp <- h_tib %>% 
+  dplyr::summarise(dplyr::across(X1:X25, mean)) %>% 
+  tidyr::pivot_longer(X1:X25) %>%
+  dplyr::rename(mean_herit = value) %>%
+  dplyr::mutate(trait_num = 1:25) %>%
+  dplyr::select(-name) %>%
+  dplyr::select(trait_num, mean_herit) %>%
+  dplyr::left_join(dplyr::bind_rows(res), by = "trait_num") 
+pp2 <- pp %>%
+  ggplot2::ggplot() + ggplot2::geom_boxplot(ggplot2::aes(x = mean_herit, y = interval_width, group = trait_num, colour = as.factor(trait_num), label = trait_num), show.legend = FALSE)
+  pp2 %>% plotly::ggplotly(tooltip = "label")
+```
+
+
+# Plot coverage vs (mean) heritability 
+
+```{r}
+pp2 <- pp %>%
+  dplyr::group_by(trait_num) %>%
+  dplyr::summarise(mean_herit = mean(mean_herit), coverage = mean(in_interval)) %>%
+  ggplot2::ggplot() + ggplot2::geom_point(ggplot2::aes(x = mean_herit, y = coverage, colour = as.factor(trait_num))) 
+pp2 %>%
+  plotly::ggplotly()
+
+```
+
+## Check correlation between (mean) heritability and coverage
+
+
+```{r}
+summ <- pp %>%
+  dplyr::group_by(trait_num) %>%
+  dplyr::summarise(mean_herit = mean(mean_herit), coverage = mean(in_interval))
+cor(summ$mean_herit, summ$coverage)
+```
+
+
+# References
+
+
+
+
+
