@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: 
   bookdown::html_document2:
     number_sections: false
-bibliography: my.bib
+bibliography: ../Rmd/my.bib
 ---
 
 ```{r}
@@ -26,9 +26,14 @@ Inputs needed:
 
 
 ```{r, echo = TRUE, message = FALSE}
+trait_type <- "binary"
 alpha <- 0.1
 out <- list()
-res_file <- "res-continuous.rds"
+if (trait_type == "continuous"){
+  res_file <- "res-continuous.rds"
+} else {
+  res_file <- "res-binary.rds"
+}
 if (!file.exists(res_file)){
   res <- lapply(1:25, function(x) {
     knitr::knit_child(
@@ -74,7 +79,16 @@ dplyr::bind_rows(res) %>%
 ## Incorporate estimated heritability of traits
 
 ```{r}
-h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2.csv", col_names = FALSE) %>% dplyr::select(-26) # drop 26, which is due to presence of trailing commas
+if (trait_type == "continuous"){
+  h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2.csv", 
+                          col_names = FALSE) %>% 
+            dplyr::select(-26) # drop 26, which is due to presence of trailing commas
+} else {
+  h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2-binary.csv", 
+                          col_names = FALSE) %>%
+            dplyr::select(-26) # drop 26, which is due to presence of trailing commas
+}
+
 pp <- h_tib %>% 
   dplyr::summarise(dplyr::across(X1:X25, mean)) %>% 
   tidyr::pivot_longer(X1:X25) %>%
