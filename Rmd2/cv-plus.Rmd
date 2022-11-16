@@ -1,5 +1,5 @@
 ---
-title: "Understanding cross-validation-plus"
+title: "Cross-validation-plus for UKB traits"
 author: "Frederick J. Boehm"
 date: "`r Sys.Date()`"
 output: 
@@ -19,8 +19,7 @@ It should be straightforward to use DBSLMM outputs and fam files to write custom
 
 Inputs needed: 
 
-- fam file to get true values for $Y$. We need trait values for both the validation and training sets.  
-- file that tells us which subjects are in the validation set for DBSLMM. We need this file to get the $Y_{n+1}$ values AND the $X_{n + 1}$ values.  
+- fam file to get true values for $Y$. We need trait values for both the verification and training sets.    
 - DBSLMM-based predicted values for a trait, for all subjects and for each of the five folds that Sheng created. 
 
 

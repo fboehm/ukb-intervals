@@ -2,7 +2,7 @@
 
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=2-0:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --job-name=cvplus
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=1
@@ -12,4 +12,4 @@
 #SBATCH --mail-user=fredboe@umich.edu  
 #SBATCH --mail-type=ALL
 
-Rscript -e "rmarkdown::render('~/research/ukb-intervals/Rmd/cv-plus.Rmd')"
+Rscript -e "rmarkdown::render('~/research/ukb-intervals/Rmd2/cv-plus.Rmd')"
