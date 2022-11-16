@@ -2,33 +2,48 @@
 
 ```{r, results = "hide", message = FALSE}
 phe_num <- x
-for (cross_num in 1:5){
   # read fam file
-  fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE)
+fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE)
+# define cols to keep
+cols_to_keep <- c(1, 2, phe_num * 5 + 1:5)
+fam_all <- fam %>%
+              dplyr::select(dplyr::all_of(cols_to_keep)) %>%
+              dplyr::rename(fold1 = 3, fold2 = 4, fold3 = 5, fold4 = 6, fold5 = 7) %>%
+              dplyr::mutate(true_pheno = 
+                purrr::pmap_dbl(.l = list(fold1, fold2, fold3, fold4, fold5), .f = function(f1, f2, f3, f4, f5){
+                  vec <- c(f1, f2, f3, f4, f5)
+                  max(vec, na.rm = TRUE)
+                })
+              )
+
+for (cross_num in 1:5){
   ## define col_num
-  col_num <- phe_num * 5 + cross_num
-  fam2 <- fam %>%
-    dplyr::select(1, 2, dplyr::all_of(col_num)) 
+  col_num <- 2 + cross_num
+  fam2 <- fam_all %>%
+    dplyr::select(1, 2, dplyr::all_of(col_num), 8) 
   # read the profile files outputted by plink score allele
   scores <- list()
   for (chr_num in 1:22){
-    fn <- paste0("~/research/ukb-intervals/results/pheno", 
+    fn <- paste0("~/research/ukb-intervals/05_internal_c/pheno", 
                  phe_num, 
-                 "/yangdbslmm/predicted_ukb_cross", 
+                 "/DBSLMM/pred_ukb_best_cross", 
                  cross_num, 
                  "_chr", 
                  chr_num, 
-                 "_auto.dbslmm.txt.profile")
+                 ".profile")
     scores[[chr_num]] <- readr::read_table(fn, col_names = TRUE)
     colnames(scores[[chr_num]]) <- paste0(colnames(scores[[chr_num]]), "_chr", chr_num)
   }
   scores2 <- lapply(X = scores, FUN = function(x){
     x %>% dplyr::select(6) # choose the SCORESUM column
   })
-  scores_df <- do.call("cbind", scores2) %>% tibble::as_tibble() %>%
-    dplyr::mutate(sum_scores = rowSums(.))
+  scores_df <- do.call("cbind", scores2) %>%
+                tibble::as_tibble() %>%
+                dplyr::mutate(sum_scores = rowSums(.))
   s2 <- scores_df %>%
-    dplyr::select(sum_scores)
+    dplyr::select(sum_scores) %>%
+    dplyr::bind_cols(scores[[1]][, 1:2]) %>%
+    dplyr::rename(FID = FID_chr1, IID = IID_chr1)
   # read idx file
   idx_fn <- paste0("~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno", phe_num, "_cross", cross_num, ".txt")
   idx <- readr::read_table(idx_fn, col_names = FALSE) %>%
@@ -37,23 +52,25 @@ for (cross_num in 1:5){
   fam3 <- fam2 %>%
     dplyr::rename(fam_id = 1) %>%
     dplyr::right_join(idx, by = "fam_id") %>%
-    dplyr::mutate(predicted_value = s2$sum_scores) 
+    dplyr::left_join(s2, by = c("fam_id" = "FID"))
   out[[cross_num]] <- fam3 %>%
-    dplyr::rename(true_pheno = 3) %>%
-    dplyr::mutate(cross_membership = cross_num)
-}  
+    dplyr::mutate(cross_membership = cross_num) %>%
+    dplyr::select(-3)
+}
 out_tib <- do.call("rbind", out) %>% 
   tibble::as_tibble() %>% 
-  dplyr::mutate(residual = abs(true_pheno - predicted_value))
+  dplyr::mutate(residual = abs(true_pheno - sum_scores))
 ```
 
 Now, we read in the plink score outputs and sum to get predicted values for the 
 500 subjects belonging to the verification set.
 
 ```{r, results='hide', message = FALSE}
-# read true pheno file for validation set
-fn <- paste0("~/research/comparisonProject/03_subsample/continuous/pheno", phe_num, "/val/ukb/02_pheno_c.txt")
-validation_true_pheno_tib <- readr::read_table(fn, col_names = FALSE)
+# read verif ids file for verification set
+fn <- paste0("~/research/ukb-intervals/03_subsample/continuous/pheno", phe_num, "/verif/ukb/02_pheno_c.txt")
+verif_true_pheno <- readr::read_table(fn, col_names = FALSE)
+
+
 # get the five versions of predicted values for the verification set subjects
 out <- list()
 for (cross_num in 1:5){
@@ -71,7 +88,7 @@ for (cross_num in 1:5){
   out[[cross_num]] <- foo 
 }
 # sum for each cross num
-pred_vals_validation_set <- list()
+pred_vals_verification_set <- list()
 for (cross_num in 1:5){
   # rename cols in each list's elements (tibbles)
   s2 <- list()
@@ -86,11 +103,11 @@ for (cross_num in 1:5){
     dplyr::select(sum_scores) %>%
     dplyr::rename(predicted_value = sum_scores)
   colnames(scores_df) <- paste0(colnames(scores_df), "_cross", cross_num)
-  pred_vals_validation_set[[cross_num]] <- scores_df
+  pred_vals_verification_set[[cross_num]] <- scores_df
 }
-pred_vals_validation_set_tib <- do.call("cbind", pred_vals_validation_set) %>%
+pred_vals_verification_set_tib <- do.call("cbind", pred_vals_verification_set) %>%
   tibble::as_tibble() %>%
-  dplyr::mutate(true_pheno = validation_true_pheno_tib$X1)
+  dplyr::mutate(true_pheno = verif_true_pheno$X1)
 ```
 
 
@@ -107,15 +124,15 @@ for (i in 1:n_verif){
    o3 <- out2 %>% 
      dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, 
                                                .f = get_fitted, 
-                                               fitted_vec = as.vector(unlist(pred_vals_validation_set_tib[i, 1:5])))
+                                               fitted_vec = as.vector(unlist(pred_vals_verification_set_tib[i, 1:5])))
                    ) %>% # calculate mu hat (X_{n + 1})
-     dplyr::mutate(fitted_minus_residual = fitted_cv - residual, 
+     dplyr::mutate(fitted_minus_residual = fitted_cv - residual,
                    fitted_plus_residual = fitted_cv + residual)
-  ## determine quantiles - type 6?  of fitted_minus_residual and fitted_plus_residual
-  intervals[[i]]<- c(quantile(o3$fitted_minus_residual, 
-                              prob = alpha / 2, na.rm = TRUE), 
-  quantile(o3$fitted_plus_residual, 
-           prob = 1 - alpha / 2, na.rm = TRUE)
+  ## determine quantiles of fitted_minus_residual and fitted_plus_residual
+  intervals[[i]] <- c(quantile(o3$fitted_minus_residual, 
+                              probs = alpha, na.rm = TRUE), 
+  quantile(o3$fitted_plus_residual,
+           probs = 1 - alpha, na.rm = TRUE)
   )
 }
 ```
@@ -127,7 +144,7 @@ for (i in 1:n_verif){
 mytib <- do.call("rbind", intervals) %>% 
   tibble::as_tibble() %>%
   dplyr::rename(left = 1, right = 2) %>%
-  dplyr::mutate(true_pheno = pred_vals_validation_set_tib$true_pheno) %>%
+  dplyr::mutate(true_pheno = pred_vals_verification_set_tib$true_pheno) %>%
   dplyr::mutate(in_interval = true_pheno <= right & true_pheno >= left) %>%
   dplyr::mutate(interval_width = right - left)
  
