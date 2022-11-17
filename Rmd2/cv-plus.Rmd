@@ -87,14 +87,14 @@ if (trait_type == "continuous"){
 } else {
   h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2-binary.csv", 
                           col_names = FALSE) %>%
-            dplyr::select(-26) # drop 26, which is due to presence of trailing commas
+            dplyr::select(- tidyselect::last_col()) # drop 26, which is due to presence of trailing commas
 }
 
 pp <- h_tib %>% 
-  dplyr::summarise(dplyr::across(X1:X25, mean)) %>% 
-  tidyr::pivot_longer(X1:X25) %>%
+  dplyr::summarise(dplyr::across(.fns = mean)) %>%
+  tidyr::pivot_longer(1:n_traits) %>%
   dplyr::rename(mean_herit = value) %>%
-  dplyr::mutate(trait_num = 1:25) %>%
+  dplyr::mutate(trait_num = traits) %>%
   dplyr::select(-name) %>%
   dplyr::select(trait_num, mean_herit) %>%
   dplyr::left_join(dplyr::bind_rows(res), by = "trait_num") 

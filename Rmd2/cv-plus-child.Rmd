@@ -3,7 +3,9 @@
 ```{r, results = "hide", message = FALSE}
 phe_num <- x
   # read fam file
-fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE)
+if (trait_type == "continuous"){
+  fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE)
+}
 # define cols to keep
 cols_to_keep <- c(1, 2, phe_num * 5 + 1:5)
 fam_all <- fam %>%
