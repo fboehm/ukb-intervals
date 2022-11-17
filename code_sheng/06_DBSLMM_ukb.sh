@@ -24,8 +24,10 @@ DBSLMMpath=/net/mulan/home/yasheng/predictionProject/code/
 blockf=${compstr}LDblock_EUR/chr
 ref=${compstr}04_reference/ukb/geno/chr
 
-for dat in ${dats[@]}; do
-for p in `seq 1 25`; do
+#for dat in ${dats[@]}; do
+for dat in binary; do 
+#for p in `seq 1 25`; do
+for p in 7; do 
 for cross in 1 2 3 4 5; do
 let k=${k}+1
 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then

@@ -5,19 +5,22 @@
 #SBATCH --job-name=gemma
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-2750%500
+#SBATCH --array=1-110
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/08_make_summary_m_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/08_make_summary_m_%a.err
 
 
 let k=0
-gemma=/net/mulan/home/yasheng/comparisonProject/program/gemma-0.98.1-linux-static
+#gemma=/net/mulan/home/yasheng/comparisonProject/program/gemma-0.98.1-linux-static
+gemma=/net/fantasia/home/borang/software/gemma-0.98.3-linux-static
+
 compstr=/net/mulan/disk2/yasheng/comparisonProject/
 fbstr=~/research/ukb-intervals/
 dat=2
 type=ukb
 
-for p in `seq 1 25`; do
+#for p in `seq 1 25`; do
+for p in 7; do 
   for cross in 1 2 3 4 5; do
     for chr in `seq 1 22`; do
       let k=${k}+1
@@ -60,7 +63,7 @@ for p in `seq 1 25`; do
           cd ${fbstr}06_internal_b/pheno${p}
           ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ} -c ${cov}
           sed -i '1d' ${fbstr}06_internal_b/pheno${p}/output/${summ}.assoc.txt
-          rm ${fbstr}06_internal_b/pheno${p}/output/${summ}.log.txt
+#          rm ${fbstr}06_internal_b/pheno${p}/output/${summ}.log.txt
           
         fi
         

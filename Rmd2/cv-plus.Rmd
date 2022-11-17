@@ -27,6 +27,7 @@ Inputs needed:
 
 ```{r, echo = TRUE, message = FALSE}
 trait_type <- "binary"
+traits <- c(1:6, 8:25) # trait numbers to analyze
 alpha <- 0.1
 out <- list()
 if (trait_type == "continuous"){
@@ -35,7 +36,7 @@ if (trait_type == "continuous"){
   res_file <- "res-binary.rds"
 }
 if (!file.exists(res_file)){
-  res <- lapply(1:25, function(x) {
+  res <- lapply(traits, function(x) {
     knitr::knit_child(
       'cv-plus-child.Rmd', 
       envir = environment(), 
