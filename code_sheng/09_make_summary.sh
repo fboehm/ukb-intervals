@@ -43,7 +43,7 @@ for p in 7; do
 
       let col=(${p}-1)*5+${cross}
 
-      bfile=/net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}
+      #bfile=/net/mulan/disk2/yasheng/predictionProject/plink_file/${type}/chr${chr}
       summ=summary_${type}_cross${cross}_chr${chr}
 
       if [ ${dat} -eq 1 ]; then
