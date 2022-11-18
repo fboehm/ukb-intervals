@@ -295,18 +295,18 @@ for (p in 1:25) {
     sample_size_mat[cross, 5] <- sum(!is.na(pheno_train[, cross]))
     cat("pheno", p, "include train", sample_size_mat[cross, 5],
         "samples, and test", sample_size_mat[cross, 4], "samples.\n")
-    # write.table(cbind(idx_test, idx_test),
-    #            file = paste0(comp_str, "02_pheno/04_test_idx_b/idx_pheno", p, "_cross", cross, ".txt"),
-    #            quote = F, row.names = F, col.names = F)
+     write.table(cbind(idx_test, idx_test),
+                file = paste0(comp_str, "02_pheno/04_test_idx_b/idx_pheno", p, "_cross", cross, ".txt"),
+                quote = F, row.names = F, col.names = F)
   }
-  # write.table(pheno_train, file = paste0(comp_str, "02_pheno/05_train_b/pheno_pheno", p, ".txt"),
-  #             quote = F, row.names = F, col.names = F)
-  # write.table(pheno_test, file = paste0(comp_str, "02_pheno/06_test_b/pheno_pheno", p, ".txt"),
-  #             quote = F, row.names = F, col.names = F)
-  # write.table(coveff, file = paste0(comp_str, "02_pheno/06_test_b/coveff_pheno", p, ".txt"),
-  #             quote = F, row.names = F, col.names = F)
-  # write.table(coveff_glm, file = paste0(comp_str, "02_pheno/06_test_b/coveff_pheno", p, "_glm.txt"),
-  #             quote = F, row.names = F, col.names = F)
+   write.table(pheno_train, file = paste0(comp_str, "02_pheno/05_train_b/pheno_pheno", p, ".txt"),
+               quote = F, row.names = F, col.names = F)
+   write.table(pheno_test, file = paste0(comp_str, "02_pheno/06_test_b/pheno_pheno", p, ".txt"),
+               quote = F, row.names = F, col.names = F)
+   write.table(coveff, file = paste0(comp_str, "02_pheno/06_test_b/coveff_pheno", p, ".txt"),
+               quote = F, row.names = F, col.names = F)
+   write.table(coveff_glm, file = paste0(comp_str, "02_pheno/06_test_b/coveff_pheno", p, "_glm.txt"),
+               quote = F, row.names = F, col.names = F)
   sample_size_dat <- rbind(sample_size_dat, sample_size_mat)
 }
 pheno_uni_b <- c("PRCA", "TA", "T2D", "CAD", "RA", 
