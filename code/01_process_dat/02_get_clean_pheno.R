@@ -4,7 +4,7 @@ library(tidyverse)
 library(plyr)
 
 # load data
-comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
+comp_str <- "~/research/ukb-intervals/"
 load(paste0(comp_str, "02_pheno/01_sqc.RData")) 
 load(paste0(comp_str, "02_pheno/02_pheno_c_raw.RData")) 
 load(paste0(comp_str, "02_pheno/03_pheno_b_raw.RData")) 
@@ -336,7 +336,7 @@ pheno_b_all <- cbind(PRCA, TA, TD2, CAD, RA,
                      QU, HT, FFI, DFI, OS, 
                      AN, GO, SAF, HA, TE, 
                      T1B, VMS, MY, SN, ES)
-save(pheno_b_all, file = "/net/mulan/disk2/yasheng/comparisonProject/02_pheno/05_pheno_b_clean.RData")
+save(pheno_b_all, file = paste0(comp_str, "02_pheno/05_pheno_b_clean.RData"))
 
 # cov
 write.table(cbind(1, covVar), file = paste0(comp_str, "02_pheno/07_cov.txt"), 

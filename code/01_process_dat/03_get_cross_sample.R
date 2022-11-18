@@ -4,10 +4,10 @@ library(tidyverse)
 library(plyr)
 
 # load data
-load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_sqc.RData")
-load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/04_pheno_c_adj.RData")
-load("/net/mulan/disk2/yasheng/comparisonProject/02_pheno/05_pheno_b_clean.RData")
-comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
+comp_str <- "~/research/ukb-intervals/"
+load(paste0(comp_str, "02_pheno/01_sqc.RData"))
+load(paste0(comp_str, "02_pheno/04_pheno_c_adj.RData"))
+load(paste0("02_pheno/05_pheno_b_clean.RData"))
 
 # na idx for continuous phenotypes
 na_list_c <- lapply(1:25, function(x){
@@ -40,15 +40,14 @@ set.seed(20170529)
 idx_female_ref <- sample(sqc_female$idx, ref_num)
 # index for reference 
 idx_ref <- sort(c(idx_male_ref, idx_female_ref))
-# write.table(cbind(idx_ref, idx_ref), 
-#             file = paste0(comp_str, "04_reference/01_idx.txt"), 
-#             col.names = F, row.names = F, quote = F)
-### End here!
+ write.table(cbind(idx_ref, idx_ref), 
+             file = paste0(comp_str, "04_reference/01_idx.txt"), 
+             col.names = F, row.names = F, quote = F)
 ##########################
 
 ##########################
 # delete reference sample 
-idx_ref <- read.table(paste0(comp_str, "04_reference/01_idx.txt"))[, 1]
+#idx_ref <- read.table(paste0(comp_str, "04_reference/01_idx.txt"))[, 1]
 sqc_sub <- sqc_i[!sqc_i$idx %in% idx_ref,]
 
 # parameters
@@ -90,22 +89,14 @@ for (p in 1:25) {
   pheno_c_adj_val <- pheno_c_adj[match(idx_val, sqc_i$idx), p]
   pheno_c_adj_agg <- pheno_c_adj[match(idx_agg, sqc_i$idx), p]
   # ## output
-  # write.table(cbind(idx_val, idx_val),
-  #             file = paste0(comp_str, "03_subsample/continuous/pheno", p,
-  #                           "/val/01_idx.txt"),
-  #             col.names = F, row.names = F, quote = F)
-  # write.table(data.frame(pheno_c_adj_val),
-  #             file = paste0(comp_str, "03_subsample/continuous/pheno", p,
-  #                           "/val/02_pheno_c.txt"),
-  #             col.names = F, row.names = F, quote = F)
-  # write.table(cbind(idx_agg, idx_agg),
-  #             file = paste0(comp_str, "03_subsample/continuous/pheno", p,
-  #                           "/agg/01_idx.txt"),
-  #             col.names = F, row.names = F, quote = F)
-  # write.table(data.frame(pheno_c_adj_agg),
-  #             file = paste0(comp_str, "03_subsample/continuous/pheno", p,
-  #                           "/agg/02_pheno_c.txt"),
-  #             col.names = F, row.names = F, quote = F)
+  write.table(cbind(idx_val, idx_val),
+               file = paste0(comp_str, "03_subsample/continuous/pheno", p,
+                             "/val/01_idx.txt"),
+               col.names = F, row.names = F, quote = F)
+   write.table(data.frame(pheno_c_adj_val),
+               file = paste0(comp_str, "03_subsample/continuous/pheno", p,
+                             "/val/02_pheno_c.txt"),
+               col.names = F, row.names = F, quote = F)
   
   # Step2: cross validation set
   set.seed(pheno_seed_str[p]+cross_seed)
@@ -224,18 +215,18 @@ for (p in 1:25) {
     pred_agg_glm <- cbind(1, covVar_all[match(idx_agg, sqc_i$idx), -11]) %*% coefMat_agg_glm
   }
   ## output
-  # write.table(cbind(idx_val, idx_val), 
-  #             file = paste0(comp_str, "03_subsample/binary/pheno", p,
-  #                           "/val/01_idx.txt"),
-  #             col.names = F, row.names = F, quote = F)
-  # write.table(pheno_b_all_val, 
-  #             file = paste0(comp_str, "03_subsample/binary/pheno", p,
-  #                           "/val/02_pheno_b.txt"), 
-  #             col.names = F, row.names = F, quote = F)
-  # write.table(pred_val, 
-  #             file = paste0(comp_str, "03_subsample/binary/pheno",p,
-  #                           "/val/03_cov_eff.txt"), 
-  #             row.names = F, col.names = F, quote = F)
+   write.table(cbind(idx_val, idx_val), 
+               file = paste0(comp_str, "03_subsample/binary/pheno", p,
+                             "/val/01_idx.txt"),
+               col.names = F, row.names = F, quote = F)
+   write.table(pheno_b_all_val, 
+               file = paste0(comp_str, "03_subsample/binary/pheno", p,
+                             "/val/02_pheno_b.txt"), 
+               col.names = F, row.names = F, quote = F)
+   write.table(pred_val, 
+               file = paste0(comp_str, "03_subsample/binary/pheno",p,
+                             "/val/03_cov_eff.txt"), 
+               row.names = F, col.names = F, quote = F)
   # write.table(pred_val_glm,
   #             file = paste0(comp_str, "03_subsample/binary/pheno",p,
   #                           "/val/04_cov_eff_glm.txt"),

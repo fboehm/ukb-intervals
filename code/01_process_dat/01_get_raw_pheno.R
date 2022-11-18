@@ -2,7 +2,7 @@
 rm(list=ls())
 library(bigreadr)
 library(plyr)
-
+fbstr <- "~/research/ukb-intervals/"
 # Combine the sqc and fam
 ## Load files
 sqc <- fread2("/net/mulan/Biobank/rawdata/EGAD00010001225/001/ukb_sqc_v2.txt")
@@ -48,12 +48,12 @@ cat("Samples Remaining:", sum(cnd), "\n")
 ## Start
 idx_xi <- sqc_i$idx[sqc_i$eid %in% remove_id]
 write.table(cbind(idx_xi, idx_xi), 
-            file = "/net/mulan/disk2/yasheng/comparisonProject/w30186_idx.txt", 
+            file = paste0(fbstr, "w30186_idx.txt"), 
             row.names = F, col.names = F, quote = F)
 ## End
 
 sqc_i <- as.data.frame(sqc_i)[cnd, ]
-save(sqc_i, file = "/net/mulan/disk2/yasheng/comparisonProject/02_pheno/01_sqc.RData")
+save(sqc_i, file = paste0(fbstr, "02_pheno/01_sqc.RData"))
 
 # continuous phenotype data
 ## load data 1
@@ -98,7 +98,7 @@ pheno_c <- merge(pheno_c1, pheno_c2, by.x = "eid", by.y = "f.eid")
 ## match data
 pheno_c <- pheno_c[match(eid_i, pheno_c$eid), ]
 pheno_c <- pheno_c[cnd, ]
-save(pheno_c, file = "/net/mulan/disk2/yasheng/comparisonProject/02_pheno/02_pheno_c_raw.RData")
+save(pheno_c, file = paste0(fbstr, "02_pheno/02_pheno_c_raw.RData"))
 
 # binary phenotype data
 ## load data
@@ -144,5 +144,5 @@ pheno_b <- fread2("/net/mulan/data/UKB/ukb10683.csv", select = c("eid",
 ## match data
 pheno_b <- pheno_b[match(eid_i, pheno_b$eid), ]
 pheno_b <- pheno_b[cnd, ]
-save(pheno_b, file = "/net/mulan/disk2/yasheng/comparisonProject/02_pheno/03_pheno_b_raw.RData")
+save(pheno_b, file = paste0(fbstr, "02_pheno/03_pheno_b_raw.RData"))
 

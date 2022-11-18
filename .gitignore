@@ -6,5 +6,8 @@
 plink.log
 plink.nosex
 03_subsample
+02_pheno
 05_internal_c
 06_internal_b
+w30186_idx.txt
+
