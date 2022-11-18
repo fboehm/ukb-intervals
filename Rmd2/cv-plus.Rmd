@@ -30,12 +30,12 @@ trait_type <- "binary"
 traits <- c(1:6, 8:25) # trait numbers to analyze
 alpha <- 0.1
 out <- list()
-if (trait_type == "continuous"){
+if (trait_type == "continuous") {
   res_file <- "res-continuous.rds"
 } else {
   res_file <- "res-binary.rds"
 }
-if (!file.exists(res_file)){
+if (!file.exists(res_file)) {
   res <- lapply(traits, function(x) {
     knitr::knit_child(
       'cv-plus-child.Rmd', 
@@ -92,7 +92,7 @@ if (trait_type == "continuous"){
 
 pp <- h_tib %>% 
   dplyr::summarise(dplyr::across(.fns = mean)) %>%
-  tidyr::pivot_longer(1:n_traits) %>%
+  tidyr::pivot_longer(1:length(traits)) %>%
   dplyr::rename(mean_herit = value) %>%
   dplyr::mutate(trait_num = traits) %>%
   dplyr::select(-name) %>%
