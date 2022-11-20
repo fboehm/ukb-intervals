@@ -7,7 +7,7 @@ library(plyr)
 comp_str <- "~/research/ukb-intervals/"
 load(paste0(comp_str, "02_pheno/01_sqc.RData"))
 load(paste0(comp_str, "02_pheno/04_pheno_c_adj.RData"))
-load(paste0("02_pheno/05_pheno_b_clean.RData"))
+load(paste0(comp_str, "02_pheno/05_pheno_b_clean.RData"))
 
 # na idx for continuous phenotypes
 na_list_c <- lapply(1:25, function(x){
@@ -23,8 +23,9 @@ na_list_b <- lapply(1:25, function(x){
 })
 
 # parameters
-ref_num <- 250 # reference number: 500 inviduals (250 males and 250 females)
-
+ref_num <- 1000 # reference number: 2000 inviduals (1000 males and 1000 females)
+# we extract 2000 subjects for use in the combined reference plus verification sets
+# later, we'll split the combined set into 1000 reference and 1000 verification
 ##########################
 ### Get the reference index
 ## reference index
@@ -52,74 +53,64 @@ sqc_sub <- sqc_i[!sqc_i$idx %in% idx_ref,]
 
 # parameters
 pheno_seed_str <- 2020*1:25
-fold <- 5
-group_num <- 10
+n_folds <- 5
+#group_num <- 10
 cross_seed <- 20170529
 
 ##########################
 # Continuous trait
-sample_size_dat <- data.frame()
+# trait values get split into 
 for (p in 1:25) {
-  sample_size_mat <- matrix(NA, fold, 5) #nrow = fold & ncol = 5
   idx_tot <- setdiff(sqc_sub$idx, na_list_c[[p]])
-  sample_size_mat[c(1:5), 1] <- length(idx_tot)
   cat("pheno", p, "include", length(idx_tot), "samples.\n")
   set.seed(pheno_seed_str[p])
-  idx_group <- idx_tot %>% as.data.frame() %>%
-    split(sample(1:group_num, length(idx_tot), replace=T))
-  # sample(1:group_num, length(idx_tot), replace=T) draws numbers 1 through 10, with replacement, 
-  # for every entry in idx_tot... so we have a vector of length `length(idx_tot)` with each entry being a number from 
-  # 1 to 10.
-  # application of `split` function creates a list of length 10 (one entry per integer). Each entry in the list is a data.frame with one column. 
-  # the one column contains the indices for members of that 'group' (ie, for that entry in the list)
-  
-  
-  # Step1: validation and PGSagg set
-  ## get index
-  set.seed(pheno_seed_str[p])
-  idx_val_agg <- idx_group[[1]] %>%
-    split(sample(1:2, nrow(idx_group[[1]]), replace=T))
-  idx_val <- idx_val_agg[[1]][, 1]
-  idx_agg <- idx_val_agg[[2]][, 1]
-  sample_size_mat[c(1:5), 2] <- length(idx_val)
-  sample_size_mat[c(1:5), 3] <- length(idx_agg)
-  cat("pheno", p, "include val", length(idx_val), "samples, and",
-      "agg", length(idx_agg), "samples.\n")
+ # idx_group <- idx_tot %>% as.data.frame() %>%
+ #   split(sample(1:group_num, length(idx_tot), replace=T))
+  # put 10% of subjects with nonmissing trait values into validation set
+  # sample the indices 
+  idx_val <- sample(x = idx_tot, size = floor(0.1 * length(idx_tot)), replace = FALSE)
+  cat("pheno", p, "include val", length(idx_val), "samples.\n")
   ## pheno data
   pheno_c_adj_val <- pheno_c_adj[match(idx_val, sqc_i$idx), p]
-  pheno_c_adj_agg <- pheno_c_adj[match(idx_agg, sqc_i$idx), p]
   # ## output
   write.table(cbind(idx_val, idx_val),
                file = paste0(comp_str, "03_subsample/continuous/pheno", p,
                              "/val/01_idx.txt"),
                col.names = F, row.names = F, quote = F)
-   write.table(data.frame(pheno_c_adj_val),
-               file = paste0(comp_str, "03_subsample/continuous/pheno", p,
-                             "/val/02_pheno_c.txt"),
-               col.names = F, row.names = F, quote = F)
   
   # Step2: cross validation set
+  idx_cv <- setdiff(idx_tot, idx_val)
   set.seed(pheno_seed_str[p]+cross_seed)
-  group_test <- sample(c(2: group_num), fold, replace = F) ## for
+  split_indices <- splitTools::partition(idx_cv, p = c(fold1 = 0.2, 
+                                    fold2 = 0.2, 
+                                    fold3 = 0.2, 
+                                    fold4 = 0.2, 
+                                    fold5 = 0.2)
+                                    )
+#  group_test <- sample(c(2: group_num), fold, replace = F) ## for
   pheno_train <- pheno_test <- matrix(NA, nrow(pheno_c_adj), 5)
-  for(cross in 1: fold){
-    
+  for(cross in 1: n_folds) {
     ## test set
-    idx_test <- idx_group[[group_test[cross]]][, 1]
+    #idx_test <- idx_group[[group_test[cross]]][, 1]
+    # get indices for each test fold
+    idx_test <- idx_cv[split_indices[[cross]]]
+    # 
     pheno_test[, cross] <- pheno_c_adj[, p]
     pheno_test[!sqc_i$idx%in%idx_test, cross] <- NA
     ## train set
-    idx_train <- idx_group[-c(1, group_test[cross])] %>% llply(function(a) a[, 1]) %>%
-      unlist %>% sort
+    idx_train <- setdiff(idx_cv, idx_test)
     pheno_train[, cross] <- pheno_c_adj[, p]
-    pheno_train[!sqc_i$idx%in%idx_train, cross] <- NA
-    sample_size_mat[cross, 4] <- length(idx_test)
-    sample_size_mat[cross, 5] <- sum(!is.na(pheno_train[, cross]))
-    cat("pheno", p, "include train", sample_size_mat[cross, 5],
-        "samples, and test", sample_size_mat[cross, 4], "samples.\n")
-    # write.table(cbind(idx_test, idx_test),
-    #            file = paste0(comp_str, "02_pheno/01_test_idx_c/idx_pheno", p, "_cross", cross, ".txt"),
-    #            quote = F, row.names = F, col.names = F)
+    pheno_train[!sqc_i$idx %in% idx_train, cross] <- NA
+    write.table(cbind(idx_test, idx_test),
+                file = paste0(comp_str, 
+                "02_pheno/01_test_idx_c/idx_pheno", 
+                p, 
+                "_cross", 
+                cross, 
+                ".txt"),
+                quote = F, 
+                row.names = F, 
+                col.names = F)
   }
   # write.table(pheno_train, file = paste0(comp_str, "02_pheno/02_train_c/pheno_pheno", p, ".txt"),
   #             quote = F, row.names = F, col.names = F)
