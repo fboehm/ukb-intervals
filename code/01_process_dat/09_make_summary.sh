@@ -15,7 +15,7 @@ let k=0
 gemma=/net/fantasia/home/borang/software/gemma-0.98.3-linux-static
 
 fbstr=~/research/ukb-intervals/
-dats= (1 2)
+dats=(1 2)
 type=ukb
 
 for dat in ${dats[@]}; do
