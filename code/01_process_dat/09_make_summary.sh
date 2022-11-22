@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=1-00:00:00
+#SBATCH --time=3-00:00:00
 #SBATCH --job-name=gemma
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
