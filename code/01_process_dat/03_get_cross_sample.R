@@ -23,9 +23,8 @@ na_list_b <- lapply(1:25, function(x){
 })
 
 # parameters
-ref_num <- 1000 # reference number: 2000 inviduals (1000 males and 1000 females)
-# we extract 2000 subjects for use in the combined reference plus verification sets
-# later, we'll split the combined set into 1000 reference and 1000 verification
+ref_num <- 500 # reference number: 1000 inviduals (500 males and 500 females)
+# we extract 1000 subjects for use in the reference 
 ##########################
 ### Get the reference index
 ## reference index
@@ -45,6 +44,8 @@ idx_ref <- sort(c(idx_male_ref, idx_female_ref))
              file = paste0(comp_str, "04_reference/01_idx.txt"), 
              col.names = F, row.names = F, quote = F)
 ##########################
+ 
+
 
 ##########################
 # delete reference sample 
@@ -54,7 +55,6 @@ sqc_sub <- sqc_i[!sqc_i$idx %in% idx_ref,]
 # parameters
 pheno_seed_str <- 2020*1:25
 n_folds <- 5
-#group_num <- 10
 cross_seed <- 20170529
 
 ##########################
@@ -64,14 +64,16 @@ for (p in 1:25) {
   idx_tot <- setdiff(sqc_sub$idx, na_list_c[[p]])
   cat("pheno", p, "include", length(idx_tot), "samples.\n")
   set.seed(pheno_seed_str[p])
- # idx_group <- idx_tot %>% as.data.frame() %>%
- #   split(sample(1:group_num, length(idx_tot), replace=T))
-  # put 10% of subjects with nonmissing trait values into validation set
+  # put 20% of subjects with nonmissing trait values into validation plus verification set
   # sample the indices 
-  idx_val <- sample(x = idx_tot, size = floor(0.1 * length(idx_tot)), replace = FALSE)
-  cat("pheno", p, "include val", length(idx_val), "samples.\n")
+  idx_val_ver <- sample(x = idx_tot, size = floor(0.2 * length(idx_tot)), replace = FALSE)
+  cat("pheno", p, "include val_ver ", length(idx_val_ver), " samples.\n")
+  idx_val <- sample(idx_val_ver, size = floor(length(idx_val_ver) / 2), replace = FALSE)
+  idx_ver <- setdiff(idx_val_ver, idx_val)
+  
   ## pheno data
   pheno_c_adj_val <- pheno_c_adj[match(idx_val, sqc_i$idx), p]
+  pheno_c_adj_ver <- pheno_c_adj[match(idx_ver, sqc_i$idx), p]
   # ## output
   write.table(cbind(idx_val, idx_val),
               file = paste0(comp_str, 
@@ -81,8 +83,17 @@ for (p in 1:25) {
                col.names = F, 
                row.names = F, 
                quote = F)
+  write.table(cbind(idx_ver, idx_ver),
+              file = paste0(comp_str, 
+                            "03_subsample/continuous/pheno", 
+                            p,
+                            "/verif/01_idx.txt"),
+               col.names = F, 
+               row.names = F, 
+               quote = F)
+                
   # Step2: cross validation set
-  idx_cv <- setdiff(idx_tot, idx_val)
+  idx_cv <- setdiff(idx_tot, idx_val_ver)
   set.seed(pheno_seed_str[p]+cross_seed)
   split_indices <- splitTools::partition(idx_cv, p = c(fold1 = 0.2, 
                                     fold2 = 0.2, 
@@ -92,7 +103,7 @@ for (p in 1:25) {
                                     )
 #  group_test <- sample(c(2: group_num), fold, replace = F) ## for
   pheno_train <- pheno_test <- matrix(NA, nrow(pheno_c_adj), 5)
-  for (cross in 1: n_folds) {
+  for (cross in 1:n_folds) {
     ## test set
     # get indices for each test fold
     idx_test <- idx_cv[split_indices[[cross]]]
@@ -151,32 +162,31 @@ covVar_all <- as.matrix(cbind(sqc_i[, c(26:35)], # first ten PCs
 for (p in 1:25) {
   idx_tot <- setdiff(sqc_sub$idx, na_list_b[[p]])
   cat("pheno", p, " includes ", length(idx_tot), " samples.\n")
-  set.seed(pheno_seed_str[p])
-  ##idx_group <- idx_tot %>% 
-  #                as.data.frame() %>% 
-  #                split(sample(1:group_num, length(idx_tot), replace=T))
-  
-  # Step1: validation and PGSagg set
+  # Step1: validation & verification set
   ## get index
   set.seed(pheno_seed_str[p])
-    idx_val <- sample(x = idx_tot, size = floor(0.1 * length(idx_tot)), replace = FALSE)
-
-  cat("pheno", p, "include val ", length(idx_val), "samples.\n")
+  idx_val_ver <- sample(x = idx_tot, size = floor(0.2 * length(idx_tot)), replace = FALSE)
+  cat("pheno", p, "include val_ver ", length(idx_val_ver), " samples.\n")
+  idx_val <- sample(idx_val_ver, size = floor(length(idx_val_ver) / 2), replace = FALSE)
+  idx_ver <- setdiff(idx_val_ver, idx_val)
   ## pheno data
   pheno_b_all_val <- pheno_b_all[match(idx_val, sqc_i$idx), p]
+  pheno_b_all_ver <- pheno_b_all[match(idx_ver, sqc_i$idx), p]
+ 
   ## covariates data
   if(!p %in% c(1, 6, 21)){
     ## validation
     covVar_val <- data.frame(y = pheno_b_all_val, 
                              covVar_all[match(idx_val, sqc_i$idx), ])
+    ## Verification
+    covVar_ver <- data.frame(y = pheno_b_all_ver, 
+                             covVar_all[match(idx_ver, sqc_i$idx), ])
     # linear model
     coefMat_val <- lm(y~., data = covVar_val) %>% coef()
     pred_val <- cbind(1, covVar_all[match(idx_val, sqc_i$idx), ]) %*% coefMat_val
-    # logistic regression
-    coefMat_val_glm <- glm(y~., data = covVar_val,
-                           family = binomial(link = "logit")) %>% coef()
-    pred_val_glm <- cbind(1, covVar_all[match(idx_val, sqc_i$idx), ]) %*% coefMat_val_glm
-    
+    coefMat_ver <-  lm(y~., data = covVar_ver) %>% coef()
+    pred_ver <- cbind(1, covVar_all[match(idx_ver, sqc_i$idx), ]) %*% coefMat_ver
+
   } else {
     ## validation
     covVar_val <- data.frame(y = pheno_b_all_val, 
@@ -184,11 +194,11 @@ for (p in 1:25) {
     # linear model
     coefMat_val <- lm(y~., data = covVar_val) %>% coef()
     pred_val <- cbind(1, covVar_all[match(idx_val, sqc_i$idx), -11]) %*% coefMat_val
-    # logistic regression
-    coefMat_val_glm <- glm(y~., data = covVar_val, 
-                           family = binomial(link = "logit")) %>% coef()
-    pred_val_glm <- cbind(1, covVar_all[match(idx_val, sqc_i$idx), -11]) %*% coefMat_val_glm
-    
+    covVar_ver <- data.frame(y = pheno_b_all_ver, 
+                             covVar_all[match(idx_ver, sqc_i$idx), -11])
+    # linear model
+    coefMat_ver <- lm(y~., data = covVar_ver) %>% coef()
+    pred_ver <- cbind(1, covVar_all[match(idx_ver, sqc_i$idx), -11]) %*% coefMat_ver
   }
   ## output
    write.table(cbind(idx_val, idx_val), 
@@ -203,8 +213,20 @@ for (p in 1:25) {
                file = paste0(comp_str, "03_subsample/binary/pheno",p,
                              "/val/03_cov_eff.txt"), 
                row.names = F, col.names = F, quote = F)
+   write.table(cbind(idx_ver, idx_ver), 
+               file = paste0(comp_str, "03_subsample/binary/pheno", p,
+                             "/verif/01_idx.txt"),
+               col.names = F, row.names = F, quote = F)
+   write.table(pheno_b_all_ver, 
+               file = paste0(comp_str, "03_subsample/binary/pheno", p,
+                             "/verif/02_pheno_b.txt"), 
+               col.names = F, row.names = F, quote = F)
+   write.table(pred_ver, 
+               file = paste0(comp_str, "03_subsample/binary/pheno",p,
+                             "/verif/03_cov_eff.txt"), 
+               row.names = F, col.names = F, quote = F)
   # Step2: cross validation set
-  idx_cv <- setdiff(idx_tot, idx_val)
+  idx_cv <- setdiff(idx_tot, idx_val_ver)
   set.seed(pheno_seed_str[p]+cross_seed)
   split_indices <- splitTools::partition(idx_cv, p = c(fold1 = 0.2, 
                                     fold2 = 0.2, 

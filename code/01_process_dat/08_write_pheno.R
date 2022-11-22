@@ -3,7 +3,7 @@ rm(list=ls())
 library(parallel)
 library(bigreadr)
 #trait_type <- "continuous"
-trait_type <- "binary"
+trait_type <- "continuous"
 
 comp_str <- "~/research/ukb-intervals/"
 pred_str <- "/net/mulan/disk2/yasheng/predictionProject/"

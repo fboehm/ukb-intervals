@@ -5,7 +5,7 @@
 #SBATCH --job-name=gemma
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-5500%600
+#SBATCH --array=1-220
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/08_make_summary_m_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/08_make_summary_m_%a.err
 
@@ -19,7 +19,8 @@ dats=(1 2)
 type=ukb
 
 for dat in ${dats[@]}; do
-for p in `seq 1 25`; do
+#for p in `seq 1 25`; do
+for p in 1; do
   for cross in 1 2 3 4 5; do
     for chr in `seq 1 22`; do
       let k=${k}+1
