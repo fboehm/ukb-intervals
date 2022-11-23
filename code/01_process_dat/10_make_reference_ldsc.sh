@@ -12,7 +12,7 @@
 
 
 fbstr=~/research/ukb-intervals/
-outpath=${fbstr}04_reference/ukb/ldsc/
+outpath=${fbstr}04_reference/ukb/continuous/ldsc/
 
 mkdir -p ${outpath}
 let k=0
