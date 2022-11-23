@@ -1,31 +1,28 @@
 #!/bin/bash
 
-SEND_THREAD_NUM=22
-tmp_fifofile="/tmp/$$.fifo"
-mkfifo "$tmp_fifofile"
-exec 6<>"$tmp_fifofile"
+#SBATCH --partition=mulan,main
+#SBATCH --time=1-00:00:00
+#SBATCH --job-name=ldsc
+#SBATCH --mem=2G
+#SBATCH --cpus-per-task=1
+#SBATCH --array=1-22
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/10_ldsc_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/10_ldsc_%a.err
 
-for ((i=0;i<$SEND_THREAD_NUM;i++));do
-echo
-done >&6
 
+
+fbstr=~/research/ukb-intervals/
+outpath=${fbstr}04_reference/ukb/ldsc/
+
+mkdir -p ${outpath}
+let k=0
 for chr in `seq 1 22`;do
-read -u6
-{
-ldsc=/net/mulan/home/yasheng/comparisonProject/program/ldsc/ldsc.py
-cd /net/mulan/home/yasheng/comparisonProject/program/ldsc
-source activate ldsc
-
-${ldsc} --out /net/mulan/disk2/yasheng/comparisonProject/04_reference/hm3/ldsc/${chr} \
-		--bfile /net/mulan/disk2/yasheng/comparisonProject/04_reference/hm3/geno/chr${chr} \
-		--l2  --ld-wind-kb 1000.0 
-} &
-pid=$!
-echo $pid
+    let k=${k}+1
+    if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
+		ldsc --out ${outpath}${chr} \
+				--bfile ${fbstr}plink_file/ukb/continuous/chr${chr} \
+				--l2  --ld-wind-kb 1000.0 \
+				--keep ${fbstr}04_reference/01_idx.txt
+	fi
 done
 
-wait
-
-exec 6>&-
-
-exit 0
