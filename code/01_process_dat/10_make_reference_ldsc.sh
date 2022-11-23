@@ -5,7 +5,7 @@
 #SBATCH --job-name=ldsc_ref
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-44
+#SBATCH --array=1
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/10_ldsc_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/10_ldsc_%a.err
 
@@ -14,10 +14,12 @@ fbstr=~/research/ukb-intervals/
 ldsc=/usr/cluster/ldsc/ldsc.py
 let k=0
 
-for trait_type in ${trait_types[@]}; do
+#for trait_type in ${trait_types[@]}; do
+for trait_type in continuous; do 
 	outpath=${fbstr}04_reference/ukb/${trait_type}/ldsc/
 	mkdir -p ${outpath}
-	for chr in `seq 1 22`;do
+	#for chr in `seq 1 22`;do
+	for chr in 8; do
 		let k=${k}+1
 		if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
 			source activate ldsc
