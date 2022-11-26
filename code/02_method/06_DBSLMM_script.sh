@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:C:d:" opt; do
+while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:" opt; do
   case $opt in
     D) software_path="$OPTARG"
     ;;
@@ -32,10 +32,6 @@ while getopts "D:p:B:s:m:T:H:G:R:o:P:l:c:i:t:C:d:" opt; do
     ;;
     t) thread="$OPTARG"
     ;;
-    C) test_indicator_file="$OPTARG"
-    ;;
-    d) dat_str="$OPTARG"
-    ;;
     # C) chr="$OPTARG"
     # ;;
     \?) echo "Invalid option -$OPTARG" >&2
@@ -65,9 +61,7 @@ if [ -n "$cov" ]; then
 fi
 printf "\033[33mArgument thread is %s  \033[0m\n" "$thread"
 printf "\033[33mArgument outpath is %s  \033[0m\n" "$outpath"
-printf "\033[33mArgument test_indicator_file is %s  \033[0m\n" "$test_indicator_file"
-printf "\033[33mArgument dat_str is %s  \033[0m\n" "$dat_str"
-
+# printf "\033[33mArgument chr is %s  \033[0m\n" "$chr"
 
 DBSLMM=${software_path}DBSLMM/software/DBSLMM.R
 TUNE=${software_path}DBSLMM/software/TUNE.R
@@ -135,7 +129,7 @@ fi
 if [[ "$type" == "auto" ]]
 then
 for chr in `seq 1 22` 
-#for chr in 22
+# for chr in 22 
 do
 	BLOCK=${block_prefix}${chr}
 	summchr=${summary_file_prefix}${chr}
@@ -146,21 +140,13 @@ do
 	nmis=`sed -n "2p" ${summchr}.assoc.txt | awk '{print $4}'`
 	n=$(echo "${nobs}+${nmis}" | bc -l)
 	echo ${model}
-	var_outfile=${outpath}${summchr_prefix2}_variance_chr${chr}.txt
-if [ ! -f ${var_outfile} ]; then
-	
 	Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outpath} --plink ${plink} --model ${model}\
 					  --dbslmm ${dbslmm} --ref ${ref_geno} --n ${n} --nsnp ${nsnp} --block ${BLOCK}.bed\
-					  --h2 ${h2} --thread ${thread}\
-					  --test_indicator_file ${test_indicator_file} \
-					  --dat_str ${dat_str}${chr}
-	#				  --val ${val_geno}
+					  --h2 ${h2} --thread ${thread} --val ${val_geno}
 	summchr_prefix=`echo ${summchr##*/}`
 	summchr_prefix2=`echo ${summchr_prefix%_*}`
 	mv ${outpath}${summchr_prefix2}_chr${chr}.dbslmm.txt ${outpath}${summchr_prefix2}_chr${chr}_auto.dbslmm.txt
-	#rm ${outpath}${summchr_prefix}.dbslmm.badsnps
-	mv variance.txt ${var_outfile}
-fi
+	rm ${outpath}${summchr_prefix}.dbslmm.badsnps
 
 done
 fi
