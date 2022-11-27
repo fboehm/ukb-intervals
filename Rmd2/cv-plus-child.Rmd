@@ -88,7 +88,7 @@ Now, we read in the plink score outputs and sum to get predicted values for the 
 if (trait_type == "continuous"){
   fn <- paste0("~/research/ukb-intervals/03_subsample/continuous/pheno", phe_num, "/verif/03_idx_pheno.txt")
 } else {
-  fn <- paste0("~/research/ukb-intervals/03_subsample/binary/pheno", phe_num, "/verif/01_idx.txt")
+  fn <- paste0("~/research/ukb-intervals/03_subsample/binary/pheno", phe_num, "/verif/03_idx_pheno.txt")
 }
 verif_true_pheno <- readr::read_table(fn, col_names = FALSE) %>%
                               dplyr::arrange(X1)
@@ -144,27 +144,20 @@ pred_verification_set_tib <- do.call("cbind", pred_verification_set) %>%
   dplyr::mutate(true_pheno = verif_true_pheno$X1)
 ```
 
-```{r}
-# read idx_pheno file for trait of interest - for verification set
-vfn <- paste0(comp_str, 
-              "03_subsample/continuous/pheno", 
-              phe_num,
-              "/verif/03_idx_pheno.txt")
-v_tib <- vroom::vroom(vfn, col_names = FALSE)
-```
+
 
 ```{r, message = FALSE}
 get_fitted <- function(index, fitted_vec){
   fitted_vec[index]
 }
-n_verif <- nrow(v_tib)
+n_verif <- nrow(verif_true_pheno)
 intervals <- list()
 for (i in 1:n_verif){
   ### take one validation set observation
    o3 <- out_tib %>% 
             dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, 
                                                       .f = get_fitted, 
-                                                      fitted_vec = as.vector(unlist(pred_vals_verification_set_tib[i, 1:5])))
+                                                      fitted_vec = as.vector(unlist(pred_verification_set_tib[i, 1:5])))
                    ) %>% # calculate mu hat (X_{n + 1})
      dplyr::mutate(fitted_minus_residual = fitted_cv - residual,
                    fitted_plus_residual = fitted_cv + residual)

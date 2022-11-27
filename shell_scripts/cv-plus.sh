@@ -10,5 +10,5 @@
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/cvplus_binary_%j.err
 
 Rscript -e "rmarkdown::render('~/research/ukb-intervals/Rmd2/cv-plus.Rmd',
-                              params = list(trait_type = 'binary'),
-                              output_file = 'cv-plus-binary.html')"
+                              params = list(trait_type = 'continuous'),
+                              output_file = 'cv-plus-continuous.html')"
