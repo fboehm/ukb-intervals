@@ -6,6 +6,8 @@ output:
   bookdown::html_document2:
     number_sections: false
 bibliography: ../Rmd/my.bib
+params:
+  trait_type: "binary"
 ---
 
 ```{r}
@@ -26,8 +28,8 @@ Inputs needed:
 
 
 ```{r, echo = TRUE, message = FALSE}
-trait_type <- "binary"
-traits <- c(1:6, 8:25) # trait numbers to analyze
+(trait_type <- params$trait_type)
+traits <- 1 # trait numbers to analyze
 alpha <- 0.1
 out <- list()
 if (trait_type == "continuous") {
@@ -79,7 +81,7 @@ dplyr::bind_rows(res) %>%
 
 ## Incorporate estimated heritability of traits
 
-```{r}
+```{r, eval = FALSE}
 if (trait_type == "continuous"){
   h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2.csv", 
                           col_names = FALSE) %>% 
@@ -106,7 +108,7 @@ pp2 <- pp %>%
 
 # Plot coverage vs (mean) heritability 
 
-```{r}
+```{r, eval = FALSE}
 pp2 <- pp %>%
   dplyr::group_by(trait_num) %>%
   dplyr::summarise(mean_herit = mean(mean_herit), coverage = mean(in_interval)) %>%
@@ -119,7 +121,7 @@ pp2 %>%
 ## Check correlation between (mean) heritability and coverage
 
 
-```{r}
+```{r, eval = FALSE}
 summ <- pp %>%
   dplyr::group_by(trait_num) %>%
   dplyr::summarise(mean_herit = mean(mean_herit), coverage = mean(in_interval))

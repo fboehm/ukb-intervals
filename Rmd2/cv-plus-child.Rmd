@@ -4,7 +4,9 @@
 phe_num <- x
   # read fam file
 if (trait_type == "continuous"){
-  fam <- readr::read_table(file = "~/research/predictionProject/plink_file/ukb/chr1.fam", col_names = FALSE)
+  fam <- readr::read_table(file = "~/research/ukb-intervals/plink_file/ukb/continuous/chr1.fam", col_names = FALSE)
+} else {
+  fam <- readr::read_table(file = "~/research/ukb-intervals/plink_file/ukb/binary/chr1.fam", col_names = FALSE)
 }
 # define cols to keep
 cols_to_keep <- c(1, 2, phe_num * 5 + 1:5)
@@ -12,9 +14,10 @@ fam_all <- fam %>%
               dplyr::select(dplyr::all_of(cols_to_keep)) %>%
               dplyr::rename(fold1 = 3, fold2 = 4, fold3 = 5, fold4 = 6, fold5 = 7) %>%
               dplyr::mutate(true_pheno = 
-                purrr::pmap_dbl(.l = list(fold1, fold2, fold3, fold4, fold5), .f = function(f1, f2, f3, f4, f5){
+                purrr::pmap_dbl(.l = list(fold1, fold2, fold3, fold4, fold5), 
+                .f = function(f1, f2, f3, f4, f5){
                   vec <- c(f1, f2, f3, f4, f5)
-                  max(vec, na.rm = TRUE)
+                  vec[!is.na(vec)][1]
                 })
               )
 
@@ -34,7 +37,7 @@ for (cross_num in 1:5){
                   "_chr", 
                   chr_num, 
                   ".profile")
-                  } else {
+    } else {
       fn <- paste0("~/research/ukb-intervals/06_internal_b/pheno", 
                   phe_num, 
                   "/DBSLMM/pred_ukb_best_cross", 
@@ -58,9 +61,9 @@ for (cross_num in 1:5){
     dplyr::rename(FID = FID_chr1, IID = IID_chr1)
   # read idx file
   if (trait_type == "continuous") {
-    idx_fn <- paste0("~/research/comparisonProject/02_pheno/01_test_idx_c/idx_pheno", phe_num, "_cross", cross_num, ".txt")
+    idx_fn <- paste0("~/research/ukb-intervals/02_pheno/01_test_idx_c/idx_pheno", phe_num, "_cross", cross_num, ".txt")
   } else {
-    idx_fn <- paste0("~/research/comparisonProject/02_pheno/04_test_idx_b/idx_pheno", phe_num, "_cross", cross_num, ".txt")
+    idx_fn <- paste0("~/research/ukb-intervals/02_pheno/04_test_idx_b/idx_pheno", phe_num, "_cross", cross_num, ".txt")
   }
   idx <- readr::read_table(idx_fn, col_names = FALSE) %>%
     dplyr::rename(fam_id = 1, subject_id = 2) %>%
@@ -78,17 +81,18 @@ out_tib <- do.call("rbind", out) %>%
   dplyr::mutate(residual = abs(true_pheno - sum_scores))
 ```
 
-Now, we read in the plink score outputs and sum to get predicted values for the 
-500 subjects belonging to the verification set.
+Now, we read in the plink score outputs and sum to get predicted values for the subjects belonging to the verification set.
 
 ```{r, results='hide', message = FALSE}
 # read verif ids file for verification set
 if (trait_type == "continuous"){
-  fn <- paste0("~/research/ukb-intervals/03_subsample/continuous/pheno", phe_num, "/verif/ukb/02_pheno_c.txt")
+  fn <- paste0("~/research/ukb-intervals/03_subsample/continuous/pheno", phe_num, "/verif/03_idx_pheno.txt")
 } else {
-  fn <- paste0("~/research/ukb-intervals/03_subsample/binary/pheno", phe_num, "/verif/ukb/02_pheno_b.txt")
+  fn <- paste0("~/research/ukb-intervals/03_subsample/binary/pheno", phe_num, "/verif/01_idx.txt")
 }
-verif_true_pheno <- readr::read_table(fn, col_names = FALSE)
+verif_true_pheno <- readr::read_table(fn, col_names = FALSE) %>%
+                              dplyr::arrange(X1)
+# load true phenotypes for all subjects
 
 
 # get the five versions of predicted values for the verification set subjects
@@ -118,7 +122,7 @@ for (cross_num in 1:5){
   out[[cross_num]] <- foo 
 }
 # sum for each cross num
-pred_vals_verification_set <- list()
+pred_verification_set <- list()
 for (cross_num in 1:5){
   # rename cols in each list's elements (tibbles)
   s2 <- list()
@@ -133,36 +137,44 @@ for (cross_num in 1:5){
     dplyr::select(sum_scores) %>%
     dplyr::rename(predicted_value = sum_scores)
   colnames(scores_df) <- paste0(colnames(scores_df), "_cross", cross_num)
-  pred_vals_verification_set[[cross_num]] <- scores_df
+  pred_verification_set[[cross_num]] <- scores_df
 }
-pred_vals_verification_set_tib <- do.call("cbind", pred_vals_verification_set) %>%
+pred_verification_set_tib <- do.call("cbind", pred_verification_set) %>%
   tibble::as_tibble() %>%
   dplyr::mutate(true_pheno = verif_true_pheno$X1)
 ```
 
-
+```{r}
+# read idx_pheno file for trait of interest - for verification set
+vfn <- paste0(comp_str, 
+              "03_subsample/continuous/pheno", 
+              phe_num,
+              "/verif/03_idx_pheno.txt")
+v_tib <- vroom::vroom(vfn, col_names = FALSE)
+```
 
 ```{r, message = FALSE}
 get_fitted <- function(index, fitted_vec){
   fitted_vec[index]
 }
-n_verif <- 500
+n_verif <- nrow(v_tib)
 intervals <- list()
 for (i in 1:n_verif){
   ### take one validation set observation
-  out2 <- out_tib 
-   o3 <- out2 %>% 
-     dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, 
-                                               .f = get_fitted, 
-                                               fitted_vec = as.vector(unlist(pred_vals_verification_set_tib[i, 1:5])))
+   o3 <- out_tib %>% 
+            dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, 
+                                                      .f = get_fitted, 
+                                                      fitted_vec = as.vector(unlist(pred_vals_verification_set_tib[i, 1:5])))
                    ) %>% # calculate mu hat (X_{n + 1})
      dplyr::mutate(fitted_minus_residual = fitted_cv - residual,
                    fitted_plus_residual = fitted_cv + residual)
   ## determine quantiles of fitted_minus_residual and fitted_plus_residual
-  intervals[[i]] <- c(quantile(o3$fitted_minus_residual, 
-                              probs = alpha, na.rm = TRUE), 
+  intervals[[i]] <- c(quantile(o3$fitted_minus_residual,
+                               probs = alpha,
+                               na.rm = TRUE),
   quantile(o3$fitted_plus_residual,
-           probs = 1 - alpha, na.rm = TRUE)
+           probs = 1 - alpha, 
+           na.rm = TRUE)
   )
 }
 ```

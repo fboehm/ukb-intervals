@@ -70,11 +70,21 @@ for (p in 1:25) {
   cat("pheno", p, "include val_ver ", length(idx_val_ver), " samples.\n")
   idx_val <- sample(idx_val_ver, size = floor(length(idx_val_ver) / 2), replace = FALSE)
   idx_ver <- setdiff(idx_val_ver, idx_val)
-  
+  ## assemble a tibble with idx_ver & the corresponding trait values
+  ver_tib <- tibble::tibble(FID = idx_ver, IID = idx_ver) %>%
+    dplyr::arrange(FID) %>%
+    dplyr::mutate(true_pheno = pheno_c_adj[match(IID, sqc_i$idx), p])
+  fn <- paste0(comp_str, 
+              "03_subsample/continuous/pheno", 
+              p,
+              "/verif/03_idx_pheno.txt") 
+  ver_tib %>%
+    vroom::vroom_write(file = fn, col_names = FALSE)
+
   ## pheno data
   pheno_c_adj_val <- pheno_c_adj[match(idx_val, sqc_i$idx), p]
   pheno_c_adj_ver <- pheno_c_adj[match(idx_ver, sqc_i$idx), p]
-  # ## output
+  ## output
   write.table(cbind(idx_val, idx_val),
               file = paste0(comp_str, 
                             "03_subsample/continuous/pheno", 
@@ -83,9 +93,10 @@ for (p in 1:25) {
                col.names = F, 
                row.names = F, 
                quote = F)
+  
   write.table(cbind(idx_ver, idx_ver),
               file = paste0(comp_str, 
-                            "03_subsample/continuous/pheno", 
+                            "03_subsample/continuous/pheno",
                             p,
                             "/verif/01_idx.txt"),
                col.names = F, 
