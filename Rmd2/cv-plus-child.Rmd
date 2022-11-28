@@ -91,7 +91,8 @@ if (trait_type == "continuous"){
   fn <- paste0("~/research/ukb-intervals/03_subsample/binary/pheno", phe_num, "/verif/03_idx_pheno.txt")
 }
 verif_true_pheno <- readr::read_table(fn, col_names = FALSE) %>%
-                              dplyr::arrange(X1)
+                              dplyr::arrange(X1) %>%
+                              dplyr::rename(FID = X2, IID = X1, true_pheno = X3)
 # get the five versions of predicted values for the verification set subjects
 out <- list()
 for (cross_num in 1:5){
@@ -188,7 +189,7 @@ mytib <- intervals %>%
 saveRDS(object = mytib, file = paste0(trait_type, "_ints.rds"))
 # need a join with the idx_pheno object containing true phenotype values
 mytib2 <- mytib %>%
-  dplyr::left_join(verif_true_pheno, by = c("FID" = "X1")) %>%
+  dplyr::left_join(verif_true_pheno, by = "FID") %>%
   dplyr::mutate(in_interval = true_pheno <= right & true_pheno >= left) %>%
   dplyr::mutate(interval_width = right - left)
  
