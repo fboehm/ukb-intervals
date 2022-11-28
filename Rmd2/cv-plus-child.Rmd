@@ -92,9 +92,6 @@ if (trait_type == "continuous"){
 }
 verif_true_pheno <- readr::read_table(fn, col_names = FALSE) %>%
                               dplyr::arrange(X1)
-# load true phenotypes for all subjects
-
-
 # get the five versions of predicted values for the verification set subjects
 out <- list()
 for (cross_num in 1:5){
@@ -127,21 +124,29 @@ for (cross_num in 1:5){
   # rename cols in each list's elements (tibbles)
   s2 <- list()
   for (chr_num in 1:22){
-    s2[[chr_num]] <- out[[cross_num]][[chr_num]] %>%
-      dplyr::select(6)  # choose only the SCORESUM column
-      colnames(s2[[chr_num]]) <- paste0(colnames(s2[[chr_num]]), "_chr", chr_num) 
+    if (chr_num == 1){
+      s2[[chr_num]] <- out[[cross_num]][[chr_num]] %>%
+        dplyr::select(1, 6)  # choose only the SCORESUM column
+        colnames(s2[[chr_num]])[2] <- paste0(colnames(s2[[chr_num]])[2], "_chr", chr_num) 
+    } else {
+      s2[[chr_num]] <- out[[cross_num]][[chr_num]] %>%
+        dplyr::select(6)  # choose only the SCORESUM column
+        colnames(s2[[chr_num]]) <- paste0(colnames(s2[[chr_num]]), "_chr", chr_num) 
+    }
   }
   scores_df <- do.call("cbind", s2) %>% 
     tibble::as_tibble() %>%
-    dplyr::mutate(sum_scores = rowSums(.)) %>%
-    dplyr::select(sum_scores) %>%
+    dplyr::mutate(sum_scores = rowSums(.[, -1])) %>%
+    dplyr::select(1, sum_scores) %>%
     dplyr::rename(predicted_value = sum_scores)
   colnames(scores_df) <- paste0(colnames(scores_df), "_cross", cross_num)
   pred_verification_set[[cross_num]] <- scores_df
 }
 pred_verification_set_tib <- do.call("cbind", pred_verification_set) %>%
   tibble::as_tibble() %>%
-  dplyr::mutate(true_pheno = verif_true_pheno$X1)
+  dplyr::mutate(true_pheno = verif_true_pheno$X1) %>%
+  dplyr::select(- FID_cross2, - FID_cross3, - FID_cross4, - FID_cross5) %>%
+  dplyr::rename(FID = FID_cross1)
 ```
 
 
@@ -153,22 +158,24 @@ get_fitted <- function(index, fitted_vec){
 n_verif <- nrow(verif_true_pheno)
 intervals <- list()
 for (i in 1:n_verif){
-  ### take one validation set observation
-   o3 <- out_tib %>% 
+  if (i %% 1000 == 0) print(i)
+  ### take one verification set observation
+  o3 <- out_tib %>% 
             dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, 
                                                       .f = get_fitted, 
-                                                      fitted_vec = as.vector(unlist(pred_verification_set_tib[i, 1:5])))
+                                                      fitted_vec = as.vector(unlist(pred_verification_set_tib[i, 2:6])))
                    ) %>% # calculate mu hat (X_{n + 1})
      dplyr::mutate(fitted_minus_residual = fitted_cv - residual,
                    fitted_plus_residual = fitted_cv + residual)
   ## determine quantiles of fitted_minus_residual and fitted_plus_residual
-  intervals[[i]] <- c(quantile(o3$fitted_minus_residual,
-                               probs = alpha,
-                               na.rm = TRUE),
-  quantile(o3$fitted_plus_residual,
-           probs = 1 - alpha, 
-           na.rm = TRUE)
-  )
+  intervals[[i]] <- tibble::tibble(FID = pred_verification_set_tib$FID[i],
+                                   left = quantile(o3$fitted_minus_residual,
+                                            probs = alpha,
+                                            na.rm = TRUE),
+                                   right = quantile(o3$fitted_plus_residual,
+                                                    probs = 1 - alpha,
+                                                    na.rm = TRUE)
+                                  )
 }
 ```
 
@@ -176,10 +183,12 @@ for (i in 1:n_verif){
 ## Coverage for Trait `r x`
 
 ```{r}
-mytib <- do.call("rbind", intervals) %>% 
-  tibble::as_tibble() %>%
-  dplyr::rename(left = 1, right = 2) %>%
-  dplyr::mutate(true_pheno = pred_vals_verification_set_tib$true_pheno) %>%
+mytib <- intervals %>% 
+  dplyr::bind_rows() #%>%
+saveRDS(object = mytib, file = paste0(trait_type, "_ints.rds"))
+# need a join with the idx_pheno object containing true phenotype values
+mytib2 <- mytib %>%
+  dplyr::left_join(verif_true_pheno, by = c("FID" = "X1")) %>%
   dplyr::mutate(in_interval = true_pheno <= right & true_pheno >= left) %>%
   dplyr::mutate(interval_width = right - left)
  
@@ -187,7 +196,7 @@ mytib <- do.call("rbind", intervals) %>%
 ```
 
 ```{r}
-assign(x = "out", value = mytib)
+assign(x = "out", value = mytib2)
 ```
 
 

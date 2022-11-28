@@ -180,7 +180,17 @@ for (p in 1:25) {
   cat("pheno", p, "include val_ver ", length(idx_val_ver), " samples.\n")
   idx_val <- sample(idx_val_ver, size = floor(length(idx_val_ver) / 2), replace = FALSE)
   idx_ver <- setdiff(idx_val_ver, idx_val)
-  ## pheno data
+  ## assemble a tibble with idx_ver & the corresponding trait values
+  ver_tib <- tibble::tibble(FID = idx_ver, IID = idx_ver) %>%
+    dplyr::arrange(FID) %>%
+    dplyr::mutate(true_pheno = pheno_b_all[match(IID, sqc_i$idx), p])
+  fn <- paste0(comp_str, 
+              "03_subsample/binary/pheno", 
+              p,
+              "/verif/03_idx_pheno.txt") 
+  ver_tib %>%
+    vroom::vroom_write(file = fn, col_names = FALSE)
+## pheno data
   pheno_b_all_val <- pheno_b_all[match(idx_val, sqc_i$idx), p]
   pheno_b_all_ver <- pheno_b_all[match(idx_ver, sqc_i$idx), p]
  
