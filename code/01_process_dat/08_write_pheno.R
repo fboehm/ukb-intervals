@@ -4,7 +4,6 @@ library(parallel)
 library(bigreadr)
 #trait_type <- "continuous"
 trait_type <- "continuous"
-
 comp_str <- "~/research/ukb-intervals/"
 pred_str <- "/net/mulan/disk2/yasheng/predictionProject/"
 ## output to fam file for cross validation 
