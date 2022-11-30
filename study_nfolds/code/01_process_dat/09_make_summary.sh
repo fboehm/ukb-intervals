@@ -22,7 +22,7 @@ for nfold in ${nfolds[@]}; do
     fbstr=~/research/ukb-intervals/study_nfolds/${nfold}-fold/
     for dat in ${dats[@]}; do
         if [ ${dat} -eq 1 ]; then
-            let p_num=14; # waist circumference, WC
+            let p_num=14; # waist circumference, WC. Sheng's code confirms that this is trait 14
         fi
         if [ ${dat} -eq 2 ]; then
             let p_num=24; #snoring, SN
