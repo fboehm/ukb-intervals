@@ -22,10 +22,10 @@ for nfold in ${nfolds[@]}; do
     fbstr=~/research/ukb-intervals/study_nfolds/${nfold}-fold/
     for dat in ${dats[@]}; do
         if [ ${dat} -eq 1 ]; then
-            let p_num=14; # waist circumference, WC
+            let p_num=13; # waist circumference
         fi
         if [ ${dat} -eq 2 ]; then
-            let p_num=24; #snoring, SN
+            let p_num=12; #snoring
         fi
         #for p in `seq 1 25`; do
         for p in ${p_num}; do

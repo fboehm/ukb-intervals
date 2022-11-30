@@ -1,5 +1,5 @@
 #! /usr/bin/env Rscript
-rm(list=ls())
+rm(list = ls())
 library(parallel)
 library(bigreadr)
 
@@ -12,8 +12,8 @@ pheno_num <- 25
 for (n_fold in n_folds){
     pheno <- matrix(NA, nrow = 337129, ncol = pheno_num * n_fold)
     for (p in 1: pheno_num){
-        begin <- (p-1) * n_fold + 1
-        end <- (p-1) * n_fold + n_fold
+        begin <- (p - 1) * n_fold + 1
+        end <- (p - 1) * n_fold + n_fold
         if (trait_type == "continuous") {
             pheno_str <- paste0(comp_str, n_fold, "-fold/", "02_pheno/02_train_c/pheno_pheno", p, ".txt")
         } else {
