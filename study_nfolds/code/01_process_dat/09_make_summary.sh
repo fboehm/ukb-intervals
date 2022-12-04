@@ -5,7 +5,7 @@
 #SBATCH --job-name=gemma
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-1320%600
+#SBATCH --array=1-660%100
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma/08_make_summary_m_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma/08_make_summary_m_%a.err
 
@@ -13,7 +13,8 @@
 let k=0
 gemma=/net/fantasia/home/borang/software/gemma-0.98.3-linux-static
 
-dats=(1 2)
+#dats=(1 2)
+dats=( 1 )
 type=ukb
 nfolds=(10 20)
 covstr=~/research/ukb-intervals/02_pheno/
@@ -22,7 +23,7 @@ for nfold in ${nfolds[@]}; do
     fbstr=~/research/ukb-intervals/study_nfolds/${nfold}-fold/
     for dat in ${dats[@]}; do
         if [ ${dat} -eq 1 ]; then
-            let p_num=14; # waist circumference, WC. Sheng's code confirms that this is trait 14
+            let p_num=25; # triglycerides is pheno25
         fi
         if [ ${dat} -eq 2 ]; then
             let p_num=24; #snoring, SN
