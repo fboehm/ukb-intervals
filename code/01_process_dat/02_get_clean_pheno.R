@@ -337,6 +337,24 @@ pheno_b_all <- cbind(PRCA, TA, TD2, CAD, RA,
                      AN, GO, SAF, HA, TE, 
                      T1B, VMS, MY, SN, ES)
 save(pheno_b_all, file = paste0(comp_str, "02_pheno/05_pheno_b_clean.RData"))
+## regress out effects of covariates on the binary traits
+pheno_b_adj <- matrix(NA, nrow = nrow(pheno_b_all), ncol = 25)
+for (i in 1: 25){
+  na_idx <- ifelse(is.na(pheno_b_all[, i]), T, F)
+  pheno_na <- ifelse(na_idx, NA, pheno_b_all[, i])
+  pheno_scale <- scale(pheno_na)
+  if (i %in% c(1, 6, 21)){
+    resid <- lm(pheno_scale[!na_idx] ~ covVar[!na_idx, -11])$residual
+  } else {
+    resid <- lm(pheno_scale[!na_idx] ~ covVar[!na_idx, ])$residual
+  }
+  pheno_b_adj[!na_idx, i] <- qqnorm(resid, plot.it = F)$x
+  pheno_b_adj[na_idx, i] <- NA
+  cat(paste0("pheno: ", i, ", sample size: ", length(pheno_b_adj[!na_idx, i]), "\n"))
+}
+save(pheno_b_adj, file = paste0(comp_str, "02_pheno/05a_pheno_b_adj.RData"))
+
+
 
 # cov
 write.table(cbind(1, covVar), file = paste0(comp_str, "02_pheno/07_cov.txt"), 
