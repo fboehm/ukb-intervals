@@ -8,6 +8,7 @@ comp_str <- "~/research/ukb-intervals/"
 load(paste0(comp_str, "02_pheno/01_sqc.RData"))
 load(paste0(comp_str, "02_pheno/04_pheno_c_adj.RData"))
 load(paste0(comp_str, "02_pheno/05_pheno_b_clean.RData"))
+load(paste0(comp_str, "02_pheno/05a_pheno_b_adj.RData"))
 
 # na idx for continuous phenotypes
 na_list_c <- lapply(1:25, function(x){
@@ -51,7 +52,8 @@ sqc_sub <- sqc_i[!sqc_i$idx %in% idx_ref,]
 
 # parameters
 pheno_seed_str <- 2020*1:25
-n_folds <- c(10, 20)
+# n_folds <- c(10, 20)
+n_folds <- 5
 cross_seed <- 20170529
 
 ##########################
@@ -107,6 +109,15 @@ for (n_fold in n_folds){
         # Step2: cross validation set
         idx_cv <- setdiff(idx_tot, idx_val_ver)
         set.seed(pheno_seed_str[p]+cross_seed)
+        if (n_fold == 5){
+          split_indices <- splitTools::partition(idx_cv, p = c(fold1 = 1 / n_fold, 
+                                                                fold2 = 1 / n_fold, 
+                                                                fold3 = 1 / n_fold, 
+                                                                fold4 = 1 / n_fold, 
+                                                                fold5 = 1 / n_fold)
+          )
+            
+        }
         if (n_fold == 10){
             split_indices <- splitTools::partition(idx_cv, p = c(fold1 = 1 / n_fold, 
                                                                 fold2 = 1 / n_fold, 
@@ -237,6 +248,9 @@ for (n_fold in n_folds){
   ## pheno data
     pheno_b_all_val <- pheno_b_all[match(idx_val, sqc_i$idx), p]
     pheno_b_all_ver <- pheno_b_all[match(idx_ver, sqc_i$idx), p]
+    pheno_b_adj_val <- pheno_b_adj[match(idx_val, sqc_i$idx), p]
+    pheno_b_adj_ver <- pheno_b_adj[match(idx_ver, sqc_i$idx), p]
+    
     ## covariates data
     if(!p %in% c(1, 6, 21)){
       ## validation
@@ -273,6 +287,10 @@ for (n_fold in n_folds){
     write.table(pheno_b_all_val, 
                 file = paste0(mydir_val, "02_pheno_b.txt"), 
                 col.names = F, row.names = F, quote = F)
+    write.table(pheno_b_adj_val, 
+                file = paste0(mydir_val, "02_pheno_b_adj.txt"), 
+                col.names = F, row.names = F, quote = F)
+    
     write.table(pred_val, 
                 file = paste0(mydir_val, "03_cov_eff.txt"), 
                 row.names = F, col.names = F, quote = F)
@@ -283,13 +301,26 @@ for (n_fold in n_folds){
                 file = paste0(mydir_ver,
                               "02_pheno_b.txt"), 
                 col.names = F, row.names = F, quote = F)
+    write.table(pheno_b_adj_ver, 
+                file = paste0(mydir_ver,
+                              "02_pheno_b_adj.txt"), 
+                col.names = F, row.names = F, quote = F)
+    
     write.table(pred_ver, 
                 file = paste0(mydir_ver, "03_cov_eff.txt"), 
                 row.names = F, col.names = F, quote = F)
     # Step2: cross validation set
     idx_cv <- setdiff(idx_tot, idx_val_ver)
     set.seed(pheno_seed_str[p]+cross_seed)
-        if (n_fold == 10){
+    if (n_fold == 5){
+          split_indices <- splitTools::partition(idx_cv, p = c(fold1 = 1 / n_fold, 
+                                                                fold2 = 1 / n_fold, 
+                                                                fold3 = 1 / n_fold, 
+                                                                fold4 = 1 / n_fold, 
+                                                                fold5 = 1 / n_fold)
+          )
+    }
+    if (n_fold == 10){
             split_indices <- splitTools::partition(idx_cv, p = c(fold1 = 1 / n_fold, 
                                                                 fold2 = 1 / n_fold, 
                                                                 fold3 = 1 / n_fold, 
@@ -302,8 +333,8 @@ for (n_fold in n_folds){
                                                                 fold10 = 1 / n_fold
                                                                 )
                                                                 )
-        }
-        if (n_fold == 20){
+    }
+    if (n_fold == 20){
             split_indices <- splitTools::partition(idx_cv, p = c(fold1 = 1 / n_fold, 
                                                                 fold2 = 1 / n_fold, 
                                                                 fold3 = 1 / n_fold, 
@@ -326,8 +357,8 @@ for (n_fold in n_folds){
                                                                 fold20 = 1 / n_fold
                                                                 )
                                                                 )
-        }    
-    pheno_train <- pheno_test <- coveff <- coveff_glm <- matrix(NA, nrow(pheno_b_all), n_fold)
+    }    
+    pheno_test_adj <- pheno_train_adj <- pheno_train <- pheno_test <- coveff <- coveff_glm <- matrix(NA, nrow(pheno_b_all), n_fold)
     for(cross in 1:n_fold){
       idx_test <- idx_cv[split_indices[[cross]]]
       idx_train <- setdiff(idx_cv, idx_test)
@@ -335,6 +366,9 @@ for (n_fold in n_folds){
       ## train set
       pheno_train[, cross] <- pheno_b_all[, p]
       pheno_train[!sqc_i$idx %in% idx_train, cross] <- NA
+      pheno_train_adj[, cross] <- pheno_b_adj[, p]
+      pheno_train_adj[!sqc_i$idx %in% idx_train, cross] <- NA
+      # covariates
       if(!p %in% c(1, 6, 21)){
         covVar_train <- data.frame(y = pheno_train[, cross], 
                                   covVar_all)
@@ -357,6 +391,9 @@ for (n_fold in n_folds){
       ## test set
       pheno_test[, cross] <- pheno_b_all[, p]
       pheno_test[!sqc_i$idx %in% idx_test, cross] <- NA
+      pheno_test_adj[, cross] <- pheno_b_adj[, p]
+      pheno_test_adj[!sqc_i$idx %in% idx_test, cross] <- NA
+      # covariates
       if(!p %in% c(1, 6, 21)){
         coveff[sqc_i$idx %in% idx_test, cross] <- cbind(1, covVar_all[match(idx_test, sqc_i$idx), ]) %*% coefMat_train
         coveff_glm[sqc_i$idx %in% idx_test, cross] <- cbind(1, covVar_all[match(idx_test, sqc_i$idx), ]) %*% coefMat_train_glm
@@ -374,6 +411,8 @@ for (n_fold in n_folds){
     if (!dir.exists(mydir)){dir.create(mydir, recursive = TRUE)}
     write.table(pheno_train, file = paste0(mydir, "pheno_pheno", p, ".txt"),
                 quote = F, row.names = F, col.names = F)
+    write.table(pheno_train_adj, file = paste0(mydir, "pheno_pheno", p, "_adj.txt"),
+                quote = F, row.names = F, col.names = F)
     mydir <- paste0(comp_str, "02_pheno/06_test_b/")
     if (!dir.exists(mydir)){dir.create(mydir, recursive = TRUE)}
     write.table(pheno_test, file = paste0(mydir, "pheno_pheno", p, ".txt"),
@@ -382,6 +421,9 @@ for (n_fold in n_folds){
                 quote = F, row.names = F, col.names = F)
     write.table(coveff_glm, file = paste0(mydir, "coveff_pheno", p, "_glm.txt"),
                 quote = F, row.names = F, col.names = F)
+    write.table(pheno_test_adj, file = paste0(mydir, "pheno_pheno", p, "_adj.txt"),
+                quote = F, row.names = F, col.names = F)
+    
   }
 }
 pheno_uni_b <- c("PRCA", "TA", "T2D", "CAD", "RA", 
