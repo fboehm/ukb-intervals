@@ -1,2 +1,9 @@
 *.bz2
-
+*.log
+*.bim
+*.bed
+CEU_snp_ids_chr*
+*.fam
+*.map
+*.ped
+*.tar
