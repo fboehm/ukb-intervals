@@ -5,7 +5,8 @@ library(bigreadr)
 
 
 n_folds <- c(5, 10, 20)
-trait_types <- c("continuous", "binary_adj")
+#trait_types <- c("continuous", "binary_adj")
+trait_types <- "binary"
 comp_str <- "~/research/ukb-intervals/study_nfolds/"
 pred_str <- "~/research/ukb-intervals/"
 ## output to fam file for cross validation 

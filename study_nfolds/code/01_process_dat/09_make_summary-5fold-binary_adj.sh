@@ -1,22 +1,21 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=3-00:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH --job-name=gemma
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-5500%400
-#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma/08_make_summary_m_%a.out
-#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/gemma/08_make_summary_m_%a.err
+#SBATCH --array=1-19250%400
+#SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/08_make_summary_m_%a.out
+#SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/08_make_summary_m_%a.err
 
 
 let k=0
 gemma=/net/fantasia/home/borang/software/gemma-0.98.3-linux-static
 
-#dats=(1 2)
-dats=( 1 3) # continuous and binary_adj
+dats=(2) # binary only
 type=ukb
-#nfolds=(5)
+nfolds=(5 10 20)
 covstr=~/research/ukb-intervals/02_pheno/
 
 for nfold in ${nfolds[@]}; do
@@ -53,7 +52,7 @@ for nfold in ${nfolds[@]}; do
                             cd ${mydir}
                             ${gemma} -bfile ${bfile} -notsnp -lm 1 -n ${col} -o ${summ} -c ${cov}
                             sed -i '1d' ${fbstr}06_internal_b/pheno${p}/output/${summ}.assoc.txt
-                            rm ${fbstr}06_internal_b/pheno${p}/output/${summ}.log.txt
+                            #rm ${fbstr}06_internal_b/pheno${p}/output/${summ}.log.txt
                         fi
                         if [ ${dat} -eq 3 ]; then
                             echo binary_adj phenotype
