@@ -5,6 +5,9 @@ library(plyr)
 
 # load data
 comp_str <- "~/research/ukb-intervals/"
+trait_types <- c("binary", "continuous")
+
+
 load(paste0(comp_str, "02_pheno/01_sqc.RData"))
 load(paste0(comp_str, "02_pheno/04_pheno_c_adj.RData"))
 load(paste0(comp_str, "02_pheno/05_pheno_b_clean.RData"))

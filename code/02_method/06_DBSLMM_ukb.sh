@@ -29,9 +29,9 @@ for nfold in ${nfolds[@]}; do
             for cross in `seq 1 ${nfold}`; do
                 let k=${k}+1
                 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
-                    val=${fbstr}03_subsample/${trait_type}/pheno${p}/val/ukb/geno/chr
+                    val=~/research/ukb-intervals/03_subsample/${trait_type}/pheno${p}/val/ukb/geno/chr
                     if [[ "${trait_type}" == "continuous" ]]; then
-                        phenoVal=${fbstr}/03_subsample/${trait_type}/pheno${p}/val/ukb/02_pheno_c.txt
+                        phenoVal=${fbstr}03_subsample/${trait_type}/pheno${p}/val/ukb/02_pheno_c.txt
                         index=r2
                     else
                         phenoVal=${fbstr}03_subsample/${trait_type}/pheno${p}/val/ukb/02_pheno_b.txt

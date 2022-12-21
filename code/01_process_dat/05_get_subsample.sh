@@ -12,8 +12,9 @@
 
 compStr=~/research/ukb-intervals/
 trait_types=(binary continuous)
-
 let k=0
+
+
 for trait_type in ${trait_types[@]}; do
     output_dir=${compStr}04_reference/ukb/${trait_type}/geno/
     mkdir -p ${output_dir}

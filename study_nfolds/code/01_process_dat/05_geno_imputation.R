@@ -1,0 +1,1 @@
+/net/mulan/home/fredboe/research/ukb-intervals/code/01_process_dat/05_geno_imputation.R
