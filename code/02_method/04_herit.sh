@@ -9,7 +9,7 @@
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/04_herit_%a.err
 
 
-trait_types=(binary_adj continuous)
+trait_types=(binary continuous)
 compStr=~/research/ukb-intervals/
 nfolds=(5 10 20)
 
@@ -32,7 +32,7 @@ for nfold in ${nfolds[@]}; do
                         h2path=${fbstr}05_internal_c/pheno${p}/herit/
                         h2=${h2path}h2_ukb_cross${cross}
                     fi
-                    if [[ "${trait_type}" == "binary_adj" ]]; then
+                    if [[ "${trait_type}" == "binary" ]]; then
                         summ=${fbstr}06_internal_b/pheno${p}/output/summary_ukb_cross${cross}
                         h2path=${fbstr}06_internal_b/pheno${p}/herit/
                         h2=${h2path}h2_ukb_cross${cross}
