@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #SBATCH --partition=mulan,main
-#SBATCH --time=10:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --job-name=subset
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-3300%300
+#SBATCH --array=1-3300%400
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/05a_subsample_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/05a_subsample_%a.err
 
@@ -29,19 +29,23 @@ for nfold in ${nfolds[@]}; do
                     bfileSubP=${mydir}ukb/geno/chr${chr}
                     mkdir -p ${mydir}ukb/geno
                     idxSub=${mydir}01_idx.txt
-                    plink-1.9 --silent --bfile ${bfileAll} --keep ${idxSub} --make-bed --out ${bfileSub}
-                    plink-1.9 --silent --bfile ${bfileSub} --maf 0.01 --make-bed --out ${bfileSubP}
-                    rm ${bfileSub}.log
-                    rm ${bfileSub}.bed
-                    rm ${bfileSub}.bim
-                    rm ${bfileSub}.fam
-                    rm ${bfileSubP}.log
+                    if [ ! -f "${bfileSubP}.bed" ]; then
+                        plink-1.9 --silent --bfile ${bfileAll} --keep ${idxSub} --make-bed --out ${bfileSub}
+                        plink-1.9 --silent --bfile ${bfileSub} --maf 0.01 --make-bed --out ${bfileSubP}
+                        rm ${bfileSub}.log
+                        rm ${bfileSub}.bed
+                        rm ${bfileSub}.bim
+                        rm ${bfileSub}.fam
+                        rm ${bfileSubP}.log
+                    fi
                     # impute
                     geno_impute=05_geno_imputation.R
                     input=${bfileSubP}
                     output=${mydir}impute/chr${chr}
                     mkdir -p ${mydir}impute
-                    Rscript ${geno_impute} --plinkin ${input} --plinkout ${output}
+                    if [ ! -f "${output}.bed" ]; then    
+                        Rscript ${geno_impute} --plinkin ${input} --plinkout ${output}
+                    fi
                 fi
             done
         done
