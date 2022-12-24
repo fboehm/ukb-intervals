@@ -15,14 +15,18 @@ for nfold in ${nfolds[@]}; do
             for p in `seq 1 25`; do
                 # remove old file if it's there
                 mydir=${compStr}03_subsample/${trait_type}/pheno${p}/val/
-                bfileSubP=${mydir}ukb/geno/chr${chr}
-                if [ -f "${bfileSubP}.bed" ]; then
-                    rm ${bfileSubP}.*
-                fi    
-                output=${mydir}impute/chr${chr}
-                if [ -f "${output}.bed" ]; then
-                    rm ${output}.*
-                fi
+                bdir=${mydir}ukb/geno/
+                mkdir -p ${bdir}
+                bfileSubP=${bdir}chr${chr}
+                #if [ -f "${bfileSubP}.fam" ]; then
+                    rm -f ${bfileSubP}.*
+                #fi   
+                odir=${mydir}impute/ 
+                mkdir -p ${odir}
+                output=${odir}chr${chr}
+                #if [ -f "${output}.fam" ]; then
+                    rm -f ${output}.*
+                #fi
                 # make sym links
                 ln -s ~/research/ukb-intervals/study_nfolds/5-fold/03_subsample/${trait_type}/pheno${p}/val/ukb/geno/chr${chr}.bed ${bfileSubP}.bed
                 ln -s ~/research/ukb-intervals/study_nfolds/5-fold/03_subsample/${trait_type}/pheno${p}/val/ukb/geno/chr${chr}.bim ${bfileSubP}.bim
