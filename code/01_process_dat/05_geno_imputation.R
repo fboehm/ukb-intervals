@@ -20,9 +20,9 @@ opt <- parse_args(opt_parser)
 # output <- opt$output
 
 
-if(file.exists(paste0(opt$plinkin, ".bk")) == F){
+#if(file.exists(paste0(opt$plinkin, ".bk")) == F){
   val_bed <- snp_readBed(paste0(opt$plinkin, ".bed"))
-}
+#}
 val_bed <- snp_attach(paste0(opt$plinkin, ".rds"))
 val_bed$genotypes <- snp_fastImputeSimple(val_bed$genotypes)
 
@@ -32,5 +32,5 @@ if(file.exists(paste0(opt$plinkout, ".bed"))){
   system(paste0("rm ", opt$plinkout, ".fam"))
 }
 snp_writeBed(val_bed, bedfile = paste0(opt$plinkout, ".bed"))
-system(paste0("rm ", opt$plinkin, ".bk"))
-system(paste0("rm ", opt$plinkin, ".rds"))
+#system(paste0("rm ", opt$plinkin, ".bk"))
+#system(paste0("rm ", opt$plinkin, ".rds"))

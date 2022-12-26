@@ -5,13 +5,13 @@
 #SBATCH --job-name=subset
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-1100%300
+#SBATCH --array=1-1100%400
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/05a_subsample_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/05a_subsample_%a.err
 
 olddir=~/research/ukb-intervals/
 trait_types=(binary continuous)
-nfolds=(5 10 20)
+
 
 let k=0
 let nfold=5
@@ -45,9 +45,9 @@ for trait_type in ${trait_types[@]}; do
                 input=${bfileSubP}
                 output=${mydir}impute/chr${chr}
                 mkdir -p ${mydir}impute
-                if [ ! -f "${output}.bed" ]; then    
+                #if [ ! -f "${output}.bed" ]; then    
                     Rscript ${geno_impute} --plinkin ${input} --plinkout ${output}
-                fi
+                #fi
             fi
         done
     done
