@@ -48,7 +48,7 @@ for nfold in ${nfolds[@]}; do
                         herit=${fbstr}06_internal_b/pheno${p}/herit/h2_ukb_cross${cross}.log
                         summ=${fbstr}06_internal_b/pheno${p}/output/summary_ukb_cross${cross}_chr
                         outPath=${fbstr}06_internal_b/pheno${p}/DBSLMM/
-                        cov=${fbstr}03_subsample/${trait_type}/pheno${p}/val/ukb/03_cov_eff.txt
+                        cov=${fbstr}03_subsample/${trait_type}/pheno${p}/val/03_cov_eff.txt
                     fi
                     mkdir -p ${outPath}
 
