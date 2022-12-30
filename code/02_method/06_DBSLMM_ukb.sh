@@ -30,7 +30,8 @@ for nfold in ${nfolds[@]}; do
                 let k=${k}+1
                 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
                     # specify plink file prefix, "val"
-                    val=~/research/ukb-intervals/03_subsample/${trait_type}/pheno${p}/val/ukb/geno/chr
+                    #val=~/research/ukb-intervals/03_subsample/${trait_type}/pheno${p}/val/ukb/geno/chr
+                    val=${fbstr}03_subsample/${trait_type}/pheno${p}/val/hm3/geno/chr
                     if [[ "${trait_type}" == "continuous" ]]; then
                         phenoVal=${fbstr}03_subsample/${trait_type}/pheno${p}/val/02_pheno_c.txt
                         index=r2

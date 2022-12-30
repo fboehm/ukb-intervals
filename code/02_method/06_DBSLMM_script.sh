@@ -65,18 +65,16 @@ printf "\033[33mArgument outpath is %s  \033[0m\n" "$outpath"
 
 DBSLMM=${software_path}DBSLMM/software/DBSLMM.R
 TUNE=${software_path}DBSLMM/software/TUNE.R
-dbslmm=${software_path}/DBSLMM/scr/dbslmm
+dbslmm=${software_path}DBSLMM/scr/dbslmm
 
 # LDSC: heritability and number of SNP
 nsnp=`sed -n '24p' ${herit} | cut -d ',' -f 2 | cut -d ' ' -f 2`
 h2=`sed -n '26p' ${herit} | cut -d ":" -f 2 | cut -d '(' -f 1 | cut -d " " -f 2`
+echo "nsnp: ${nsnp} and h2: ${h2}"
 
 # DBSLMM: tuning version
-if [[ "$type" == "t" ]]
-then
-	for chr in `seq 1 22`
-	do
-
+if [[ "$type" == "t" ]]; then
+	for chr in `seq 1 22`; do
 		BLOCK=${block_prefix}${chr}
 		summchr=${summary_file_prefix}${chr}
 		nobs=`sed -n "2p" ${summchr}.assoc.txt | awk '{print $5}'`
@@ -84,46 +82,44 @@ then
 		n=$(echo "${nobs}+${nmis}" | bc -l)
 		ref_geno=${ref_geno_prefix}${chr}
 		val_geno=${val_geno_prefix}${chr}
-		for pth in 1e-4 1e-5 1e-6
-		do
-		Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outpath} --plink ${plink} --model ${model}\
-						  --dbslmm ${dbslmm} --ref ${ref_geno} --n ${n} --type ${type} --nsnp ${nsnp} --block ${BLOCK}.bed\
-						   --h2 ${h2} --h2f 0.7,1,1.4 --pth ${pth} --thread ${thread} 
-		for h2f in 0.7 1 1.4
-		do
-			summchr_prefix=`echo ${summchr##*/}`
-			if [ -f "${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.dbslmm.badsnps" ];then
-				rm ${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.dbslmm.badsnps
-			fi
-			${plink}  --silent --bfile ${val_geno} --score ${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.dbslmm.txt 1 2 4 sum\
-					  --out ${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}
-			rm ${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.log
-			if [ -f "${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.nopred" ];then
-				rm ${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.nopred
-			fi
-		done
+		for pth in 1e-4 1e-5 1e-6; do
+			Rscript ${DBSLMM} --summary ${summchr}.assoc.txt --outPath ${outpath} --plink ${plink} --model ${model}\
+							--dbslmm ${dbslmm} --ref ${ref_geno} --n ${n} --type ${type} --nsnp ${nsnp} --block ${BLOCK}.bed\
+							--h2 ${h2} --h2f 0.7,1,1.4 --pth ${pth} --thread ${thread} 
+			for h2f in 0.7 1 1.4; do
+				summchr_prefix=`echo ${summchr##*/}`
+				echo "h2f is: ${h2f} and pth is: ${pth}"
+				#if [ -f "${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.dbslmm.badsnps" ];then
+				#	rm ${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.dbslmm.badsnps
+				#fi
+				${plink}  --silent --bfile ${val_geno} --score ${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.dbslmm.txt 1 2 4 sum\
+						--out ${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}
+				#rm ${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.log
+				#if [ -f "${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.nopred" ];then
+				#	rm ${outpath}${summchr_prefix}_h2f${h2f}_pth${pth}.nopred
+				#fi
+			done
 		done
 	done
 
 	summchr_prefix2=`echo ${summchr_prefix%_*}`
-	if [[ ! -n "$cov" ]]
-	then 
-	Rscript ${TUNE} --phenoPred ${outpath}${summchr_prefix2} --phenoVal ${val_pheno},${col} \
-		   --h2Range 0.7,1,1.4 --pthRange 1e-4,1e-5,1e-6 --index ${index}
+	echo "summchr_prefix2 is ${summchr_prefix2}"
+	if [[ ! -n "$cov" ]]; then 
+		Rscript ${TUNE} --phenoPred ${outpath}${summchr_prefix2} --phenoVal ${val_pheno},${col} \
+			--h2Range 0.7,1,1.4 --pthRange 1e-4,1e-5,1e-6 --index ${index}
 	else 
-	Rscript ${TUNE} --phenoPred ${outpath}${summchr_prefix2} --phenoVal ${val_pheno},${col} \
-		   --h2Range 0.7,1,1.4 --pthRange 1e-4,1e-5,1e-6 --index ${index} --cov ${cov}
+		Rscript ${TUNE} --phenoPred ${outpath}${summchr_prefix2} --phenoVal ${val_pheno},${col} \
+			--h2Range 0.7,1,1.4 --pthRange 1e-4,1e-5,1e-6 --index ${index} --cov ${cov}
 	fi
 
 	hbest=`cat ${outpath}${summchr_prefix2}_hbest.${index}`
 	pbest=`cat ${outpath}${summchr_prefix2}_pbest.${index}`
-	for chr in `seq 1 22`
-	do
+	echo "hbest is: ${hbest} and pbest is: ${pbest}."
+	for chr in `seq 1 22`; do
 		mv ${outpath}${summchr_prefix2}_chr${chr}_h2f${hbest}_pth${pbest}.dbslmm.txt ${outpath}${summchr_prefix2}_chr${chr}_best.dbslmm.txt
-		rm ${outpath}${summchr_prefix2}_chr${chr}_h2f*_pth*
+		#rm ${outpath}${summchr_prefix2}_chr${chr}_h2f*_pth*
 	done
-
-fi
+fi # end the tuning version code
 
 ## DBSLMM automatic version
 if [[ "$type" == "auto" ]]

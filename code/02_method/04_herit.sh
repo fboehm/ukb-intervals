@@ -26,7 +26,7 @@ for nfold in ${nfolds[@]}; do
             for cross in `seq 1 ${nfold}`; do
                 let k=${k}+1
                 if [ ${k} -eq ${SLURM_ARRAY_TASK_ID} ]; then
-                    ref=${compStr}04_reference/ukb/${trait_type}/ldsc/
+                    ref=${compStr}04_reference/hm3/${trait_type}/ldsc/
                     if [[ "${trait_type}" == "continuous" ]]; then
                         summ=${fbstr}05_internal_c/pheno${p}/output/summary_ukb_cross${cross}
                         h2path=${fbstr}05_internal_c/pheno${p}/herit/

@@ -5,7 +5,7 @@
 #SBATCH --job-name=subset
 #SBATCH --mem=2G
 #SBATCH --cpus-per-task=1
-#SBATCH --array=1-1100%400
+#SBATCH --array=1-1100%300
 #SBATCH --output=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/05a_subsample_%a.out
 #SBATCH --error=/net/mulan/home/fredboe/research/ukb-intervals/cluster_outputs/05a_subsample_%a.err
 
@@ -43,11 +43,14 @@ for trait_type in ${trait_types[@]}; do
                 # impute
                 geno_impute=05_geno_imputation.R
                 input=${bfileSubP}
+                if [ -f ${input}.bk ]; then
+                    rm ${input}.bk
+                fi 
                 output=${mydir}impute/chr${chr}
                 mkdir -p ${mydir}impute
-                #if [ ! -f "${output}.bed" ]; then    
+                if [ ! -f "${output}.bed" ]; then    
                     Rscript ${geno_impute} --plinkin ${input} --plinkout ${output}
-                #fi
+                fi
             fi
         done
     done

@@ -11,12 +11,12 @@ ldsc=~/ldsc/ldsc.py
 
 
 for trait_type in ${trait_types[@]}; do
-	outpath=${fbstr}04_reference/ukb/${trait_type}/ldsc/
+	outpath=${fbstr}04_reference/hm3/${trait_type}/ldsc/
 	mkdir -p ${outpath}
-	for chr in `seq 2 22`;do
+	for chr in `seq 1 22`;do
 			conda activate ldsc2
 			python2 ${ldsc} --out ${outpath}${chr} \
-					--bfile ${fbstr}04_reference/ukb/${trait_type}/geno/chr${chr} \
+					--bfile ${fbstr}04_reference/hm3/${trait_type}/geno/chr${chr} \
 					--l2 \
 					--ld-wind-kb 1000.0 
 	done
