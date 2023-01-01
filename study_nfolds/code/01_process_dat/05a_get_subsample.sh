@@ -27,12 +27,13 @@ for trait_type in ${trait_types[@]}; do
                 bfileAll=${olddir}plink_file/ukb/${trait_type}/chr${chr}
                 ## validation sample
                 mydir=${compStr}03_subsample/${trait_type}/pheno${p}/val/
-                bfileSub=${mydir}ukb/geno/allchr${chr}
-                bfileSubP=${mydir}ukb/geno/chr${chr}
-                mkdir -p ${mydir}ukb/geno
+                bfileSub=${mydir}hm3/geno/allchr${chr}
+                bfileSubP=${mydir}hm3/geno/chr${chr}
+                mkdir -p ${mydir}hm3/geno
                 idxSub=${mydir}01_idx.txt
+                snps_to_keep=${olddir}hapmap3/CEU_snp_ids_chr${chr}                
                 if [ ! -f "${bfileSubP}.bed" ]; then
-                    plink-1.9 --silent --bfile ${bfileAll} --keep ${idxSub} --make-bed --out ${bfileSub}
+                    plink-1.9 --silent --bfile ${bfileAll} --keep ${idxSub} --extract ${snps_to_keep} --make-bed --out ${bfileSub}
                     plink-1.9 --silent --bfile ${bfileSub} --maf 0.01 --make-bed --out ${bfileSubP}
                     rm ${bfileSub}.log
                     rm ${bfileSub}.bed
