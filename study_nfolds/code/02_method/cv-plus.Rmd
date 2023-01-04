@@ -5,14 +5,17 @@ date: "`r Sys.Date()`"
 output: 
   bookdown::html_document2:
     number_sections: false
-bibliography: ../Rmd/my.bib
 params:
-  - trait_type: "continuous"
-  - nfold: 10
-  - traits: 1
+  trait_type: "binary"
+  trait_number: 25
+  nfold: 20
 ---
 
 ```{r}
+trait_type <- params$trait_type
+trait_num <- params$trait_num
+nfold <- params$nfold
+
 library(magrittr)
 ```
 
@@ -30,19 +33,16 @@ Inputs needed:
 
 
 ```{r, echo = TRUE, message = FALSE}
-(trait_type <- params$trait_type)
-(traits <- params$traits) # trait numbers to analyze
-(nfold <- params$nfold)
 alpha <- 0.1
 fbstr <- paste0("~/research/ukb-intervals/study_nfolds/", nfold, "-fold/")
 out <- list()
 if (trait_type == "continuous") {
-  	res_file <- paste0(fbstr, "res-continuous.rds")
+  	res_file <- paste0(output_dir, "res.rds")
 } else {
-  	res_file <- paste0(fbstr, "res-binary.rds")
+  	res_file <- paste0(output_dir, "res.rds")
 }
 if (!file.exists(res_file)) {
-  	res <- lapply(traits, function(x) {
+  	res <- lapply(trait_number, function(x) {
 		knitr::knit_child(
 		'cv-plus-child.Rmd', 
 		envir = environment(), 
@@ -56,7 +56,7 @@ if (!file.exists(res_file)) {
 }
 ```
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 coverages <- lapply(X = res, 
                     FUN = function(mytib){
   mytib %>%
@@ -84,7 +84,7 @@ coverage_tib %>%
 
 ```
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 cov_tib <- tibble::tibble(verif_size = c(length(res[[1]]$in_interval), 10000, 1000), 
                          coverage = c(unlist(coverages), unlist(cov10k), unlist(cov1k)))
 cov_tib %>%
@@ -93,7 +93,7 @@ cov_tib %>%
 
 ## Boxplots of interval width
 
-```{r}
+```{r, eval = FALSE}
 for (i in seq_along(res)){
   res[[i]] <- res[[i]] %>%
     dplyr::mutate(trait_num = i)
@@ -105,13 +105,13 @@ dplyr::bind_rows(res) %>%
 
 ## Incorporate estimated heritability of traits
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 if (trait_type == "continuous"){
-  h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2.csv", 
+  h_tib <- readr::read_csv(paste0(fbstr, "05_internal_c/pheno25/herit/h2.csv"), 
                           col_names = FALSE) %>% 
             dplyr::select(-26) # drop 26, which is due to presence of trailing commas
 } else {
-  h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2-binary.csv", 
+  h_tib <- readr::read_csv(paste0(fbstr, "06_internal_b/pheno25/herit/h2.csv"), 
                           col_names = FALSE) %>%
             dplyr::select(- tidyselect::last_col()) # drop 26, which is due to presence of trailing commas
 }
@@ -132,7 +132,7 @@ pp2 <- pp %>%
 
 # Plot coverage vs (mean) heritability 
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 pp2 <- pp %>%
   dplyr::group_by(trait_num) %>%
   dplyr::summarise(mean_herit = mean(mean_herit), coverage = mean(in_interval)) %>%
@@ -145,7 +145,7 @@ pp2 %>%
 ## Check correlation between (mean) heritability and coverage
 
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 summ <- pp %>%
   dplyr::group_by(trait_num) %>%
   dplyr::summarise(mean_herit = mean(mean_herit), coverage = mean(in_interval))

@@ -3,20 +3,14 @@
 ```{r, results = "hide", message = FALSE}
 phe_num <- x
 # read true pheno values file
-
-if (trait_type == "continuous"){
-	true_pheno_file <- paste0(fbstr, "02_pheno/02_train_c/pheno_pheno", phe_num, ".txt")
-}
-if (trait_type == "binary"){
-	true_pheno_file <- paste0(fbstr, "02_pheno/05_train_b/pheno_pheno", phe_num, ".txt") 
-}
-true_pheno <- vroom::vroom(true_pheno_file, col_names = FALSE)
+fam_file <- paste0(fbstr, "plink_file/ukb-hapmap3/", trait_type, "/chr22.fam")
+fam <- vroom::vroom(fam_file, col_names = FALSE)
 ``` 
 
 ```{r}
 # make a true pheno column vector
 true_pheno_vec <- apply(MARGIN = 1, 
-	X = true_pheno, 
+	X = fam[, (5 + nfold * (phe_num - 1) + 1):(5 + nfold * phe_num)], 
 	FUN = function(x){
 		foo <- x[!is.na(x)]
 		if (length(foo) > 0){
@@ -26,6 +20,11 @@ true_pheno_vec <- apply(MARGIN = 1,
 		}
 		return(out)
 })
+
+true_pheno_tib <- fam %>%
+					dplyr::select(1,2) %>%
+					dplyr::mutate(true_pheno = true_pheno_vec) %>%
+					dplyr::rename(FID = X1, IID = X2)
 
 ```
 
@@ -92,8 +91,8 @@ for (cross_num in 1:nfold){
 }
 out_tib <- do.call("rbind", out) %>% 
   tibble::as_tibble() %>% 
-  dplyr::arrange(FID) %>%
-  dplyr::mutate(true_pheno = true_pheno_vec) %>%
+  dplyr::left_join(true_pheno_tib) %>%
+  #dplyr::mutate(true_pheno = true_pheno_vec) %>%
   dplyr::mutate(residual = abs(true_pheno - sum_scores))
 ```
 
@@ -161,9 +160,8 @@ for (cross_num in 1:nfold){
 }
 pred_verification_set_tib <- do.call("cbind", pred_verification_set) %>%
   tibble::as_tibble() %>%
-  dplyr::mutate(true_pheno = verif_true_pheno$X1) %>%
-  dplyr::select(- FID_cross2, - FID_cross3, - FID_cross4, - FID_cross5) %>%
-  dplyr::rename(FID = FID_cross1)
+  dplyr::rename(FID = FID_cross1) %>%
+  dplyr::left_join(true_pheno_tib)
 ```
 
 
@@ -173,6 +171,7 @@ get_fitted <- function(index, fitted_vec){
   fitted_vec[index]
 }
 n_verif <- nrow(verif_true_pheno)
+#n_verif <- 1000
 intervals <- list()
 for (i in 1:n_verif){
 	if (i %% 1000 == 0) print(i)
@@ -180,7 +179,7 @@ for (i in 1:n_verif){
 	o3 <- out_tib %>% 
 				dplyr::mutate(fitted_cv =  purrr::map_dbl(.x = cross_membership, 
 														.f = get_fitted, 
-														fitted_vec = as.vector(unlist(pred_verification_set_tib[i, 2:(1 + nfold)])))
+														fitted_vec = as.vector(unlist(pred_verification_set_tib[i, 2 * (1:nfold)])))
 					) %>% # calculate mu hat (X_{n + 1})
 		dplyr::mutate(fitted_minus_residual = fitted_cv - residual,
 					fitted_plus_residual = fitted_cv + residual)
@@ -201,8 +200,13 @@ for (i in 1:n_verif){
 
 ```{r}
 mytib <- intervals %>% 
-  	dplyr::bind_rows() #%>%
-saveRDS(object = mytib, file = paste0(trait_type, "_ints.rds"))
+  			dplyr::bind_rows() #%>%
+mytib_outfile <- paste0(fbstr, trait_type, "-intervals-pheno", phe_num, ".rds")
+saveRDS(object = mytib, file = mytib_outfile)
+```
+
+```{r, eval = TRUE}
+
 # need a join with the idx_pheno object containing true phenotype values
 mytib2 <- mytib %>%
 	dplyr::left_join(verif_true_pheno, by = "FID") %>%

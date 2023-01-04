@@ -1,9 +1,8 @@
 #!/bin/bash
 
-compstr=/net/mulan/disk2/yasheng/comparisonProject/
-fbstr=~/research/ukb-intervals/
 
-trait_type=continuous
+nfolds=(5 10 20)
+trait_types=(continuous binary)
 echo ${trait_type}
 
 print_array ()
@@ -18,30 +17,24 @@ print_array ()
   printf '\n'
 }
 
-if [ "${trait_type}" == "continuous" ]; then
-    outfile=h2.csv
-else 
-    outfile=h2-binary.csv
-fi
 
-echo $outfile
+for nfold in ${nfolds[@]}; do
+    fbstr=~/research/ukb-intervals/study_nfolds/${nfold}-fold/
+    for cross in `seq 1 ${nfold}`; do
+        array=()
+        for p in `seq 1 25`; do # p is for phenotypes
+            if [ "${trait_type}" == "continuous" ]; then 
+                herit=${fbstr}05_internal_c/pheno${p}/herit/h2_ukb_cross${cross}.log
+                outfile=${fbstr}05_internal_c/pheno${p}/herit/h2.csv
+            else 
+                herit=${fbstr}06_internal_b/pheno${p}/herit/h2_ukb_cross${cross}.log
+                outfile=${fbstr}06_internal_b/pheno${p}/herit/h2.csv
+            fi 
 
-if [ -f $outfile ]; then 
-    rm $outfile 
-fi   
-
-for cross in 1 2 3 4 5; do
-    array=()
-    for p in `seq 1 25`; do # p is for phenotypes
-        if [ "${trait_type}" == "continuous" ]; then 
-            herit=${compstr}05_internal_c/pheno${p}/herit/h2_ukb_cross${cross}.log
-        else 
-            herit=${fbstr}06_internal_b/pheno${p}/herit/h2_ukb_cross${cross}.log
-        fi 
-        echo ${herit}
-        h2=`sed -n '26p' ${herit} | cut -d ":" -f 2 | cut -d '(' -f 1 | cut -d " " -f 2`
-        array+=( ${h2} )
+            echo ${herit}
+            h2=`sed -n '26p' ${herit} | cut -d ":" -f 2 | cut -d '(' -f 1 | cut -d " " -f 2`
+            array+=( ${h2} )
+            done
+        print_array "${array[@]}" >> $outfile
     done
-    print_array "${array[@]}" >> $outfile
 done
-
