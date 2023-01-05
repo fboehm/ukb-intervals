@@ -201,8 +201,9 @@ for (i in 1:n_verif){
 ```{r}
 mytib <- intervals %>% 
   			dplyr::bind_rows() #%>%
-mytib_outfile <- paste0(fbstr, trait_type, "-intervals-pheno", phe_num, ".rds")
-saveRDS(object = mytib, file = mytib_outfile)
+#mytib_outfile <- paste0(fbstr, trait_type, "-intervals-pheno", phe_num, ".rds")
+#saveRDS(object = mytib, file = mytib_outfile)
+# I might change the directory in the line above, where I save the rds file
 ```
 
 ```{r, eval = TRUE}
