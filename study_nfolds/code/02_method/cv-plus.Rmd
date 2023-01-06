@@ -12,9 +12,9 @@ params:
 ---
 
 ```{r}
-trait_type <- params$trait_type
-trait_number <- params$trait_number
-nfold <- params$nfold
+(trait_type <- params$trait_type)
+(trait_number <- params$trait_number)
+(nfold <- params$nfold)
 
 library(magrittr)
 ```
@@ -58,19 +58,19 @@ if (!file.exists(res_file)) {
 coverages <- lapply(X = res, 
                     FUN = function(mytib){
   mytib %>%
-	dplyr::summarise(coverage = mean(in_interval))
+	dplyr::summarise(coverage = mean(in_interval, na.rm = TRUE))
        }
 )
 cov1k <- lapply(X = res, 
                     FUN = function(mytib){
   mytib %>%
-    dplyr::summarise(coverage = mean(in_interval[1:1000]))
+    dplyr::summarise(coverage = mean(in_interval[1:1000], na.rm = TRUE))
        }
 ) 
 cov10k <- lapply(X = res, 
                     FUN = function(mytib){
   mytib %>%
-    dplyr::summarise(coverage = mean(in_interval[1:10000]))
+    dplyr::summarise(coverage = mean(in_interval[1:10000], na.rm = TRUE))
        }
 ) 
 
