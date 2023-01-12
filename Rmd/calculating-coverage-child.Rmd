@@ -6,7 +6,7 @@ phe_num <- inputs$phe_num[i]
 cross_num <- inputs$cross_num[i]
 res_list <- list()
 for (i in 1:22){
-  res_list[[i]] <- readr::read_table(paste0("~/research/ukb-intervals/results/pheno", phe_num, "/summary_ukb_cross", cross_num, "_variance_chr", i, ".txt"), col_names = FALSE, skip = 2)
+  res_list[[i]] <- readr::read_table(paste0("/net/mulan/disk2/fredboe/research/ukb-intervals/results/pheno", phe_num, "/summary_ukb_cross", cross_num, "_variance_chr", i, ".txt"), col_names = FALSE, skip = 2)
 }
 # fix column names
 for (chr in 1:22){
@@ -31,7 +31,7 @@ To ensure that we're reading the files accurately, we'll also read the fam file,
 
 ```{r}
 #read test indicator file
-test_indicator <- readr::read_table(file = paste0("~/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest1000.txt"), col_names = FALSE)
+test_indicator <- readr::read_table(file = paste0("/net/mulan/disk2/fredboe/research/ukb-intervals/test_indicator_files/test_indicator_pheno_", phe_num, "_cross_", cross_num, "_ntest1000.txt"), col_names = FALSE)
 ```
 
 ```{r}
@@ -50,7 +50,7 @@ fam2 <- fam %>%
 # read the profile files outputted by plink score allele
 scores <- list()
 for (i in 1:22){
-  fn <- paste0("~/research/ukb-intervals/results/pheno", phe_num, "/predicted_ukb_cross", cross_num, "_chr", i, "_auto.dbslmm.txt.profile")
+  fn <- paste0("/net/mulan/disk2/fredboe/research/ukb-intervals/results/pheno", phe_num, "/predicted_ukb_cross", cross_num, "_chr", i, "_auto.dbslmm.txt.profile")
   scores[[i]] <- readr::read_table(fn, col_names = TRUE)
   colnames(scores[[i]]) <- paste0(colnames(scores[[i]]), "_chr", i)
 }
@@ -187,18 +187,24 @@ calibration_set <- fam3[1:500, ] %>%
   dplyr::mutate(overall_multiplicative_factor = .$multiplicative_factor[450]) %>%
   dplyr::mutate(adjusted_interval_half_width = interval_half_width * overall_multiplicative_factor) %>%
   dplyr::mutate(in_adjusted_interval = adjusted_interval_half_width >= diff)
-calibration_set %>% dplyr::summarise(coverage = mean(in_adjusted_interval))
+calibration_set %>%
+  dplyr::summarise(coverage = mean(in_adjusted_interval))
 
 ```
 
 ```{r}
-fam3[501:1000, ] %>%
+fam4 <- fam3[501:1000, ] %>%
   dplyr::rename(true_pheno = 3) %>%
   dplyr::mutate(validated_predicted_value = temp_res[[3]][501:1000, 1]) %>%
   dplyr::mutate(diff = abs(true_pheno - validated_predicted_value)) %>%
   dplyr::mutate(adjusted_interval_half_width = interval_half_width * calibration_set$overall_multiplicative_factor[1]) %>%
-  dplyr::mutate(in_adjusted_interval = adjusted_interval_half_width >= diff) %>%
-  dplyr::summarise(coverage = mean(in_adjusted_interval))
+  dplyr::mutate(in_adjusted_interval = adjusted_interval_half_width >= diff)
 
+fam4
+vroom::vroom_write(x = fam4,
+                  file = paste0("results_trait", phe_num, ".txt"))
+
+fam4 %>%
+  dplyr::summarise(coverage = mean(in_adjusted_interval))
 ```
 

@@ -1,7 +1,7 @@
 ---
 title: "Calculating coverage for UKB analyses"
 author: "Frederick J. Boehm"
-date: '2022-05-02'
+date: '`r lubridate::now()`'
 output: html_document
 ---
 
@@ -15,7 +15,8 @@ Within each phenotype's subdir, we have the files "summary_ukb_cross_variance_ch
 
 ```{r}
 library(magrittr)
-inputs <- tibble::tibble(phe_num = rep(1:25, each = 5), cross_num = rep(1:5, times = 25))
+inputs <- tibble::tibble(phe_num = rep(1:25, each = 5), cross_num = rep(1:5, times = 25)) %>%
+  dplyr::filter(phe_num == 1)
 res <- list()
 for (i in 1:nrow(inputs)){
 res[[i]] <- knitr::knit_child(
