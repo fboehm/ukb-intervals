@@ -1,0 +1,201 @@
+---
+title: "Prepare files for MCCP"
+author: "Frederick J. Boehm"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::html_document2:
+    number_sections: false
+---
+
+
+```{r}
+library(magrittr)
+```
+
+## Code to get CV-based PGS for training set
+
+
+```{r, results = "hide", message = FALSE}
+phe_nums <- 1:25
+trait_type <- "binary"
+nfold <- 5
+(fbstr <- paste0("/net/mulan/disk2/fredboe/research/ukb-intervals/study_nfolds/", nfold, "-fold/"))
+# read fam file to get ids vector
+fam_file <- paste0(fbstr, "plink_file/ukb/binary/chr1.fam")
+fam <- vroom::vroom(file = fam_file, col_names = FALSE)
+#####
+# read true pheno values file
+for (phe_num in phe_nums){
+  if (trait_type == "continuous"){
+    true_pheno_file <- paste0(fbstr, "02_pheno/02_train_c/pheno_pheno", phe_num, ".txt")
+  }
+  if (trait_type == "binary"){
+    true_pheno_file <- paste0(fbstr, "02_pheno/05_train_b/pheno_pheno", phe_num, ".txt") 
+  }
+  true_pheno <- vroom::vroom(true_pheno_file, col_names = FALSE)
+  # make a true pheno column vector
+  true_pheno_vec <- apply(MARGIN = 1, 
+    X = true_pheno, 
+    FUN = function(x){
+      foo <- x[!is.na(x)]
+      if (length(foo) > 0){
+        out <- max(foo)
+      } else {
+        out <- NA
+      }
+      return(out)
+  })
+  fam2 <- fam %>%	
+        dplyr::select(1, 2) %>%
+        dplyr::mutate(true_pheno = true_pheno_vec) %>%
+        dplyr::rename(FID = 1, IID = 2)
+  out <- list()
+  for (cross_num in 1:nfold){
+    ## define col_num
+  #	col_num <- 2 + cross_num
+  #	fam2 <- fam_all %>%
+  #		dplyr::select(1, 2, dplyr::all_of(col_num), 8) 
+    # read the profile files outputted by plink score allele
+    scores <- list()
+    for (chr_num in 1:22){
+      if (trait_type == "continuous"){
+        fn <- paste0(fbstr, "05_internal_c/pheno", 
+            phe_num, 
+            "/DBSLMM/pred_ukb_best_cross", 
+            cross_num, 
+            "_chr", 
+            chr_num, 
+            ".profile")
+      } else {
+        fn <- paste0(fbstr, "06_internal_b/pheno", 
+            phe_num, 
+            "/DBSLMM/pred_ukb_best_cross", 
+            cross_num, 
+            "_chr", 
+            chr_num, 
+            ".profile")
+            }
+      scores[[chr_num]] <- readr::read_table(fn, col_names = TRUE)
+      colnames(scores[[chr_num]]) <- paste0(colnames(scores[[chr_num]]), "_chr", chr_num)
+    }
+    scores2 <- lapply(X = scores, FUN = function(x){
+      x %>% dplyr::select(6) # choose the SCORESUM column
+    })
+    scores_df <- do.call("cbind", scores2) %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(sum_scores = rowSums(.))
+    s2 <- scores_df %>%
+      dplyr::select(sum_scores) %>%
+      dplyr::bind_cols(scores[[1]][, 1:2]) %>% # add the identifiers, FID and IID
+      dplyr::rename(FID = FID_chr1, IID = IID_chr1) # fix identifier names
+    # read idx file
+    if (trait_type == "continuous") {
+      idx_fn <- paste0(fbstr, "02_pheno/01_test_idx_c/idx_pheno", phe_num, "_cross", cross_num, ".txt")
+    } else {
+      idx_fn <- paste0(fbstr, "02_pheno/04_test_idx_b/idx_pheno", phe_num, "_cross", cross_num, ".txt")
+    }
+    idx <- readr::read_table(idx_fn, col_names = FALSE) %>%
+      dplyr::rename(fam_id = 1, subject_id = 2) %>%
+      dplyr::select(fam_id)
+    out[[cross_num]] <- s2 %>%
+      dplyr::mutate(cross_membership = cross_num) 
+  }
+  out_tib <- do.call("rbind", out) %>% 
+    tibble::as_tibble() %>% 
+    dplyr::arrange(FID) %>%
+    dplyr::left_join(fam2, by = c("FID", "IID")) %>%
+    dplyr::mutate(residual = abs(true_pheno - sum_scores))
+  # read verif ids file for verification set
+  if (trait_type == "continuous"){
+    fn <- paste0(fbstr, "03_subsample/continuous/pheno", phe_num, "/verif/03_idx_pheno.txt")
+  } else {
+    fn <- paste0(fbstr, "03_subsample/binary/pheno", phe_num, "/verif/03_idx_pheno.txt")
+  }
+  verif_true_pheno <- readr::read_table(fn, col_names = FALSE) %>%
+                                dplyr::arrange(X1) %>%
+                                dplyr::rename(FID = X2, IID = X1, true_pheno = X3)
+  # get the nfold versions of predicted values for the verification set subjects
+  out2 <- list()
+  for (cross_num in 1:nfold){
+    foo <- list()
+    for (chr_num in 1:22){
+      if (trait_type == "continuous"){
+        fn <- paste0(fbstr, "05_internal_c/pheno", 
+                phe_num, 
+                "/DBSLMM/verif_pred_ukb_best_cross", 
+                cross_num, 
+                "_chr", 
+                chr_num, 
+                ".profile")
+      } else {
+        fn <- paste0(fbstr, "06_internal_b/pheno", 
+                phe_num, 
+                "/DBSLMM/verif_pred_ukb_best_cross", 
+                cross_num, 
+                "_chr", 
+                chr_num, 
+                ".profile")
+      }
+      foo[[chr_num]] <- readr::read_table(fn)
+    }
+    out2[[cross_num]] <- foo 
+  }
+  # sum for each cross num
+  pred_verification_set <- list()
+  for (cross_num in 1:nfold){
+    # rename cols in each list's elements (tibbles)
+    ss <- list()
+    for (chr_num in 1:22){
+      if (chr_num == 1){
+        ss[[chr_num]] <- out2[[cross_num]][[chr_num]] %>%
+          dplyr::select(1, 6)  # choose only the SCORESUM column, unless it's chr1
+          colnames(ss[[chr_num]])[2] <- paste0(colnames(ss[[chr_num]])[2], "_chr", chr_num) 
+      } else {
+        ss[[chr_num]] <- out2[[cross_num]][[chr_num]] %>%
+          dplyr::select(6)  # choose only the SCORESUM column
+          colnames(ss[[chr_num]]) <- paste0(colnames(ss[[chr_num]]), "_chr", chr_num) 
+      }
+    }
+    scores_df <- do.call("cbind", ss) %>% 
+      tibble::as_tibble() %>%
+      dplyr::mutate(sum_scores = rowSums(.[, -1])) %>%
+      dplyr::select(1, sum_scores) %>%
+      dplyr::rename(predicted_value = sum_scores)
+    colnames(scores_df) <- paste0(colnames(scores_df), "_cross", cross_num)
+    pred_verification_set[[cross_num]] <- scores_df
+  }
+  pred_verification_set_tib <- do.call("cbind", pred_verification_set) %>%
+    tibble::as_tibble() %>%
+    dplyr::select(- FID_cross2, - FID_cross3, - FID_cross4, - FID_cross5) %>%
+    dplyr::rename(FID = FID_cross1) %>%
+    dplyr::left_join(verif_true_pheno, by = "FID")
+  comp_str <- "/net/mulan/disk2/fredboe/research/ukb-intervals/"
+  load(paste0(comp_str, "02_pheno/01_sqc.RData")) 
+  PC <- sqc_i[, which(colnames(sqc_i)%in%paste0("PC", 1:20))]
+  sex <- sqc_i[, which(colnames(sqc_i)%in%"Inferred.Gender")]
+  covVar <- tibble::as_tibble(as.matrix(cbind(PC[, c(1:10)], ifelse(sex == "F", 0, 1)))) %>%
+              dplyr::mutate(FID = sqc_i$idx)
+
+  test_tib <- pred_verification_set_tib %>%
+                  dplyr::left_join(covVar, by = "FID") %>%
+                  dplyr::rename(sex = `ifelse(sex == "F", 0, 1)`) %>%
+                  dplyr::mutate(sum_scores = purrr::pmap_dbl(.l = list(predicted_value_cross1, 
+                                                                      predicted_value_cross2, 
+                                                                      predicted_value_cross3,
+                                                                      predicted_value_cross4,
+                                                                      predicted_value_cross5 ),
+                                                              .f = mean)) %>%
+                  dplyr::select(IID, true_pheno, sum_scores, tidyselect::all_of(9:18), sex)
+  training_tib <- out_tib %>%
+                      dplyr::left_join(covVar, by = "FID") %>% 
+                      dplyr::rename(sex = `ifelse(sex == "F", 0, 1)`) %>%
+                      dplyr::select(IID, true_pheno, sum_scores, tidyselect::all_of(7:16), sex)
+  test_out_file <- paste0(fbstr, "mccp/test", phe_num, ".txt")
+  test_tib %>%
+      vroom::vroom_write(test_out_file, col_names = TRUE)
+  training_out_file <- paste0(fbstr, "mccp/training", phe_num, ".txt")
+  training_tib %>%
+      vroom::vroom_write(training_out_file, col_names = TRUE)
+}
+```
+

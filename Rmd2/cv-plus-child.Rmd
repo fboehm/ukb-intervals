@@ -26,8 +26,12 @@ true_pheno_vec <- apply(MARGIN = 1,
 		}
 		return(out)
 })
-
+fam2 <- fam %>%	
+			dplyr::select(1, 2) %>%
+			dplyr::mutate(true_pheno = true_pheno_vec) %>%
+			dplyr::rename(FID = 1, IID = 2)
 ```
+
 
 
 
@@ -93,7 +97,7 @@ for (cross_num in 1:nfold){
 out_tib <- do.call("rbind", out) %>% 
   tibble::as_tibble() %>% 
   dplyr::arrange(FID) %>%
-  dplyr::mutate(true_pheno = true_pheno_vec) %>%
+  dplyr::left_join(fam2, by = c("FID", "IID")) %>%
   dplyr::mutate(residual = abs(true_pheno - sum_scores))
 ```
 
@@ -161,9 +165,10 @@ for (cross_num in 1:nfold){
 }
 pred_verification_set_tib <- do.call("cbind", pred_verification_set) %>%
   tibble::as_tibble() %>%
-  dplyr::mutate(true_pheno = verif_true_pheno$X1) %>%
   dplyr::select(- FID_cross2, - FID_cross3, - FID_cross4, - FID_cross5) %>%
-  dplyr::rename(FID = FID_cross1)
+  dplyr::rename(FID = FID_cross1) %>%
+  dplyr::left_join(verif_true_pheno, by = "FID")
+  
 ```
 
 
@@ -172,7 +177,7 @@ pred_verification_set_tib <- do.call("cbind", pred_verification_set) %>%
 get_fitted <- function(index, fitted_vec){
   fitted_vec[index]
 }
-n_verif <- nrow(verif_true_pheno)
+(n_verif <- nrow(verif_true_pheno))
 intervals <- list()
 for (i in 1:n_verif){
 	if (i %% 1000 == 0) print(i)
@@ -202,7 +207,7 @@ for (i in 1:n_verif){
 ```{r}
 mytib <- intervals %>% 
   	dplyr::bind_rows() #%>%
-saveRDS(object = mytib, file = paste0(trait_type, "_ints.rds"))
+saveRDS(object = mytib, file = paste0(trait_type, "_ints", traits, ".rds"))
 # need a join with the idx_pheno object containing true phenotype values
 mytib2 <- mytib %>%
 	dplyr::left_join(verif_true_pheno, by = "FID") %>%

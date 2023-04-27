@@ -6,10 +6,8 @@ output:
   bookdown::html_document2:
     number_sections: false
 bibliography: ../Rmd/my.bib
-params:
-  - trait_type: "continuous"
-  - nfold: 10
-  - traits: 1
+params: 
+  traits: 1
 ---
 
 ```{r}
@@ -30,17 +28,31 @@ Inputs needed:
 
 
 ```{r, echo = TRUE, message = FALSE}
-(trait_type <- params$trait_type)
-(traits <- params$traits) # trait numbers to analyze
-(nfold <- params$nfold)
+#(trait_type <- params$trait_type)
+traits <- params$traits
+trait_type <- "binary"
+nfold <- 5
 alpha <- 0.1
-fbstr <- paste0("~/research/ukb-intervals/study_nfolds/", nfold, "-fold/")
+```
+
+
+
+
+
+
+```{r}
+(fbstr <- paste0("/net/mulan/disk2/fredboe/research/ukb-intervals/study_nfolds/", nfold, "-fold/"))
+# read fam file to get ids vector
+fam_file <- paste0(fbstr, "plink_file/ukb/binary/chr1.fam")
+fam <- vroom::vroom(file = fam_file, col_names = FALSE)
+#####
+# make list output object to be filled
 out <- list()
-if (trait_type == "continuous") {
-  	res_file <- paste0(fbstr, "res-continuous.rds")
-} else {
-  	res_file <- paste0(fbstr, "res-binary.rds")
-}
+#if (trait_type == "continuous") {
+#  	res_file <- paste0(fbstr, "res-continuous.rds")
+#} else {
+  	res_file <- paste0(fbstr, "res-binary", traits, ".rds")
+#}
 if (!file.exists(res_file)) {
   	res <- lapply(traits, function(x) {
 		knitr::knit_child(
@@ -107,11 +119,11 @@ dplyr::bind_rows(res) %>%
 
 ```{r, eval = FALSE}
 if (trait_type == "continuous"){
-  h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2.csv", 
+  h_tib <- readr::read_csv("/net/mulan/disk2/fredboe/research/ukb-intervals/shell_scripts/h2.csv", 
                           col_names = FALSE) %>% 
             dplyr::select(-26) # drop 26, which is due to presence of trailing commas
 } else {
-  h_tib <- readr::read_csv("~/research/ukb-intervals/shell_scripts/h2-binary.csv", 
+  h_tib <- readr::read_csv("/net/mulan/disk2/research/ukb-intervals/shell_scripts/h2-binary.csv", 
                           col_names = FALSE) %>%
             dplyr::select(- tidyselect::last_col()) # drop 26, which is due to presence of trailing commas
 }
