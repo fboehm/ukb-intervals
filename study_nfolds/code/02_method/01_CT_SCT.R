@@ -38,7 +38,8 @@ opt = parse_args(opt_parser)
 
 # set parameter
 #comp_str <- "/net/mulan/disk2/yasheng/comparisonProject/"
-comp_str <- "~/research/ukb-intervals/"
+#comp_str <- "~/research/ukb-intervals/"
+comp_str <- here::here()
 if (opt$dat == "binary"){
   ref_str <- paste0(comp_str, "04_reference/hm3/binary/geno/")
   val_str <- paste0(comp_str, "study_nfolds/", opt$nfold, 

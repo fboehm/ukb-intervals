@@ -15,9 +15,9 @@ let k=0
 fbstr=~/research/ukb-intervals/study_nfolds/
 CT=${fbstr}code/02_method/01_CT_SCT.R
 ref=ukb
-dat=continuous
 thread=5
-trait_types=( continuous binary )
+#trait_types=( continuous binary )
+trait_types = ( continuous )
 nfolds=(5 10 20)
 
 for nfold in ${nfolds[@]}; do
