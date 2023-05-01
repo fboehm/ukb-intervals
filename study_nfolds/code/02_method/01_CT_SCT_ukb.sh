@@ -18,7 +18,7 @@ ref=ukb
 thread=5
 #trait_types=( continuous binary )
 trait_types = ( continuous )
-nfolds=(5 10 20)
+nfolds=( 5 10 20 )
 
 for nfold in ${nfolds[@]}; do
     foldstr=${fbstr}${nfold}-fold/
